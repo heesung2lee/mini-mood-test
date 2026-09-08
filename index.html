@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오늘 내 마음 날씨 — 20문항 기분 체크 | MY Lovely Bipolar Diary</title>
+<meta name="description" content="오늘의 기분을 20문항으로 체크하고, 결과에 맞는 오늘의 액션 플랜을 받아보세요.">
+<style>
+:root{
+  --bg1:#fff9ec; --bg2:#eef4ff; --ink:#33302a; --sub:#7a7466;
+  --accent:#e8a93d; --accent2:#6c8fd6; --card:#ffffff; --line:#eee3cb;
+  --good:#7fb069; --watch:#e8a93d; --down:#6c8fd6; --up:#d66c8a; --mix:#9b7bd6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  background:linear-gradient(160deg,var(--bg1),var(--bg2));color:var(--ink);min-height:100vh}
+.wrap{max-width:640px;margin:0 auto;padding:24px 18px 60px}
+header.top{text-align:center;padding:26px 0 8px}
+header.top .blog{font-size:13px;color:var(--sub);letter-spacing:1px}
+header.top h1{font-size:26px;margin:8px 0 6px}
+header.top p{font-size:14px;color:var(--sub);line-height:1.6}
+.progress{height:8px;background:#e9e0cd;border-radius:99px;margin:18px 0 6px;overflow:hidden}
+.progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .3s}
+.pcount{font-size:13px;color:var(--sub);text-align:right;margin-bottom:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 22px;box-shadow:0 6px 24px rgba(180,150,80,.10)}
+.qcat{font-size:12px;color:var(--accent2);font-weight:700;letter-spacing:.5px;margin-bottom:6px}
+.qtext{font-size:19px;font-weight:700;line-height:1.55;margin-bottom:20px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{border:2px solid var(--line);border-radius:12px;padding:13px 15px;font-size:15px;cursor:pointer;
+  display:flex;align-items:center;gap:10px;background:#fffdf7;transition:border-color .15s,background .15s;text-align:left;width:100%}
+.opt:hover{border-color:var(--accent)}
+.opt.sel{border-color:var(--accent);background:#fff4dc;font-weight:700}
+.opt .n{display:inline-flex;width:26px;height:26px;border-radius:50%;background:#f3ead3;font-size:13px;
+  align-items:center;justify-content:center;flex:none}
+.opt.sel .n{background:var(--accent);color:#fff}
+.nav{display:flex;gap:10px;margin-top:20px}
+button.btn{flex:1;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer}
+.btn.prev{background:#f1ebdb;color:var(--sub)}
+.btn.next{background:var(--accent);color:#fff}
+.btn.next:disabled{background:#ddd0b5;cursor:not-allowed}
+.btn.restart{background:var(--accent2);color:#fff;margin-top:14px;width:100%}
+.start-btn{background:var(--accent);color:#fff;border:none;border-radius:14px;padding:16px 30px;
+  font-size:17px;font-weight:800;cursor:pointer;width:100%;margin-top:18px}
+.result-emoji{font-size:56px;text-align:center;margin:6px 0}
+.result-title{text-align:center;font-size:23px;font-weight:800;margin-bottom:4px}
+.result-sub{text-align:center;font-size:14px;color:var(--sub);margin-bottom:16px;line-height:1.6}
+.bars{margin:16px 0}
+.bar-row{margin-bottom:12px}
+.bar-row .lbl{font-size:13px;font-weight:700;margin-bottom:4px;display:flex;justify-content:space-between}
+.bar{height:10px;background:#f0e9d6;border-radius:99px;overflow:hidden}
+.bar>div{height:100%;border-radius:99px}
+.plan{background:#fffdf4;border:1px dashed var(--accent);border-radius:14px;padding:16px;margin-top:12px}
+.plan h3{font-size:15px;margin-bottom:8px}
+.plan ul{padding-left:20px;font-size:14px;line-height:1.8}
+.tag{display:inline-block;font-size:12px;font-weight:800;border-radius:99px;padding:3px 12px;margin-bottom:8px;color:#fff}
+.disclaimer{margin-top:18px;font-size:12.5px;color:var(--sub);line-height:1.7;background:#f6f2e7;
+  border-radius:12px;padding:14px}
+.hidden{display:none}
+footer{text-align:center;font-size:12px;color:var(--sub);margin-top:26px;line-height:1.7}
+@media(max-width:420px){.qtext{font-size:17px}.wrap{padding:16px 12px 50px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="blog">MY Lovely Bipolar Diary</div>
+    <h1>🌤️ 오늘 내 마음 날씨</h1>
+    <p>20개의 작은 질문으로 오늘의 기분을 체크해요.<br>답에 정답은 없어요. 솔직한 지금 그대로 골라주세요.</p>
+  </header>
+
+  <!-- 시작 화면 -->
+  <div class="card" id="screen-start">
+    <div class="qtext" style="font-size:17px">5가지 영역 × 각 4문항, 약 3분 소요</div>
+    <div class="plan">
+      <h3>📋 체크 영역</h3>
+      <ul>
+        <li>⚡ 에너지 · 들뜸 (4문항)</li>
+        <li>🌧️ 우울 · 무기력 (4문항)</li>
+        <li>💓 불안 · 초조 (4문항)</li>
+        <li>🌙 수면 · 생활리듬 (4문항)</li>
+        <li>🤝 관계 · 일상기능 (4문항)</li>
+      </ul>
+    </div>
+    <button class="start-btn" id="btn-start">테스트 시작하기</button>
+    <div class="disclaimer">이 테스트는 의학적 진단이 아니에요. 스스로의 상태를 돌아보는 참고용이며, 힘든 마음이 계속되면 정신건강의학과 전문의·상담 전문가와 꼭 상의하세요. 위기 시 자살예방상담전화 ☎109 (24시간).</div>
+  </div>
+
+  <!-- 문항 화면 -->
+  <div id="screen-quiz" class="hidden">
+    <div class="progress"><div id="pbar"></div></div>
+    <div class="pcount" id="pcount"></div>
+    <div class="card">
+      <div class="qcat" id="qcat"></div>
+      <div class="qtext" id="qtext"></div>
+      <div class="opts" id="opts"></div>
+      <div class="nav">
+        <button class="btn prev" id="btn-prev">← 이전</button>
+        <button class="btn next" id="btn-next" disabled>다음 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 결과 화면 -->
+  <div id="screen-result" class="hidden">
+    <div class="card">
+      <div id="result-badge" style="text-align:center"></div>
+      <div class="result-emoji" id="result-emoji"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="bars" id="bars"></div>
+      <div id="plans"></div>
+      <button class="btn restart" id="btn-restart">🔄 다시 체크하기</button>
+      <div class="disclaimer">이 결과는 오늘 하루의 참고용이에요. 진단이 아니며, 2주 이상 우울·들뜸·불안이 일상에 영향을 준다면 전문가 상담을 권해요. 위기 시 ☎109 (자살예방상담전화, 24시간 무료).</div>
+    </div>
+  </div>
+
+  <footer>MY Lovely Bipolar Diary · 오늘 내 마음 날씨<br>살고 싶어서 쓰는 글, 미니</footer>
+</div>
+
+<script>
+var QUESTIONS = [
+ {cat:"⚡ 에너지 · 들뜸", t:"평소보다 기분이 유난히 들뜨거나 고양되어 있다", k:"up"},
+ {cat:"⚡ 에너지 · 들뜸", t:"말이 빨라지거나 생각이 평소보다 빠르게 흘러간다", k:"up"},
+ {cat:"⚡ 에너지 · 들뜸", t:"잠을 적게 자도 피곤하지 않고 에너지가 넘친다", k:"up"},
+ {cat:"⚡ 에너지 · 들뜸", t:"평소보다 충동적인 결정(지출·계획·약속)을 하고 싶어진다", k:"up"},
+ {cat:"🌧️ 우울 · 무기력", t:"기분이 가라앉고 슬프거나 공허한 느낌이 든다", k:"down"},
+ {cat:"🌧️ 우울 · 무기력", t:"예전에 즐겁던 일에도 흥미가 생기지 않는다", k:"down"},
+ {cat:"🌧️ 우울 · 무기력", t:"몸이 무겁고 아무것도 하기 싫은 무기력이 느껴진다", k:"down"},
+ {cat:"🌧️ 우울 · 무기력", t:"자신을 자책하거나 쓸모없다고 느끼는 생각이 든다", k:"down"},
+ {cat:"💓 불안 · 초조", t:"이유 없이 가슴이 두근거리거나 초조하다", k:"anx"},
+ {cat:"💓 불안 · 초조", t:"걱정이 꼬리에 꼬리를 물고 멈추기 어렵다", k:"anx"},
+ {cat:"💓 불안 · 초조", t:"몸이 긴장되어 있거나 쉽게 짜증이 난다", k:"anx"},
+ {cat:"💓 불안 · 초조", t:"나쁜 일이 생길 것 같은 불길한 예감이 든다", k:"anx"},
+ {cat:"🌙 수면 · 생활리듬", t:"잠들기 어렵거나 새벽에 자주 깬다", k:"sleep"},
+ {cat:"🌙 수면 · 생활리듬", t:"자고 일어나도 개운하지 않고 낮에 졸린다", k:"sleep"},
+ {cat:"🌙 수면 · 생활리듬", t:"식사 시간이 불규칙하거나 입맛이 크게 변했다", k:"sleep"},
+ {cat:"🌙 수면 · 생활리듬", t:"하루 생활리듬(기상·취침)이 평소와 많이 어긋나 있다", k:"sleep"},
+ {cat:"🤝 관계 · 일상기능", t:"사람 만나는 일이 부담스럽고 피하고 싶다", k:"func"},
+ {cat:"🤝 관계 · 일상기능", t:"해야 할 일(학업·일·집안일)이 손에 잡히지 않는다", k:"func"},
+ {cat:"🤝 관계 · 일상기능", t:"집중력이 떨어져 대화나 글을 따라가기 어렵다", k:"func"},
+ {cat:"🤝 관계 · 일상기능", t:"사소한 일에도 쉽게 상처받거나 예민해져 있다", k:"func"}
+];
+var LABELS = ["전혀 아니다","가끔 그렇다","자주 그렇다","거의 항상 그렇다"];
+var LABEL_INFO = {up:"들뜸", down:"우울", anx:"불안", sleep:"수면·리듬", func:"관계·기능"};
+var BAR_COLOR = {up:"#d66c8a", down:"#6c8fd6", anx:"#e8a93d", sleep:"#7fb069", func:"#9b7bd6"};
+var answers = new Array(QUESTIONS.length).fill(-1);
+var idx = 0;
+
+function $(id){ return document.getElementById(id); }
+
+$("btn-start").addEventListener("click", function(){
+  $("screen-start").classList.add("hidden");
+  $("screen-quiz").classList.remove("hidden");
+  render();
+});
+$("btn-prev").addEventListener("click", function(){
+  if(idx > 0){ idx--; render(); }
+});
+$("btn-next").addEventListener("click", function(){
+  if(answers[idx] < 0) return;
+  if(idx < QUESTIONS.length - 1){ idx++; render(); }
+  else { showResult(); }
+});
+$("btn-restart").addEventListener("click", function(){
+  answers = new Array(QUESTIONS.length).fill(-1);
+  idx = 0;
+  $("screen-result").classList.add("hidden");
+  $("screen-quiz").classList.remove("hidden");
+  render();
+  window.scrollTo(0,0);
+});
+
+function render(){
+  var q = QUESTIONS[idx];
+  $("qcat").textContent = q.cat + " (" + (idx+1) + "/" + QUESTIONS.length + ")";
+  $("qtext").textContent = q.t;
+  $("pbar").style.width = ((idx) / QUESTIONS.length * 100) + "%";
+  $("pcount").textContent = "문항 " + (idx+1) + " / " + QUESTIONS.length;
+  var box = $("opts");
+  box.innerHTML = "";
+  for(var i=0;i<LABELS.length;i++){
+    (function(v){
+      var b = document.createElement("button");
+      b.className = "opt" + (answers[idx]===v ? " sel" : "");
+      b.innerHTML = "<span class='n'>" + (v+1) + "</span><span>" + LABELS[v] + "</span>";
+      b.addEventListener("click", function(){
+        answers[idx] = v;
+        render();
+      });
+      box.appendChild(b);
+    })(i);
+  }
+  $("btn-prev").style.visibility = idx===0 ? "hidden" : "visible";
+  var nb = $("btn-next");
+  nb.disabled = answers[idx] < 0;
+  nb.textContent = idx === QUESTIONS.length-1 ? "결과 보기 ✨" : "다음 →";
+}
+
+function sum(k){
+  var s = 0;
+  for(var i=0;i<QUESTIONS.length;i++){ if(QUESTIONS[i].k===k && answers[i]>=0) s += answers[i]; }
+  return s; // 0~12
+}
+
+function showResult(){
+  $("screen-quiz").classList.add("hidden");
+  $("screen-result").classList.remove("hidden");
+  $("pbar").style.width = "100%";
+  var up=sum("up"), down=sum("down"), anx=sum("anx"), sleep=sum("sleep"), func=sum("func");
+  var total = up+down+anx+sleep+func; // 0~60
+  var type, emoji, title, sub, color;
+  if(total <= 12 && up <= 5){
+    type="stable"; emoji="☀️"; color="var(--good)"; title="맑음 — 오늘은 안정적인 하루";
+    sub="에너지·기분·리듬이 비교적 고르게 유지되고 있어요.<br>이 좋은 흐름을 이어가 보세요.";
+  } else if(up >= 8 && up > down){
+    type="up"; emoji="🎈"; color="var(--up)"; title="들뜸 주의 — 에너지가 높게 치우쳐 있어요";
+    sub="기분이 들뜨고 에너지가 평소보다 높게 나타났어요.<br>무리한 결정·과도한 활동을 잠시 쉬어가는 게 좋아요.";
+  } else if(down >= 8 && down >= up){
+    type="down"; emoji="🌧️"; color="var(--down)"; title="흐림 — 우울감이 다소 높아요";
+    sub="가라앉음·무기력이 평소보다 크게 느껴지는 오늘이에요.<br>스스로를 다그치지 말고 작은 회복부터 시작해요.";
+  } else if(anx >= 8){
+    type="anx"; emoji="🌊"; color="var(--watch)"; title="파도 — 불안·초조가 높아요";
+    sub="걱정과 긴장이 마음을 흔들고 있는 오늘이에요.<br>몸을 먼저 이완시키면 마음도 따라 잦아들어요.";
+  } else {
+    type="watch"; emoji="⛅"; color="var(--mix)"; title="구름 조금 — 몇 군데 흔들림이 보여요";
+    sub="전체적으로는 버티고 있지만 일부 영역에 피로가 보여요.<br>오늘은 회복에 시간을 써 보세요.";
+  }
+  $("result-badge").innerHTML = "<span class='tag' style='background:" + color + "'>" +
+    (type==="stable"?"안정":type==="up"?"들뜸 주의":type==="down"?"우울 주의":type==="anx"?"불안 주의":"관심 필요") + "</span>";
+  $("result-emoji").textContent = emoji;
+  $("result-title").textContent = title;
+  $("result-sub").innerHTML = sub;
+
+  var bars = $("bars"); bars.innerHTML = "";
+  var keys = ["up","down","anx","sleep","func"];
+  var vals = {up:up, down:down, anx:anx, sleep:sleep, func:func};
+  for(var j=0;j<keys.length;j++){
+    (function(k){
+      var v = vals[k], pct = Math.round(v/12*100);
+      var row = document.createElement("div");
+      row.className = "bar-row";
+      row.innerHTML = "<div class='lbl'><span>" + LABEL_INFO[k] + "</span><span>" + v + " / 12</span></div>" +
+        "<div class='bar'><div style='width:" + pct + "%;background:" + BAR_COLOR[k] + "'></div></div>";
+      bars.appendChild(row);
+    })(keys[j]);
+  }
+
+  var PLANS = {
+    stable: [
+      {h:"☀️ 오늘 바로 — 좋은 흐름 굳히기", items:["기분 점수를 일기장에 한 줄로 기록해요 (나중에 비교 자료가 돼요)","햇볕 15분 + 가벼운 산책으로 리듬을 유지해요","고마웠던 사람에게 짧게 안부를 전해 보세요"]},
+      {h:"🌱 이번 주 — 예방 루틴 만들기", items:["수면·복약 시간을 일정하게 유지해요","즐거웠던 활동을 주 2회 일정표에 넣어 두세요","마음 날씨를 주 1회 다시 체크해 변화를 기록해요"]},
+      {h:"💛 혹시 흔들릴 때를 위한 준비", items:["힘들 때 연락할 사람 1명을 미리 정해 두세요","나를 진정시키는 문장 3개를 메모해 두세요","위기 시 ☎109 (자살예방상담전화, 24시간)"]}
+    ],
+    up: [
+      {h:"🛑 오늘 바로 — 속도 늦추기", items:["큰 지출·중요 결정은 48시간 미루기로 정해요","카페인·야간 활동을 줄이고 취침 시간을 지켜요","격한 운동 대신 스트레칭·산책으로 에너지를 분산시켜요"]},
+      {h:"📓 이번 주 — 신호 관찰하기", items:["수면 시간·기분·지출을 매일 1분씩 기록해요","주변 사람에게 '내가 빨라 보이면 알려달라'고 부탁해 보세요","들뜸이 3일 넘게 계속되면 주치의·상담사와 상의해요"]},
+      {h:"🚨 바로 상담이 필요한 신호", items:["며칠째 거의 잠을 안 자도 멀쩡하다","위험한 행동(과속·폭음·무리한 투자) 충동이 강하다","주변에서 '너 요즘 다르다'는 말을 자주 듣는다 → 전문가에게 바로 연락하세요"]}
+    ],
+    down: [
+      {h:"🛋️ 오늘 바로 — 가장 작은 회복부터", items:["햇볕 쬐며 물 한 잔 마시기 (그것만으로 충분해요)","5분 정리·5분 산책처럼 아주 작은 목표 하나만 해요","따뜻한 식사 한 끼를 챙겨 먹어요"]},
+      {h:"🌧️ 이번 주 — 우울과 거리 두기", items:["기상·취침 시간만이라도 일정하게 맞춰 보세요","좋아했던 일을 10분만 다시 해 보세요 (완벽하지 않아도 돼요)","믿을 만한 사람에게 '요즘 가라앉는다'고 말해 보세요"]},
+      {h:"🚨 바로 상담·도움이 필요한 신호", items:["2주 넘게 우울·무기력이 계속된다","일·학업·식사 같은 기본생활이 어렵다","스스로를 해치고 싶은 생각이 든다 → ☎109에 지금 바로 전화하세요 (24시간)"]}
+    ],
+    anx: [
+      {h:"🌬️ 오늘 바로 — 몸부터 풀기", items:["4-7-8 호흡 (4초 들이마시고 7초 참고 8초 내쉬기) 3회","어깨·목 스트레칭 5분으로 긴장을 풀어요","걱정을 종이에 5분간 쏟아 쓰고 덮어 두세요"]},
+      {h:"📋 이번 주 — 걱정 다이어트", items:["걱정 시간을 하루 15분으로 정해 그때만 몰아서 해요","카페인·과도한 뉴스 시청을 줄여 보세요","걱정거리 중 '내가 통제 가능한 것' 1개만 골라 행동해요"]},
+      {h:"🚨 바로 상담이 필요한 신호", items:["가슴 두근거림·호흡곤란 등 몸 증상이 반복된다","불안 때문에 외출·일상이 어려워졌다","공황 비슷한 발작을 경험했다 → 전문가 상담을 받아 보세요"]}
+    ],
+    watch: [
+      {h:"⛅ 오늘 바로 — 회복 시간 갖기", items:["점수가 높았던 영역 1곳만 골라 쉬어주세요","따뜻한 차 한 잔 + 10분 멍때리기를 해 보세요","오늘 할 일을 3개 이하로 줄여 보세요"]},
+      {h:"📓 이번 주 — 균형 되찾기", items:["수면 시간을 일정하게 되돌려 보세요","가벼운 운동(산책·요가)을 주 2회 넣어 보세요","3일 뒤 다시 체크해서 점수 변화를 확인해요"]},
+      {h:"💛 기억할 것", items:["흔들리는 날도 있는 게 자연스러워요","점수가 2주 이상 높게 유지되면 전문가와 상의해요","위기 시 ☎109 (24시간)"]}
+    ]
+  };
+  var box = $("plans"); box.innerHTML = "";
+  var list = PLANS[type];
+  for(var p=0;p<list.length;p++){
+    (function(pl){
+      var d = document.createElement("div");
+      d.className = "plan";
+      var h = "<h3>" + pl.h + "</h3><ul>";
+      for(var m=0;m<pl.items.length;m++){ h += "<li>" + pl.items[m] + "</li>"; }
+      h += "</ul>";
+      d.innerHTML = h;
+      box.appendChild(d);
+    })(list[p]);
+  }
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
