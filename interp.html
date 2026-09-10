@@ -18,12 +18,7 @@ header h1{font-size:17px;font-weight:800}
 header .live{margin-left:auto;font-size:11px;font-weight:700;color:#fff;background:#ef4444;border-radius:20px;padding:4px 10px;display:none}
 header .live.on{display:block;animation:blink 1.4s infinite}
 @keyframes blink{50%{opacity:.55}}
-/* two listen buttons */
-#listenBar{display:flex;gap:8px;padding:12px 16px 4px}
-#listenBar button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--dim);border-radius:14px;padding:14px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
-#listenBar button.act{background:var(--gold);color:#0b1220;border-color:var(--gold)}
-#listenBar button.live{border-color:#ef4444;color:#ef4444}
-#listenBar button.act.live{background:#ef4444;color:#fff;border-color:#ef4444}
+/* bottom deck: listen buttons + clear */
 /* split conversation: KO left / EN right */
 #log{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch}
 .turn{display:flex;gap:8px;align-items:stretch}
@@ -33,22 +28,24 @@ header .live.on{display:block;animation:blink 1.4s infinite}
 .cell.heard{opacity:.6;border-style:dashed}
 .cell .flag{font-size:10px;opacity:.6;margin-bottom:2px}
 #hint{text-align:center;font-size:12px;color:var(--dim);padding:6px 16px;min-height:28px}
-#deck{padding:8px 16px calc(env(safe-area-inset-bottom,0px) + 14px);border-top:1px solid var(--line);background:#0d1526;display:flex;gap:8px}
-#deck button{flex:1;background:none;border:1px solid var(--line);color:var(--dim);border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+#deck{padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 16px);border-top:1px solid var(--line);background:#0d1526;display:flex;gap:8px}
+#deck button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--dim);border-radius:14px;padding:14px 6px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit}
+#deck button.act{background:var(--gold);color:#0b1220;border-color:var(--gold)}
+#deck button.live{border-color:#ef4444;color:#ef4444}
+#deck button.act.live{background:#ef4444;color:#fff;border-color:#ef4444}
+#deck #clearBtn{flex:0.6;font-size:12px}
 #err{display:none;margin:0 16px 8px;background:#450a0a;color:#fca5a5;border-radius:10px;padding:10px 14px;font-size:13px}
 </style>
 </head>
 <body>
 <header><span class="dot"></span><h1>🗣️ Translator</h1><span id="liveTag" class="live">● LISTENING</span></header>
-<div id="listenBar">
-<button id="btnKo" onclick="tapListen('ko')">🇰🇷🎤<br>Listen in Korean</button>
-<button id="btnEn" onclick="tapListen('en')">🇺🇸🎤<br>Listen in English</button>
-</div>
 <div id="err"></div>
 <div id="log"></div>
 <div id="hint">Tap a side, talk freely — both languages appear live</div>
 <div id="deck">
-<button onclick="clearLog()">🧹 Clear</button>
+<button id="btnKo" onclick="tapListen('ko')">🇰🇷🎤<br>Listen in Korean</button>
+<button id="btnEn" onclick="tapListen('en')">🇺🇸🎤<br>Listen in English</button>
+<button id="clearBtn" onclick="clearLog()">🧹<br>Clear</button>
 </div>
 <script>
 'use strict';
