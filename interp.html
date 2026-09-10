@@ -14,20 +14,21 @@ html,body{height:100%}
 body{font-family:-apple-system,'Segoe UI',Roboto,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--txt);display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height:100dvh}
 header{padding:calc(env(safe-area-inset-top,0px) + 14px) 20px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
 header .dot{width:10px;height:10px;border-radius:50%;background:var(--gold)}
-header h1{font-size:17px;font-weight:800;letter-spacing:-.02em}
+header h1{font-size:17px;font-weight:800}
 header .live{margin-left:auto;font-size:11px;font-weight:700;color:#0b1220;background:#ef4444;border-radius:20px;padding:4px 10px;display:none}
 header .live.on{display:block;animation:blink 1.4s infinite}
 @keyframes blink{50%{opacity:.6}}
-#langbar{display:flex;gap:8px;padding:14px 16px 4px}
-#langbar button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--dim);border-radius:14px;padding:13px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
-#langbar button.act{background:var(--gold);color:#0b1220;border-color:var(--gold)}
-#langbar button small{display:block;font-size:11px;font-weight:600;margin-top:2px;opacity:.75}
+#who{display:flex;gap:8px;padding:14px 16px 4px}
+#who button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--dim);border-radius:14px;padding:13px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+#who button.act{background:var(--gold);color:#0b1220;border-color:var(--gold)}
+#who button small{display:block;font-size:11px;font-weight:600;margin-top:2px;opacity:.75}
 #log{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch}
-.msg{max-width:88%;padding:10px 14px;border-radius:16px;font-size:16px;line-height:1.5;cursor:pointer}
-.msg .o{font-size:12px;opacity:.6;margin-bottom:3px}
-.msg.out{align-self:flex-end;background:var(--gold);color:#0b1220;border-bottom-right-radius:6px}
-.msg.in{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px}
-#heard{background:var(--card);border:1px dashed var(--gold);border-radius:12px;margin:0 16px;padding:9px 14px;font-size:14px;color:var(--txt);min-height:38px;display:none}
+.turn{max-width:92%;padding:10px 14px;border-radius:16px;font-size:16px;line-height:1.55;cursor:pointer}
+.turn.ko{align-self:flex-start;background:var(--card);border:1px solid var(--gold);border-bottom-left-radius:6px}
+.turn.en{align-self:flex-end;background:var(--gold);color:#0b1220;border-bottom-right-radius:6px}
+.turn .flag{font-size:11px;opacity:.65;margin-bottom:3px}
+.turn.pending{opacity:.55}
+#heard{background:var(--card);border:1px dashed var(--gold);border-radius:12px;margin:0 16px;padding:9px 14px;font-size:14px;min-height:38px;display:none}
 #heard.on{display:block}
 #deck{padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 16px);border-top:1px solid var(--line);background:#0d1526}
 #micBtn{width:100%;border:none;border-radius:16px;background:var(--gold);color:#0b1220;font-size:18px;font-weight:800;padding:17px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px}
@@ -37,144 +38,90 @@ header .live.on{display:block;animation:blink 1.4s infinite}
 #textIn{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;color:#fff;padding:13px 14px;font-size:16px;font-family:inherit;outline:none;min-width:0}
 #textIn:focus{border-color:var(--gold)}
 #sendBtn{background:var(--card);border:1px solid var(--gold);color:var(--gold);border-radius:12px;padding:0 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap}
-#voiceRow{display:flex;gap:8px;margin-top:10px;align-items:stretch}
-#voiceBtn{flex:1.4;background:var(--card);border:1px solid var(--gold);color:var(--gold);border-radius:12px;padding:10px 8px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#rateWrap{flex:1;display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:0 10px}
-#rateWrap span{font-size:11px;color:var(--dim);white-space:nowrap}
-#rate{flex:1;accent-color:var(--gold);min-width:0}
 #utilRow{display:flex;gap:8px;margin-top:10px}
 #utilRow button{flex:1;background:none;border:1px solid var(--line);color:var(--dim);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
-#utilRow button.on{color:var(--gold);border-color:var(--gold)}
 #err{display:none;margin:0 16px 8px;background:#450a0a;color:#fca5a5;border-radius:10px;padding:10px 14px;font-size:13px}
 </style>
 </head>
 <body>
 <header><span class="dot"></span><h1>🗣️ Translator</h1><span id="liveTag" class="live">● LISTENING</span></header>
-<div id="langbar">
-<button id="dKoEn" class="act" onclick="setDir('ko-en')">🇰🇷 Korean → 🇺🇸 English<small>Korean → English</small></button>
-<button id="dEnKo" onclick="setDir('en-ko')">🇺🇸 English → 🇰🇷 Korean<small>English → Korean</small></button>
+<div id="who">
+<button id="wKo" class="act" onclick="setWho('ko')">🇰🇷 Korean speaking<small>한국어 → English</small></button>
+<button id="wEn" onclick="setWho('en')">🇺🇸 English speaking<small>영어 → 한국어</small></button>
 </div>
 <div id="err"></div>
 <div id="log"></div>
 <div id="heard"></div>
 <div id="deck">
 <button id="micBtn" onclick="toggleMic()">🎤 Tap to speak</button>
-<div id="hint">Keeps listening through pauses · Tap again to translate</div>
+<div id="hint">Tap once, talk freely · Tap again to translate</div>
 <div id="textRow">
 <input id="textIn" placeholder="✏️ Type message…" enterkeyhint="send" onkeydown="if(event.key==='Enter')sendText()">
 <button id="sendBtn" onclick="sendText()">📤 Send</button>
 </div>
-<div id="voiceRow">
-<button id="voiceBtn" onclick="cycleVoice()">🔊 Loading voices…</button>
-<div id="rateWrap"><span>⏩ Speed</span><input id="rate" type="range" min="0.6" max="1.3" step="0.05" value="1" oninput="saveRate()"></div>
-</div>
 <div id="utilRow">
-<button id="autoBtn" onclick="toggleAuto()">🔇 Auto-play OFF</button>
-<button id="liveBtn" onclick="toggleLiveMode()">⚡ Live OFF</button>
 <button onclick="clearLog()">🧹 Clear</button>
 </div>
 </div>
 <script>
 'use strict';
-window.addEventListener('error',function(e){ showErr('Error: '+(e.message||'unknown')); });
-var dir=localStorage.getItem('interp_dir')||'ko-en';
-var listening=false, wantListen=false;
-var autoSpeak=localStorage.getItem('interp_auto2')==='1'; /* default OFF */
-var liveMode=localStorage.getItem('interp_live')==='1';
-var rec=null, fullTxt='', voiceIdx=0, voicesCache=[], commitT=null, lastCommitted='';
-var SRC={'ko-en':'ko-KR','en-ko':'en-US'};
-var TGT={'ko-en':'en-US','en-ko':'ko-KR'};
-var TGTLANG={'ko-en':'en','en-ko':'ko'};
-var VKEY=function(){return 'interp_voice2_'+TGTLANG[dir];};
-/* ---------- voices: strict native match only ---------- */
+window.addEventListener('error',function(e){showErr('Error: '+(e.message||'unknown'));});
+var who=localStorage.getItem('interp_who')||'ko';
+var wantListen=false, rec=null, segBuffer='', voicesEN=[], voiceKO=null, heardTimer=null;
+/* ---------- voices ---------- */
 function normLang(l){return (l||'').replace('_','-').toLowerCase();}
-function isEN(){return TGTLANG[dir]==='en';}
-function rankVoice(v){
- var n=((v.name||'')+' '+(v.voiceURI||'')).toLowerCase();
- var s=0, en=isEN();
- if(en){
-  if(/google us english/.test(n))s+=100;
-  else if(/google uk english/.test(n))s+=85;
-  else if(/samsung.*english/.test(n))s+=70;
-  else if(/samantha|aria|jenny|guy|zira|david|natasha|jenny|ryan/.test(n))s+=60;
-  if(/natural|neural|premium|enhanced/.test(n))s+=30;
-  if(/^en-us/.test(normLang(v.lang)))s+=8;
-  else if(/^en-gb/.test(normLang(v.lang)))s+=5;
-  if(v.localService)s+=4;
- }else{
-  if(/google.*(korean|한국)/.test(n))s+=100;
-  else if(/samsung.*(korean|한국)/.test(n))s+=70;
-  else if(/yuna|kyogu|seoyeon|ina/.test(n))s+=60;
-  if(/natural|neural|premium|enhanced/.test(n))s+=30;
-  if(v.localService)s+=4;
- }
- return s;
-}
-function refreshVoices(){
- if(!('speechSynthesis' in window)){document.getElementById('voiceBtn').textContent='🔇 No voice support';return;}
- var code=TGTLANG[dir];
+function loadVoices(){
+ if(!('speechSynthesis' in window)){return;}
  var all=speechSynthesis.getVoices()||[];
- /* STRICT: voice language must start with target code — never cross (fixes Konglish) */
- var match=all.filter(function(v){return normLang(v.lang).indexOf(code)===0;});
- match.sort(function(a,b){return rankVoice(b)-rankVoice(a);});
- voicesCache=match;
- if(!match.length){document.getElementById('voiceBtn').textContent=isEN()?'🔇 No English voice on device':'🔇 기기 영어 음성 없음';return;}
- var saved=localStorage.getItem(VKEY), i=0;
- if(saved){for(var k=0;k<match.length;k++){if(match[k].name===saved){i=k;break;}}}
- else localStorage.setItem(VKEY,match[0].name);
- voiceIdx=i; paintVoice();
+ /* English: lang must start with en, ranked native-first */
+ voicesEN=all.filter(function(v){return normLang(v.lang).indexOf('en')===0;});
+ voicesEN.sort(function(a,b){return rankEN(b)-rankEN(a);});
+ /* Korean: Yuna only, exact ko */
+ var yuna=all.filter(function(v){return /yuna/i.test(v.name||'')&&normLang(v.lang).indexOf('ko')===0;});
+ if(yuna.length)voiceKO=yuna[0];
+ else{var kos=all.filter(function(v){return normLang(v.lang).indexOf('ko')===0;});voiceKO=kos[0]||null;}
 }
-function paintVoice(){
- var b=document.getElementById('voiceBtn');
- if(!voicesCache.length)return;
- b.textContent='🎙️ '+(voicesCache.length>1?('◂ '+voicesCache[voiceIdx].name+' ▸'):voicesCache[voiceIdx].name);
-}
-function cycleVoice(){
- if(voicesCache.length<2){refreshVoices();return;}
- voiceIdx=(voiceIdx+1)%voicesCache.length;
- localStorage.setItem(VKEY,voicesCache[voiceIdx].name);
- paintVoice(); previewVoice();
-}
-var previewT=null;
-function previewVoice(){
- clearTimeout(previewT);
- previewT=setTimeout(function(){
-  try{
-   speechSynthesis.cancel();
-   var u=new SpeechSynthesisUtterance(isEN()?"Hello, how can I help you?":'안녕하세요, 무엇을 도와드릴까요?');
-   u.lang=TGT[dir]; u.rate=parseFloat(document.getElementById('rate').value)||1;
-   var v=voicesCache[voiceIdx];
-   if(v&&normLang(v.lang).indexOf(TGTLANG[dir])===0)u.voice=v;
-   speechSynthesis.speak(u);
-  }catch(e){showErr('Preview failed: '+e.message);}
- },350);
+function rankEN(v){
+ var n=((v.name||'')+' '+(v.voiceURI||'')).toLowerCase(),s=0;
+ if(/google us english/.test(n))s+=100;
+ else if(/google uk english/.test(n))s+=85;
+ else if(/samsung.*english/.test(n))s+=70;
+ else if(/samantha|aria|jenny|guy|zira|david|natasha|ryan/.test(n))s+=60;
+ if(/natural|neural|premium|enhanced/.test(n))s+=30;
+ if(/^en-us/.test(normLang(v.lang)))s+=8;
+ if(v.localService)s+=4;
+ return s;
 }
 if('speechSynthesis' in window){
  try{speechSynthesis.getVoices();}catch(e){}
- if(speechSynthesis.onvoiceschanged!==undefined)speechSynthesis.onvoiceschanged=refreshVoices;
- setTimeout(refreshVoices,500); setTimeout(refreshVoices,2000);
+ if(speechSynthesis.onvoiceschanged!==undefined)speechSynthesis.onvoiceschanged=loadVoices;
+ setTimeout(loadVoices,500);setTimeout(loadVoices,2000);
 }
-function saveRate(){localStorage.setItem('interp_rate',document.getElementById('rate').value);}
-(function(){var r=localStorage.getItem('interp_rate');if(r)document.getElementById('rate').value=r;})();
+function speak(text,lang){
+ try{
+  if(!('speechSynthesis' in window)){showErr('Voice not supported');return;}
+  speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(text);
+  u.rate=1;
+  if(lang==='ko'){u.lang='ko-KR';if(voiceKO&&normLang(voiceKO.lang).indexOf('ko')===0)u.voice=voiceKO;}
+  else{u.lang='en-US';var v=voicesEN[0];if(v&&normLang(v.lang).indexOf('en')===0)u.voice=v;}
+  speechSynthesis.speak(u);
+ }catch(e){showErr('Voice error: '+e.message);}
+}
 /* ---------- ui ---------- */
-function setDir(d){dir=d;localStorage.setItem('interp_dir',d);
- document.getElementById('dKoEn').classList.toggle('act',d==='ko-en');
- document.getElementById('dEnKo').classList.toggle('act',d==='en-ko');
- stopAll();refreshVoices();
- hint(d==='ko-en'?'Speak Korean':'Speak English');
+function setWho(w){who=w;localStorage.setItem('interp_who',w);
+ document.getElementById('wKo').classList.toggle('act',w==='ko');
+ document.getElementById('wEn').classList.toggle('act',w==='en');
+ stopMic();
+ hint(w==='ko'?'Speak Korean':'Speak English');
 }
 function hint(s){document.getElementById('hint').textContent=s;}
 function showErr(s){var e=document.getElementById('err');e.style.display='block';e.textContent=s;setTimeout(function(){e.style.display='none';},6000);}
-function toggleAuto(){autoSpeak=!autoSpeak;localStorage.setItem('interp_auto2',autoSpeak?'1':'0');paintAuto();}
-function paintAuto(){var b=document.getElementById('autoBtn');b.textContent=autoSpeak?'🔊 Auto-play ON':'🔇 Auto-play OFF';b.classList.toggle('on',autoSpeak);}
-function toggleLiveMode(){liveMode=!liveMode;localStorage.setItem('interp_live',liveMode?'1':'0');paintLive();
- hint(liveMode?'Translates at every pause':'Listens only until you tap again');}
-function paintLive(){var b=document.getElementById('liveBtn');b.textContent=liveMode?'⚡ Live ON':'⚡ Live OFF';b.classList.toggle('on',liveMode);}
 function clearLog(){document.getElementById('log').innerHTML='';}
-function heardBox(txt){var h=document.getElementById('heard');if(!txt){h.classList.remove('on');h.textContent='';return;}h.classList.add('on');h.textContent='… '+txt;}
-/* ---------- translation: Google gtx primary, MyMemory fallback ---------- */
-async function translate(text){
- var tl=TGTLANG[dir],sl=dir==='ko-en'?'ko':'en';
+function heardBox(t){var h=document.getElementById('heard');if(!t){h.classList.remove('on');h.textContent='';return;}h.classList.add('on');h.textContent='… '+t;}
+/* ---------- translation ---------- */
+async function translate(text,from){
+ var sl=from,tl=from==='ko'?'en':'ko';
  try{
   var r=await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl='+sl+'&tl='+tl+'&dt=t&q='+encodeURIComponent(text));
   if(!r.ok)throw new Error('gtx '+r.status);
@@ -183,50 +130,53 @@ async function translate(text){
   if(out)return out;throw new Error('empty');
  }catch(e){
   var r2=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair='+sl+'|'+tl);
-  if(!r2.ok)throw new Error('translate failed ('+e.message+')');
+  if(!r2.ok)throw new Error('translate failed');
   var j2=await r2.json();
-  if(j2.responseData&&j2.responseData.translatedText&&j2.responseData.translatedText!=='')return j2.responseData.translatedText;
-  throw new Error('translate failed ('+e.message+')');
+  if(j2.responseData&&j2.responseData.translatedText)return j2.responseData.translatedText;
+  throw new Error('translate failed');
  }
 }
-function speak(text){
- try{
-  if(!('speechSynthesis' in window)){showErr('Voice not supported in this browser');return;}
-  speechSynthesis.cancel();
-  var u=new SpeechSynthesisUtterance(text);
-  u.lang=TGT[dir]; /* exact locale: en-US / ko-KR — native accent */
-  u.rate=parseFloat(document.getElementById('rate').value)||1;
-  var v=voicesCache[voiceIdx];
-  if(v&&normLang(v.lang).indexOf(TGTLANG[dir])===0)u.voice=v; /* guard: never cross-language */
-  speechSynthesis.speak(u);
- }catch(e){showErr('Voice error: '+e.message);}
-}
-async function handleText(text){
- text=(text||'').trim();if(!text)return;
- hint('Translating…');
- try{
-  var t=await translate(text);
-  addMsg(text,t);
-  hint(wantListen?'Still listening…':(dir==='ko-en'?'Speak Korean':'Speak English'));
-  if(autoSpeak)speak(t);
- }catch(e){hint('Error');showErr('Translate error: '+e.message);}
-}
-function addMsg(src,tgt){
+/* one conversation turn: ko bubble left + en bubble right, tap to hear each */
+function addTurn(koText,enText){
  var log=document.getElementById('log');
- var o=document.createElement('div');o.className='msg out';
- o.innerHTML='<div class="o"></div><div></div>';
- o.children[0].textContent=src;o.children[1].textContent=tgt;
- o.onclick=function(){speak(tgt);};
- log.appendChild(o);log.scrollTop=log.scrollHeight;
+ var k=document.createElement('div');k.className='turn ko';
+ k.innerHTML='<div class="flag">🇰🇷 Korean · tap to hear</div><div></div>';
+ k.children[1].textContent=koText;
+ k.onclick=function(){speak(koText,'ko');};
+ var e=document.createElement('div');e.className='turn en';
+ e.innerHTML='<div class="flag">🇺🇸 English · tap to hear</div><div></div>';
+ e.children[1].textContent=enText;
+ e.onclick=function(){speak(enText,'en');};
+ log.appendChild(k);log.appendChild(e);
+ log.scrollTop=log.scrollHeight;
 }
-function sendText(){var i=document.getElementById('textIn');handleText(i.value);i.value='';i.blur();}
-/* ---------- mic: open through pauses, tap again to commit ---------- */
-function toggleMic(){wantListen?finishAndCommit():startLoop();}
-function startLoop(){
+function pendingTurn(from,text){
+ var log=document.getElementById('log');
+ var d=document.createElement('div');
+ d.className='turn pending '+(from==='ko'?'ko':'en');
+ d.innerHTML='<div class="flag">'+(from==='ko'?'🇰🇷':'🇺🇸')+' …</div><div></div>';
+ d.children[1].textContent=text;
+ log.appendChild(d);log.scrollTop=log.scrollHeight;
+ return d;
+}
+async function handleSentence(text,from){
+ var el=pendingTurn(from,text);
+ try{
+  var t=await translate(text,from);
+  el.remove();
+  if(from==='ko')addTurn(text,t);
+  else addTurn(t,text);
+  speak(t,from==='ko'?'en':'ko'); /* auto-play the translation */
+ }catch(e){el.remove();showErr('Translate error: '+e.message);}
+}
+function sendText(){var i=document.getElementById('textIn');var v=i.value.trim();i.value='';i.blur();if(v)handleSentence(v,who);}
+/* ---------- mic: open through pauses, sentence-by-sentence ---------- */
+function toggleMic(){wantListen?finishMic():startMic();}
+function startMic(){
  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
  if(!SR){showErr('Please open in Chrome, Edge, or Safari');return;}
  try{if('speechSynthesis' in window)speechSynthesis.cancel();}catch(e){}
- wantListen=true;fullTxt='';lastCommitted='';
+ wantListen=true;segBuffer='';
  openRec();
 }
 function openRec(){
@@ -234,53 +184,54 @@ function openRec(){
  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
  try{if(rec){try{rec.abort();}catch(e){}}}catch(e){}
  rec=new SR();
- rec.lang=SRC[dir];rec.interimResults=true;rec.continuous=true;
+ rec.lang=who==='ko'?'ko-KR':'en-US';
+ rec.interimResults=true;rec.continuous=true;
+ var interim='';
  rec.onresult=function(e){
-  var inter='';
+  var freshFinal='';
   for(var i=e.resultIndex;i<e.results.length;i++){
    var tr=e.results[i][0].transcript;
-   if(e.results[i].isFinal){fullTxt=(fullTxt+' '+tr).trim();if(liveMode)commitSoon();}
-   else inter+=tr;
+   if(e.results[i].isFinal)freshFinal+=' '+tr;
+   else interim=tr;
   }
-  heardBox((fullTxt+' '+inter).trim());
+  if(freshFinal){segBuffer=(segBuffer+freshFinal).trim();scheduleCommit();}
+  heardBox((segBuffer+(interim?' | '+interim:'')).trim());
  };
  rec.onend=function(){setLive(false);if(wantListen)setTimeout(function(){if(wantListen)openRec();},250);};
  rec.onerror=function(e){
-  if(e.error==='not-allowed'||e.error==='service-not-allowed'){wantListen=false;setLive(false);fullTxt='';showErr('Please allow microphone access');return;}
+  if(e.error==='not-allowed'||e.error==='service-not-allowed'){wantListen=false;setLive(false);showErr('Please allow microphone access');return;}
   setLive(false);
   if(wantListen)setTimeout(function(){if(wantListen){try{rec.start();}catch(x){openRec();}}},500);
  };
- try{rec.start();setLive(true);hint(liveMode?'Listening… translates at pauses':'Listening… tap again to translate');}
+ try{rec.start();setLive(true);hint('Listening… sentences appear as you pause');}
  catch(e){showErr('Mic failed: '+e.message);wantListen=false;}
 }
-function commitSoon(){
- clearTimeout(commitT);
- commitT=setTimeout(function(){
-  var cur=fullTxt.trim();
-  if(cur&&cur!==lastCommitted){lastCommitted=cur;handleText(cur);}
- },2500);
+function scheduleCommit(){
+ clearTimeout(heardTimer);
+ heardTimer=setTimeout(function(){
+  var s=segBuffer.trim();
+  if(s&&wantListen){segBuffer='';heardBox('');handleSentence(s,who);}
+ },1800);
 }
-function finishAndCommit(){
- wantListen=false;clearTimeout(commitT);
+function finishMic(){
+ wantListen=false;clearTimeout(heardTimer);
  try{if(rec)rec.abort();}catch(e){}
  rec=null;setLive(false);
- var txt=fullTxt.trim();fullTxt='';heardBox('');
- if(txt)handleText(txt);
- else hint(dir==='ko-en'?'Speak Korean':'Speak English');
+ var s=segBuffer.trim();segBuffer='';heardBox('');
+ if(s)handleSentence(s,who);
+ else hint(who==='ko'?'Speak Korean':'Speak English');
 }
 function setLive(on){
  document.getElementById('micBtn').classList.toggle('live',wantListen);
- document.getElementById('micBtn').innerHTML=wantListen?'⏹ Tap to translate':'🎤 Tap to speak';
+ document.getElementById('micBtn').innerHTML=wantListen?'⏹ Tap to stop':'🎤 Tap to speak';
  document.getElementById('liveTag').classList.toggle('on',wantListen);
- if(!wantListen&&!fullTxt)heardBox('');
 }
-function stopAll(){wantListen=false;clearTimeout(commitT);fullTxt='';try{if(rec)rec.abort();}catch(e){}rec=null;setLive(false);}
+function stopMic(){wantListen=false;clearTimeout(heardTimer);segBuffer='';try{if(rec)rec.abort();}catch(e){}rec=null;setLive(false);heardBox('');}
 /* init */
 (function(){
- document.getElementById('dKoEn').classList.toggle('act',dir==='ko-en');
- document.getElementById('dEnKo').classList.toggle('act',dir==='en-ko');
- paintAuto();paintLive();
- hint('Keeps listening through pauses · Tap again to translate');
+ document.getElementById('wKo').classList.toggle('act',who==='ko');
+ document.getElementById('wEn').classList.toggle('act',who==='en');
+ hint('Tap once, talk freely · Tap again to stop');
 })();
 </script>
 </body>
