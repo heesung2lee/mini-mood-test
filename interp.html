@@ -11,72 +11,57 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--gold:#d4af37;--bg:#0b1220;--card:#151f33;--line:#24314d;--txt:#eef2f7;--dim:#8b98ad}
 html,body{height:100%}
-body{font-family:-apple-system,'Segoe UI',Roboto,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--txt);display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height:100dvh}
-header{padding:calc(env(safe-area-inset-top,0px) + 14px) 20px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+body{font-family:-apple-system,'Segoe UI',Roboto,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--txt);display:flex;flex-direction:column;min-height:100dvh;max-width:900px;margin:0 auto}
+header{padding:calc(env(safe-area-inset-top,0px) + 12px) 20px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
 header .dot{width:10px;height:10px;border-radius:50%;background:var(--gold)}
 header h1{font-size:17px;font-weight:800}
-header .live{margin-left:auto;font-size:11px;font-weight:700;color:#0b1220;background:#ef4444;border-radius:20px;padding:4px 10px;display:none}
+header .live{margin-left:auto;font-size:11px;font-weight:700;color:#fff;background:#ef4444;border-radius:20px;padding:4px 10px;display:none}
 header .live.on{display:block;animation:blink 1.4s infinite}
-@keyframes blink{50%{opacity:.6}}
-#who{display:flex;gap:8px;padding:14px 16px 4px}
-#who button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--dim);border-radius:14px;padding:13px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
-#who button.act{background:var(--gold);color:#0b1220;border-color:var(--gold)}
-#who button small{display:block;font-size:11px;font-weight:600;margin-top:2px;opacity:.75}
-#log{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch}
-.turn{max-width:92%;padding:10px 14px;border-radius:16px;font-size:16px;line-height:1.55;cursor:pointer}
-.turn.ko{align-self:flex-start;background:var(--card);border:1px solid var(--gold);border-bottom-left-radius:6px}
-.turn.en{align-self:flex-end;background:var(--gold);color:#0b1220;border-bottom-right-radius:6px}
-.turn .flag{font-size:11px;opacity:.65;margin-bottom:3px}
-.turn.pending{opacity:.55}
-#heard{background:var(--card);border:1px dashed var(--gold);border-radius:12px;margin:0 16px;padding:9px 14px;font-size:14px;min-height:38px;display:none}
-#heard.on{display:block}
-#deck{padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 16px);border-top:1px solid var(--line);background:#0d1526}
-#micBtn{width:100%;border:none;border-radius:16px;background:var(--gold);color:#0b1220;font-size:18px;font-weight:800;padding:17px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px}
-#micBtn.live{background:#ef4444;color:#fff}
-#hint{text-align:center;font-size:12px;color:var(--dim);margin-top:8px;min-height:18px}
-#textRow{display:flex;gap:8px;margin-top:10px}
-#textIn{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;color:#fff;padding:13px 14px;font-size:16px;font-family:inherit;outline:none;min-width:0}
-#textIn:focus{border-color:var(--gold)}
-#sendBtn{background:var(--card);border:1px solid var(--gold);color:var(--gold);border-radius:12px;padding:0 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap}
-#utilRow{display:flex;gap:8px;margin-top:10px}
-#utilRow button{flex:1;background:none;border:1px solid var(--line);color:var(--dim);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+@keyframes blink{50%{opacity:.55}}
+/* two listen buttons */
+#listenBar{display:flex;gap:8px;padding:12px 16px 4px}
+#listenBar button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--dim);border-radius:14px;padding:14px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+#listenBar button.act{background:var(--gold);color:#0b1220;border-color:var(--gold)}
+#listenBar button.live{border-color:#ef4444;color:#ef4444}
+#listenBar button.act.live{background:#ef4444;color:#fff;border-color:#ef4444}
+/* split conversation: KO left / EN right */
+#log{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch}
+.turn{display:flex;gap:8px;align-items:stretch}
+.cell{flex:1;min-width:0;padding:10px 12px;border-radius:12px;font-size:15px;line-height:1.5;cursor:pointer;word-break:break-word}
+.cell.ko{background:var(--card);border:1px solid var(--gold)}
+.cell.en{background:#1a2b1a;border:1px solid #2f5b33}
+.cell.heard{opacity:.6;border-style:dashed}
+.cell .flag{font-size:10px;opacity:.6;margin-bottom:2px}
+#hint{text-align:center;font-size:12px;color:var(--dim);padding:6px 16px;min-height:28px}
+#deck{padding:8px 16px calc(env(safe-area-inset-bottom,0px) + 14px);border-top:1px solid var(--line);background:#0d1526;display:flex;gap:8px}
+#deck button{flex:1;background:none;border:1px solid var(--line);color:var(--dim);border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
 #err{display:none;margin:0 16px 8px;background:#450a0a;color:#fca5a5;border-radius:10px;padding:10px 14px;font-size:13px}
 </style>
 </head>
 <body>
 <header><span class="dot"></span><h1>🗣️ Translator</h1><span id="liveTag" class="live">● LISTENING</span></header>
-<div id="who">
-<button id="wKo" class="act" onclick="setWho('ko')">🇰🇷 Korean speaking<small>한국어 → English</small></button>
-<button id="wEn" onclick="setWho('en')">🇺🇸 English speaking<small>영어 → 한국어</small></button>
+<div id="listenBar">
+<button id="btnKo" onclick="tapListen('ko')">🇰🇷🎤<br>Listen in Korean</button>
+<button id="btnEn" onclick="tapListen('en')">🇺🇸🎤<br>Listen in English</button>
 </div>
 <div id="err"></div>
 <div id="log"></div>
-<div id="heard"></div>
+<div id="hint">Tap a side, talk freely — both languages appear live</div>
 <div id="deck">
-<button id="micBtn" onclick="toggleMic()">🎤 Tap to speak</button>
-<div id="hint">Tap once, talk freely · Tap again to translate</div>
-<div id="textRow">
-<input id="textIn" placeholder="✏️ Type message…" enterkeyhint="send" onkeydown="if(event.key==='Enter')sendText()">
-<button id="sendBtn" onclick="sendText()">📤 Send</button>
-</div>
-<div id="utilRow">
 <button onclick="clearLog()">🧹 Clear</button>
-</div>
 </div>
 <script>
 'use strict';
 window.addEventListener('error',function(e){showErr('Error: '+(e.message||'unknown'));});
-var who=localStorage.getItem('interp_who')||'ko';
-var wantListen=false, rec=null, segBuffer='', voicesEN=[], voiceKO=null, heardTimer=null;
-/* ---------- voices ---------- */
+var activeSide=null, wantListen=false, rec=null, heardRow=null, heardTimer=null;
+var voicesEN=[], voiceKO=null;
+/* ---------- voices: KO=Yuna fixed, EN=best native ---------- */
 function normLang(l){return (l||'').replace('_','-').toLowerCase();}
 function loadVoices(){
- if(!('speechSynthesis' in window)){return;}
+ if(!('speechSynthesis' in window))return;
  var all=speechSynthesis.getVoices()||[];
- /* English: lang must start with en, ranked native-first */
  voicesEN=all.filter(function(v){return normLang(v.lang).indexOf('en')===0;});
  voicesEN.sort(function(a,b){return rankEN(b)-rankEN(a);});
- /* Korean: Yuna only, exact ko */
  var yuna=all.filter(function(v){return /yuna/i.test(v.name||'')&&normLang(v.lang).indexOf('ko')===0;});
  if(yuna.length)voiceKO=yuna[0];
  else{var kos=all.filter(function(v){return normLang(v.lang).indexOf('ko')===0;});voiceKO=kos[0]||null;}
@@ -99,140 +84,178 @@ if('speechSynthesis' in window){
 }
 function speak(text,lang){
  try{
-  if(!('speechSynthesis' in window)){showErr('Voice not supported');return;}
+  if(!('speechSynthesis' in window))return;
   speechSynthesis.cancel();
-  var u=new SpeechSynthesisUtterance(text);
-  u.rate=1;
+  var u=new SpeechSynthesisUtterance(text);u.rate=1;
   if(lang==='ko'){u.lang='ko-KR';if(voiceKO&&normLang(voiceKO.lang).indexOf('ko')===0)u.voice=voiceKO;}
   else{u.lang='en-US';var v=voicesEN[0];if(v&&normLang(v.lang).indexOf('en')===0)u.voice=v;}
   speechSynthesis.speak(u);
- }catch(e){showErr('Voice error: '+e.message);}
+ }catch(e){}
 }
-/* ---------- ui ---------- */
-function setWho(w){who=w;localStorage.setItem('interp_who',w);
- document.getElementById('wKo').classList.toggle('act',w==='ko');
- document.getElementById('wEn').classList.toggle('act',w==='en');
- stopMic();
- hint(w==='ko'?'Speak Korean':'Speak English');
+/* ---------- translation chain: gtx → mymemory → TITAN (Kakao) ---------- */
+async function viaGtx(text,sl,tl){
+ var r=await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl='+sl+'&tl='+tl+'&dt=t&q='+encodeURIComponent(text));
+ if(!r.ok)throw new Error('gtx '+r.status);
+ var j=await r.json();
+ var out=j&&j[0]?j[0].map(function(s){return s[0];}).join(''):'';
+ if(!out)throw new Error('empty');
+ return out;
 }
-function hint(s){document.getElementById('hint').textContent=s;}
-function showErr(s){var e=document.getElementById('err');e.style.display='block';e.textContent=s;setTimeout(function(){e.style.display='none';},6000);}
-function clearLog(){document.getElementById('log').innerHTML='';}
-function heardBox(t){var h=document.getElementById('heard');if(!t){h.classList.remove('on');h.textContent='';return;}h.classList.add('on');h.textContent='… '+t;}
-/* ---------- translation ---------- */
+async function viaMyMemory(text,sl,tl){
+ var r=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair='+sl+'|'+tl);
+ if(!r.ok)throw new Error('mm '+r.status);
+ var j=await r.json();
+ if(j.responseData&&j.responseData.translatedText)return j2text(j);
+ throw new Error('empty');
+ function j2text(j){return j.responseData.translatedText;}
+}
+/* TITAN = unofficial Kakao Translate API (often more natural KO) */
+async function viaTitan(text,sl,tl){
+ var r=await fetch('https://titan.tiarapt.com/translate', {
+  method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({text:text,source:sl==='ko'?'kr':'en',target:tl==='ko'?'kr':'en'})
+ });
+ if(!r.ok)throw new Error('titan '+r.status);
+ var j=await r.json();
+ var out=j.translatedText||j.result||j.translation||'';
+ if(!out)throw new Error('empty');
+ return out;
+}
 async function translate(text,from){
  var sl=from,tl=from==='ko'?'en':'ko';
- try{
-  var r=await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl='+sl+'&tl='+tl+'&dt=t&q='+encodeURIComponent(text));
-  if(!r.ok)throw new Error('gtx '+r.status);
-  var j=await r.json();
-  var out=j&&j[0]?j[0].map(function(s){return s[0];}).join(''):'';
-  if(out)return out;throw new Error('empty');
- }catch(e){
-  var r2=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair='+sl+'|'+tl);
-  if(!r2.ok)throw new Error('translate failed');
-  var j2=await r2.json();
-  if(j2.responseData&&j2.responseData.translatedText)return j2.responseData.translatedText;
-  throw new Error('translate failed');
+ var errs=[];
+ /* KO→EN: gtx is fine. EN→KO: try TITAN first (more natural), then gtx */
+ var chain=from==='ko'?[viaGtx,viaMyMemory]:[viaTitan,viaGtx,viaMyMemory];
+ for(var i=0;i<chain.length;i++){
+  try{return await chain[i](text,sl,tl);}catch(e){errs.push(e.message);}
  }
+ throw new Error(errs.join(' / '));
 }
-/* one conversation turn: ko bubble left + en bubble right, tap to hear each */
-function addTurn(koText,enText){
+/* ---------- split rows ---------- */
+function showErr(s){var e=document.getElementById('err');e.style.display='block';e.textContent=s;setTimeout(function(){e.style.display='none';},6000);}
+function hint(s){document.getElementById('hint').textContent=s;}
+function clearLog(){document.getElementById('log').innerHTML='';}
+function ensureHeardRow(){
+ if(heardRow&&heardRow.parentNode)return heardRow;
  var log=document.getElementById('log');
- var k=document.createElement('div');k.className='turn ko';
- k.innerHTML='<div class="flag">🇰🇷 Korean · tap to hear</div><div></div>';
- k.children[1].textContent=koText;
- k.onclick=function(){speak(koText,'ko');};
- var e=document.createElement('div');e.className='turn en';
- e.innerHTML='<div class="flag">🇺🇸 English · tap to hear</div><div></div>';
- e.children[1].textContent=enText;
- e.onclick=function(){speak(enText,'en');};
- log.appendChild(k);log.appendChild(e);
- log.scrollTop=log.scrollHeight;
+ heardRow=document.createElement('div');heardRow.className='turn';
+ heardRow.innerHTML='<div class="cell ko heard"><div class="flag">🇰🇷</div><div class="tx"></div></div><div class="cell en heard"><div class="flag">🇺🇸</div><div class="tx"></div></div>';
+ log.appendChild(heardRow);log.scrollTop=log.scrollHeight;
+ return heardRow;
 }
-function pendingTurn(from,text){
+function clearHeardRow(){if(heardRow&&heardRow.parentNode)heardRow.parentNode.removeChild(heardRow);heardRow=null;}
+function paintHeard(orig,trans,from){
+ var row=ensureHeardRow();
+ var k=row.querySelector('.ko .tx'),e=row.querySelector('.en .tx');
+ if(from==='ko'){k.textContent=orig;e.textContent=trans||'…';}
+ else{e.textContent=orig;k.textContent=trans||'…';}
+ document.getElementById('log').scrollTop=document.getElementById('log').scrollHeight;
+}
+function commitRow(koText,enText){
+ clearHeardRow();
  var log=document.getElementById('log');
- var d=document.createElement('div');
- d.className='turn pending '+(from==='ko'?'ko':'en');
- d.innerHTML='<div class="flag">'+(from==='ko'?'🇰🇷':'🇺🇸')+' …</div><div></div>';
- d.children[1].textContent=text;
+ var d=document.createElement('div');d.className='turn';
+ d.innerHTML='<div class="cell ko"><div class="flag">🇰🇷</div><div class="tx"></div></div><div class="cell en"><div class="flag">🇺🇸</div><div class="tx"></div></div>';
+ d.querySelector('.ko .tx').textContent=koText;
+ d.querySelector('.en .tx').textContent=enText;
+ d.querySelector('.ko').onclick=function(){speak(koText,'ko');};
+ d.querySelector('.en').onclick=function(){speak(enText,'en');};
  log.appendChild(d);log.scrollTop=log.scrollHeight;
- return d;
+ /* auto-play the OTHER side's language */
+ speak(activeSide==='ko'?enText:koText,activeSide==='ko'?'en':'ko');
 }
-async function handleSentence(text,from){
- var el=pendingTurn(from,text);
- try{
-  var t=await translate(text,from);
-  el.remove();
-  if(from==='ko')addTurn(text,t);
-  else addTurn(t,text);
-  speak(t,from==='ko'?'en':'ko'); /* auto-play the translation */
- }catch(e){el.remove();showErr('Translate error: '+e.message);}
-}
-function sendText(){var i=document.getElementById('textIn');var v=i.value.trim();i.value='';i.blur();if(v)handleSentence(v,who);}
-/* ---------- mic: open through pauses, sentence-by-sentence ---------- */
-function toggleMic(){wantListen?finishMic():startMic();}
-function startMic(){
- var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!SR){showErr('Please open in Chrome, Edge, or Safari');return;}
+/* ---------- mic: one side at a time, pause-commits to rows ---------- */
+function tapListen(side){
+ if(wantListen&&activeSide===side){finishMic();return;} /* tap same side = stop+commit */
+ if(wantListen)finishMicSilent();
+ activeSide=side;
+ paintBtns();
  try{if('speechSynthesis' in window)speechSynthesis.cancel();}catch(e){}
- wantListen=true;segBuffer='';
+ wantListen=true;
  openRec();
 }
+function paintBtns(){
+ var k=document.getElementById('btnKo'),e=document.getElementById('btnEn');
+ k.classList.toggle('act',activeSide==='ko'&&!wantListen);
+ e.classList.toggle('act',activeSide==='en'&&!wantListen);
+ k.classList.toggle('live',wantListen&&activeSide==='ko');
+ e.classList.toggle('live',wantListen&&activeSide==='en');
+ k.innerHTML=(wantListen&&activeSide==='ko')?'⏹ Tap to stop':'🇰🇷🎤<br>Listen in Korean';
+ e.innerHTML=(wantListen&&activeSide==='en')?'⏹ Tap to stop':'🇺🇸🎤<br>Listen in English';
+ document.getElementById('liveTag').classList.toggle('on',wantListen);
+}
+var segBuffer='';
 function openRec(){
  if(!wantListen)return;
  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){showErr('Please open in Chrome, Edge, or Safari');wantListen=false;paintBtns();return;}
  try{if(rec){try{rec.abort();}catch(e){}}}catch(e){}
  rec=new SR();
- rec.lang=who==='ko'?'ko-KR':'en-US';
+ rec.lang=activeSide==='ko'?'ko-KR':'en-US';
  rec.interimResults=true;rec.continuous=true;
- var interim='';
  rec.onresult=function(e){
-  var freshFinal='';
+  var freshFinal='',inter='';
   for(var i=e.resultIndex;i<e.results.length;i++){
    var tr=e.results[i][0].transcript;
    if(e.results[i].isFinal)freshFinal+=' '+tr;
-   else interim=tr;
+   else inter=tr;
   }
-  if(freshFinal){segBuffer=(segBuffer+freshFinal).trim();scheduleCommit();}
-  heardBox((segBuffer+(interim?' | '+interim:'')).trim());
+  if(freshFinal){
+   segBuffer=(segBuffer+freshFinal).trim();
+   /* translate the pause-chunk immediately, show live in both cells */
+   liveTranslate(segBuffer);
+   scheduleCommit();
+  }else{
+   paintHeard((segBuffer+(inter?' | '+inter:'')).trim()||inter,segBuffer?'…':'',activeSide);
+  }
  };
- rec.onend=function(){setLive(false);if(wantListen)setTimeout(function(){if(wantListen)openRec();},250);};
+ rec.onend=function(){if(wantListen)setTimeout(function(){if(wantListen)openRec();},250);};
  rec.onerror=function(e){
-  if(e.error==='not-allowed'||e.error==='service-not-allowed'){wantListen=false;setLive(false);showErr('Please allow microphone access');return;}
-  setLive(false);
+  if(e.error==='not-allowed'||e.error==='service-not-allowed'){wantListen=false;showErr('Please allow microphone access');paintBtns();return;}
   if(wantListen)setTimeout(function(){if(wantListen){try{rec.start();}catch(x){openRec();}}},500);
  };
- try{rec.start();setLive(true);hint('Listening… sentences appear as you pause');}
- catch(e){showErr('Mic failed: '+e.message);wantListen=false;}
+ try{rec.start();paintBtns();hint(activeSide==='ko'?'Listening Korean… tap again to stop':'Listening English… tap again to stop');}
+ catch(e){showErr('Mic failed: '+e.message);wantListen=false;paintBtns();}
+}
+var liveToken=0;
+async function liveTranslate(full){
+ var my=++liveToken;
+ var cur=full.trim();if(!cur)return;
+ try{
+  var t=await translate(cur,activeSide);
+  if(my!==liveToken)return; /* stale */
+  paintHeard(cur,t,activeSide);
+ }catch(e){/* keep orig visible, translation on commit */}
 }
 function scheduleCommit(){
  clearTimeout(heardTimer);
- heardTimer=setTimeout(function(){
-  var s=segBuffer.trim();
-  if(s&&wantListen){segBuffer='';heardBox('');handleSentence(s,who);}
- },1800);
+ heardTimer=setTimeout(commitChunk,2200);
+}
+function commitChunk(){
+ var s=segBuffer.trim();
+ if(!s||!wantListen)return;
+ segBuffer='';
+ translate(s,activeSide).then(function(t){
+  if(activeSide==='ko')commitRow(s,t);
+  else commitRow(t,s);
+ }).catch(function(e){showErr('Translate error: '+e.message);paintHeard(s,'⚠️',activeSide);});
 }
 function finishMic(){
- wantListen=false;clearTimeout(heardTimer);
+ wantListen=false;clearTimeout(heardTimer);liveToken++;
  try{if(rec)rec.abort();}catch(e){}
- rec=null;setLive(false);
- var s=segBuffer.trim();segBuffer='';heardBox('');
- if(s)handleSentence(s,who);
- else hint(who==='ko'?'Speak Korean':'Speak English');
+ rec=null;
+ var s=segBuffer.trim();segBuffer='';
+ var side=activeSide;
+ paintBtns();
+ hint('Tap a side, talk freely — both languages appear live');
+ if(s){translate(s,side).then(function(t){if(side==='ko')commitRow(s,t);else commitRow(t,s);}).catch(function(e){showErr('Translate error: '+e.message);});}
+ clearHeardRow();
 }
-function setLive(on){
- document.getElementById('micBtn').classList.toggle('live',wantListen);
- document.getElementById('micBtn').innerHTML=wantListen?'⏹ Tap to stop':'🎤 Tap to speak';
- document.getElementById('liveTag').classList.toggle('on',wantListen);
+function finishMicSilent(){
+ wantListen=false;clearTimeout(heardTimer);liveToken++;
+ try{if(rec)rec.abort();}catch(e){}
+ rec=null;segBuffer='';clearHeardRow();
 }
-function stopMic(){wantListen=false;clearTimeout(heardTimer);segBuffer='';try{if(rec)rec.abort();}catch(e){}rec=null;setLive(false);heardBox('');}
-/* init */
-(function(){
- document.getElementById('wKo').classList.toggle('act',who==='ko');
- document.getElementById('wEn').classList.toggle('act',who==='en');
- hint('Tap once, talk freely · Tap again to stop');
-})();
 </script>
 </body>
 </html>
