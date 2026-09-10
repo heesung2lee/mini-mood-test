@@ -144,11 +144,12 @@ function ensureHeardRow(){
  return heardRow;
 }
 function clearHeardRow(){if(heardRow&&heardRow.parentNode)heardRow.parentNode.removeChild(heardRow);heardRow=null;}
-function paintHeard(orig,trans,from){
+function paintHeard(orig,trans,from,preview){
  var row=ensureHeardRow();
  var k=row.querySelector('.ko .tx'),e=row.querySelector('.en .tx');
- if(from==='ko'){k.textContent=orig;e.textContent=trans||'…';}
- else{e.textContent=orig;k.textContent=trans||'…';}
+ var koCell=row.querySelector('.ko'),enCell=row.querySelector('.en');
+ if(from==='ko'){k.textContent=orig||preview||'';koCell.style.opacity=preview&&!orig?'0.55':'1';e.textContent=trans||'…';}
+ else{e.textContent=orig||preview||'';enCell.style.opacity=preview&&!orig?'0.55':'1';k.textContent=trans||'…';}
  document.getElementById('log').scrollTop=document.getElementById('log').scrollHeight;
 }
 function commitRow(koText,enText){
@@ -197,16 +198,18 @@ function openRec(){
   var freshFinal='',inter='';
   for(var i=e.resultIndex;i<e.results.length;i++){
    var tr=e.results[i][0].transcript;
+   /* FINAL only into buffer — interim is preview only, never committed */
    if(e.results[i].isFinal)freshFinal+=' '+tr;
-   else inter=tr;
+   else if(!freshFinal)inter=tr;
   }
   if(freshFinal){
    segBuffer=(segBuffer+freshFinal).trim();
    /* translate the pause-chunk immediately, show live in both cells */
    liveTranslate(segBuffer);
    scheduleCommit();
-  }else{
-   paintHeard((segBuffer+(inter?' | '+inter:'')).trim()||inter,segBuffer?'…':'',activeSide);
+   paintHeard(segBuffer,null,activeSide);
+  }else if(inter){
+   paintHeard(segBuffer,segBuffer?null:inter,activeSide,inter);
   }
  };
  rec.onend=function(){if(wantListen)setTimeout(function(){if(wantListen)openRec();},250);};
