@@ -94,12 +94,27 @@ audio{width:100%;margin-top:10px}
 <audio id="a3" controls></audio>
 <div class="hint">Tip: 5–15 sec clear speech works best. Funny voices welcome.</div>
 </section>
+<section>
+<h2>4️⃣ Video Dub <span style="font-weight:400;font-size:11px;color:var(--dim)">EN video → KO voice</span></h2>
+<div class="row"><button class="ghost" onclick="document.getElementById('dubUp').click()">🎬 Pick video / audio file</button></div>
+<input type="file" id="dubUp" accept="video/*,audio/*" style="display:none" onchange="dubPicked(this)">
+<div class="filebox" id="dubBox">No file yet</div>
+<div class="chips" id="dubDir">
+<button data-v="en-ko" class="act">🇺🇸→🇰🇷 EN→KO</button>
+<button data-v="ko-en">🇰🇷→🇺🇸 KO→EN</button>
+</div>
+<div class="row"><button id="b4" onclick="genDub()">🎬 Transcribe + Translate + Speak</button></div>
+<div class="hint" id="dubOrig"></div>
+<div class="hint" id="dubTrans"></div>
+<audio id="a4" controls></audio>
+<div class="hint">Runs Whisper large-v3 on your Mac (~1-2 min per 10 min). Keep the page open.</div>
+</section>
 <script>
 'use strict';
-var API = localStorage.getItem('studio_api') || 'https://kruger-builders-socks-commissions.trycloudflare.com';
+var API = localStorage.getItem('studio_api') || 'https://filled-month-number-griffin.trycloudflare.com';
 function showErr(s){var e=document.getElementById('err');e.style.display='block';e.textContent=s;setTimeout(function(){e.style.display='none';},6000);}
 function chipWire(id){var el=document.getElementById(id);el.addEventListener('click',function(e){if(e.target.tagName!=='BUTTON')return;[...el.children].forEach(function(b){b.classList.remove('act')});e.target.classList.add('act');});}
-['lang1','spk1','lang2','lang3'].forEach(chipWire);
+['lang1','spk1','lang2','lang3','dubDir'].forEach(chipWire);
 function sel(id){var a=document.querySelector('#'+id+' .act');return a?a.dataset.v:'';}
 async function health(){try{var r=await fetch(API+'/');if(r.ok){document.getElementById('st').textContent='● online';document.getElementById('st').classList.remove('off');return;}}catch(e){}document.getElementById('st').textContent='● offline';document.getElementById('st').classList.add('off');}
 health();setInterval(health,15000);
@@ -156,6 +171,27 @@ function genClone(){
  }).then(function(b){aud.src=URL.createObjectURL(b);aud.play();})
  .catch(function(e){showErr('Clone failed: '+e.message);});
  btn.disabled=false;btn.innerHTML=old;
+}
+
+var dubFile=null;
+function dubPicked(inp){if(!inp.files[0])return;dubFile=inp.files[0];document.getElementById('dubBox').innerHTML='Ready: <b>'+inp.files[0].name+'</b> ('+Math.round(inp.files[0].size/1024)+'KB)';}
+function genDub(){
+ if(!dubFile)return showErr('Pick a video/audio file first');
+ var dd=sel('dubDir').split('-');
+ var fd=new FormData();fd.append('video',dubFile);fd.append('src',dd[0]);fd.append('tgt',dd[1]);
+ var btn=document.getElementById('b4'),aud=document.getElementById('a4');
+ btn.disabled=true;btn.innerHTML='<span class="spin">⏳</span> Transcribing… (minutes)';
+ fetch(API+'/dub',{method:'POST',body:fd}).then(function(r){
+  if(!r.ok)return r.json().then(function(j){throw new Error(j.error||('http '+r.status));});
+  return r.json();
+ }).then(function(j){
+  document.getElementById('dubOrig').textContent='📝 Heard: '+j.orig;
+  document.getElementById('dubTrans').textContent='🌐 Translated: '+j.trans;
+  var bin=atob(j.wav),arr=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+  aud.src=URL.createObjectURL(new Blob([arr],{type:'audio/wav'}));aud.play();
+ }).catch(function(e){showErr('Dub failed: '+e.message);});
+ btn.disabled=false;btn.innerHTML='🎬 Transcribe + Translate + Speak';
 }
 </script>
 </body>
