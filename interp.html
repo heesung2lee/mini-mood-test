@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>통역</title>
+<title>Translator</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--gold:#d4af37;--bg:#0b1220;--card:#151f33;--line:#24314d;--txt:#eef2f7;--dim:#8b98ad}
 html,body{height:100%}
-body{font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--bg);color:var(--txt);display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height:100dvh}
+body{font-family:-apple-system,'Segoe UI',Roboto,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--txt);display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height:100dvh}
 header{padding:calc(env(safe-area-inset-top,0px) + 14px) 20px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
 header .dot{width:10px;height:10px;border-radius:50%;background:var(--gold)}
 header h1{font-size:17px;font-weight:800;letter-spacing:-.02em}
@@ -37,7 +37,6 @@ header .live.on{display:block;animation:blink 1.4s infinite}
 #textIn{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;color:#fff;padding:13px 14px;font-size:16px;font-family:inherit;outline:none;min-width:0}
 #textIn:focus{border-color:var(--gold)}
 #sendBtn{background:var(--card);border:1px solid var(--gold);color:var(--gold);border-radius:12px;padding:0 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap}
-/* voice + style row */
 #voiceRow{display:flex;gap:8px;margin-top:10px;align-items:stretch}
 #voiceBtn{flex:1.4;background:var(--card);border:1px solid var(--gold);color:var(--gold);border-radius:12px;padding:10px 8px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #rateWrap{flex:1;display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:0 10px}
@@ -50,67 +49,91 @@ header .live.on{display:block;animation:blink 1.4s infinite}
 </style>
 </head>
 <body>
-<header><span class="dot"></span><h1>통역</h1><span id="liveTag" class="live">● 듣는 중</span></header>
+<header><span class="dot"></span><h1>🗣️ Translator</h1><span id="liveTag" class="live">● LISTENING</span></header>
 <div id="langbar">
-<button id="dKoEn" class="act" onclick="setDir('ko-en')">🇰🇷 한국어 → 🇺🇸 영어<small>Korean → English</small></button>
-<button id="dEnKo" onclick="setDir('en-ko')">🇺🇸 영어 → 🇰🇷 한국어<small>English → Korean</small></button>
+<button id="dKoEn" class="act" onclick="setDir('ko-en')">🇰🇷 Korean → 🇺🇸 English<small>Korean → English</small></button>
+<button id="dEnKo" onclick="setDir('en-ko')">🇺🇸 English → 🇰🇷 Korean<small>English → Korean</small></button>
 </div>
 <div id="err"></div>
 <div id="log"></div>
 <div id="heard"></div>
 <div id="deck">
-<button id="micBtn" onclick="toggleMic()">🎤 탭하여 말하기</button>
-<div id="hint">멈춰도 계속 듣습니다 · 다시 탭하면 번역됩니다</div>
+<button id="micBtn" onclick="toggleMic()">🎤 Tap to speak</button>
+<div id="hint">Keeps listening through pauses · Tap again to translate</div>
 <div id="textRow">
-<input id="textIn" placeholder="텍스트 입력…" enterkeyhint="send" onkeydown="if(event.key==='Enter')sendText()">
-<button id="sendBtn" onclick="sendText()">전송</button>
+<input id="textIn" placeholder="✏️ Type message…" enterkeyhint="send" onkeydown="if(event.key==='Enter')sendText()">
+<button id="sendBtn" onclick="sendText()">📤 Send</button>
 </div>
 <div id="voiceRow">
-<button id="voiceBtn" onclick="cycleVoice()">🔊 목소리 불러오는 중…</button>
-<div id="rateWrap"><span>속도</span><input id="rate" type="range" min="0.6" max="1.3" step="0.05" value="0.95" oninput="saveRate()"></div>
+<button id="voiceBtn" onclick="cycleVoice()">🔊 Loading voices…</button>
+<div id="rateWrap"><span>⏩ Speed</span><input id="rate" type="range" min="0.6" max="1.3" step="0.05" value="1" oninput="saveRate()"></div>
 </div>
 <div id="utilRow">
-<button id="autoBtn" class="on" onclick="toggleAuto()">🔊 자동재생 ON</button>
-<button id="liveBtn" onclick="toggleLiveMode()">⚡ 실시간번역 OFF</button>
-<button onclick="clearLog()">지우기</button>
+<button id="autoBtn" onclick="toggleAuto()">🔇 Auto-play OFF</button>
+<button id="liveBtn" onclick="toggleLiveMode()">⚡ Live OFF</button>
+<button onclick="clearLog()">🧹 Clear</button>
 </div>
 </div>
 <script>
 'use strict';
+window.addEventListener('error',function(e){ showErr('Error: '+(e.message||'unknown')); });
 var dir=localStorage.getItem('interp_dir')||'ko-en';
-var listening=false, wantListen=false, autoSpeak=localStorage.getItem('interp_auto')!=='0';
+var listening=false, wantListen=false;
+var autoSpeak=localStorage.getItem('interp_auto2')==='1'; /* default OFF */
 var liveMode=localStorage.getItem('interp_live')==='1';
 var rec=null, fullTxt='', voiceIdx=0, voicesCache=[], commitT=null, lastCommitted='';
 var SRC={'ko-en':'ko-KR','en-ko':'en-US'};
 var TGT={'ko-en':'en-US','en-ko':'ko-KR'};
 var TGTLANG={'ko-en':'en','en-ko':'ko'};
-var VKEY=function(){return 'interp_voice_'+TGTLANG[dir];};
-/* ---------- voices ---------- */
-function targetVoices(){
- var code=TGT[dir].toLowerCase().slice(0,2);
- var all=speechSynthesis?speechSynthesis.getVoices():[];
- return all.filter(function(v){return v.lang&&v.lang.replace('_','-').toLowerCase().indexOf(code)===0;});
+var VKEY=function(){return 'interp_voice2_'+TGTLANG[dir];};
+/* ---------- voices: strict native match only ---------- */
+function normLang(l){return (l||'').replace('_','-').toLowerCase();}
+function isEN(){return TGTLANG[dir]==='en';}
+function rankVoice(v){
+ var n=((v.name||'')+' '+(v.voiceURI||'')).toLowerCase();
+ var s=0, en=isEN();
+ if(en){
+  if(/google us english/.test(n))s+=100;
+  else if(/google uk english/.test(n))s+=85;
+  else if(/samsung.*english/.test(n))s+=70;
+  else if(/samantha|aria|jenny|guy|zira|david|natasha|jenny|ryan/.test(n))s+=60;
+  if(/natural|neural|premium|enhanced/.test(n))s+=30;
+  if(/^en-us/.test(normLang(v.lang)))s+=8;
+  else if(/^en-gb/.test(normLang(v.lang)))s+=5;
+  if(v.localService)s+=4;
+ }else{
+  if(/google.*(korean|한국)/.test(n))s+=100;
+  else if(/samsung.*(korean|한국)/.test(n))s+=70;
+  else if(/yuna|kyogu|seoyeon|ina/.test(n))s+=60;
+  if(/natural|neural|premium|enhanced/.test(n))s+=30;
+  if(v.localService)s+=4;
+ }
+ return s;
 }
 function refreshVoices(){
- if(!('speechSynthesis' in window))return;
- voicesCache=targetVoices();
- if(!voicesCache.length){ document.getElementById('voiceBtn').textContent='🔇 해당 언어 목소리 없음'; return; }
+ if(!('speechSynthesis' in window)){document.getElementById('voiceBtn').textContent='🔇 No voice support';return;}
+ var code=TGTLANG[dir];
+ var all=speechSynthesis.getVoices()||[];
+ /* STRICT: voice language must start with target code — never cross (fixes Konglish) */
+ var match=all.filter(function(v){return normLang(v.lang).indexOf(code)===0;});
+ match.sort(function(a,b){return rankVoice(b)-rankVoice(a);});
+ voicesCache=match;
+ if(!match.length){document.getElementById('voiceBtn').textContent=isEN()?'🔇 No English voice on device':'🔇 기기 영어 음성 없음';return;}
  var saved=localStorage.getItem(VKEY), i=0;
- if(saved){ for(var k=0;k<voicesCache.length;k++){ if(voicesCache[k].name===saved){i=k;break;} } }
- voiceIdx=i;
- paintVoice();
+ if(saved){for(var k=0;k<match.length;k++){if(match[k].name===saved){i=k;break;}}}
+ else localStorage.setItem(VKEY,match[0].name);
+ voiceIdx=i; paintVoice();
 }
 function paintVoice(){
  var b=document.getElementById('voiceBtn');
- if(!voicesCache.length){b.textContent='🔇 해당 언어 목소리 없음';return;}
- b.textContent='🔊 '+(voicesCache.length>1?('◂ '+voicesCache[voiceIdx].name+' ▸'):voicesCache[voiceIdx].name);
+ if(!voicesCache.length)return;
+ b.textContent='🎙️ '+(voicesCache.length>1?('◂ '+voicesCache[voiceIdx].name+' ▸'):voicesCache[voiceIdx].name);
 }
 function cycleVoice(){
  if(voicesCache.length<2){refreshVoices();return;}
  voiceIdx=(voiceIdx+1)%voicesCache.length;
  localStorage.setItem(VKEY,voicesCache[voiceIdx].name);
- paintVoice();
- previewVoice();
+ paintVoice(); previewVoice();
 }
 var previewT=null;
 function previewVoice(){
@@ -118,146 +141,146 @@ function previewVoice(){
  previewT=setTimeout(function(){
   try{
    speechSynthesis.cancel();
-   var hello=TGTLANG[dir]==='ko'?'안녕하세요':"Hello, how can I help you?";
-   var u=new SpeechSynthesisUtterance(hello);
-   u.lang=TGT[dir]; u.rate=parseFloat(document.getElementById('rate').value)||0.95;
-   if(voicesCache[voiceIdx])u.voice=voicesCache[voiceIdx];
+   var u=new SpeechSynthesisUtterance(isEN()?"Hello, how can I help you?":'안녕하세요, 무엇을 도와드릴까요?');
+   u.lang=TGT[dir]; u.rate=parseFloat(document.getElementById('rate').value)||1;
+   var v=voicesCache[voiceIdx];
+   if(v&&normLang(v.lang).indexOf(TGTLANG[dir])===0)u.voice=v;
    speechSynthesis.speak(u);
-  }catch(e){}
+  }catch(e){showErr('Preview failed: '+e.message);}
  },350);
 }
 if('speechSynthesis' in window){
- speechSynthesis.getVoices();
+ try{speechSynthesis.getVoices();}catch(e){}
  if(speechSynthesis.onvoiceschanged!==undefined)speechSynthesis.onvoiceschanged=refreshVoices;
  setTimeout(refreshVoices,500); setTimeout(refreshVoices,2000);
 }
-function saveRate(){ localStorage.setItem('interp_rate',document.getElementById('rate').value); }
-(function(){ var r=localStorage.getItem('interp_rate'); if(r)document.getElementById('rate').value=r; })();
+function saveRate(){localStorage.setItem('interp_rate',document.getElementById('rate').value);}
+(function(){var r=localStorage.getItem('interp_rate');if(r)document.getElementById('rate').value=r;})();
 /* ---------- ui ---------- */
-function setDir(d){ dir=d; localStorage.setItem('interp_dir',d);
+function setDir(d){dir=d;localStorage.setItem('interp_dir',d);
  document.getElementById('dKoEn').classList.toggle('act',d==='ko-en');
  document.getElementById('dEnKo').classList.toggle('act',d==='en-ko');
- stopAll(); refreshVoices();
- hint(d==='ko-en'?'한국어로 말하세요':'Speak in English');
+ stopAll();refreshVoices();
+ hint(d==='ko-en'?'Speak Korean':'Speak English');
 }
-function hint(s){ document.getElementById('hint').textContent=s; }
-function showErr(s){ var e=document.getElementById('err'); e.style.display='block'; e.textContent=s; setTimeout(function(){e.style.display='none'},4500); }
-function toggleAuto(){ autoSpeak=!autoSpeak; localStorage.setItem('interp_auto',autoSpeak?'1':'0');
- var b=document.getElementById('autoBtn'); b.textContent=autoSpeak?'🔊 자동재생 ON':'🔇 자동재생 OFF'; b.classList.toggle('on',autoSpeak); }
-function toggleLiveMode(){ liveMode=!liveMode; localStorage.setItem('interp_live',liveMode?'1':'0');
- var b=document.getElementById('liveBtn'); b.textContent=liveMode?'⚡ 실시간번역 ON':'⚡ 실시간번역 OFF'; b.classList.toggle('on',liveMode);
- hint(liveMode?'문장 끝날 때마다 바로 번역됩니다':'다시 탭할 때까지 듣기만 합니다'); }
-function clearLog(){ document.getElementById('log').innerHTML=''; }
-function heardBox(txt){ var h=document.getElementById('heard'); if(!txt){h.classList.remove('on');h.textContent='';return;} h.classList.add('on'); h.textContent='… '+txt; }
+function hint(s){document.getElementById('hint').textContent=s;}
+function showErr(s){var e=document.getElementById('err');e.style.display='block';e.textContent=s;setTimeout(function(){e.style.display='none';},6000);}
+function toggleAuto(){autoSpeak=!autoSpeak;localStorage.setItem('interp_auto2',autoSpeak?'1':'0');paintAuto();}
+function paintAuto(){var b=document.getElementById('autoBtn');b.textContent=autoSpeak?'🔊 Auto-play ON':'🔇 Auto-play OFF';b.classList.toggle('on',autoSpeak);}
+function toggleLiveMode(){liveMode=!liveMode;localStorage.setItem('interp_live',liveMode?'1':'0');paintLive();
+ hint(liveMode?'Translates at every pause':'Listens only until you tap again');}
+function paintLive(){var b=document.getElementById('liveBtn');b.textContent=liveMode?'⚡ Live ON':'⚡ Live OFF';b.classList.toggle('on',liveMode);}
+function clearLog(){document.getElementById('log').innerHTML='';}
+function heardBox(txt){var h=document.getElementById('heard');if(!txt){h.classList.remove('on');h.textContent='';return;}h.classList.add('on');h.textContent='… '+txt;}
 /* ---------- translation: Google gtx primary, MyMemory fallback ---------- */
 async function translate(text){
- var tl=TGTLANG[dir], sl=dir==='ko-en'?'ko':'en';
+ var tl=TGTLANG[dir],sl=dir==='ko-en'?'ko':'en';
  try{
   var r=await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl='+sl+'&tl='+tl+'&dt=t&q='+encodeURIComponent(text));
+  if(!r.ok)throw new Error('gtx '+r.status);
   var j=await r.json();
-  var out=j&&j[0]?j[0].map(function(s){return s[0]}).join(''):'';
-  if(out)return out; throw new Error('empty');
+  var out=j&&j[0]?j[0].map(function(s){return s[0];}).join(''):'';
+  if(out)return out;throw new Error('empty');
  }catch(e){
   var r2=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair='+sl+'|'+tl);
+  if(!r2.ok)throw new Error('translate failed ('+e.message+')');
   var j2=await r2.json();
-  if(j2.responseData&&j2.responseData.translatedText)return j2.responseData.translatedText;
-  throw new Error('번역 실패');
+  if(j2.responseData&&j2.responseData.translatedText&&j2.responseData.translatedText!=='')return j2.responseData.translatedText;
+  throw new Error('translate failed ('+e.message+')');
  }
 }
 function speak(text){
  try{
+  if(!('speechSynthesis' in window)){showErr('Voice not supported in this browser');return;}
   speechSynthesis.cancel();
-  var u=new SpeechSynthesisUtterance(text); u.lang=TGT[dir];
-  u.rate=parseFloat(document.getElementById('rate').value)||0.95;
-  if(voicesCache[voiceIdx])u.voice=voicesCache[voiceIdx];
+  var u=new SpeechSynthesisUtterance(text);
+  u.lang=TGT[dir]; /* exact locale: en-US / ko-KR — native accent */
+  u.rate=parseFloat(document.getElementById('rate').value)||1;
+  var v=voicesCache[voiceIdx];
+  if(v&&normLang(v.lang).indexOf(TGTLANG[dir])===0)u.voice=v; /* guard: never cross-language */
   speechSynthesis.speak(u);
- }catch(e){ showErr('음성재생 미지원: '+e.message); }
+ }catch(e){showErr('Voice error: '+e.message);}
 }
 async function handleText(text){
- text=(text||'').trim(); if(!text)return;
- hint('번역 중…');
+ text=(text||'').trim();if(!text)return;
+ hint('Translating…');
  try{
   var t=await translate(text);
   addMsg(text,t);
-  hint(wantListen?'계속 듣는 중…':(dir==='ko-en'?'한국어로 말하세요':'Speak in English'));
+  hint(wantListen?'Still listening…':(dir==='ko-en'?'Speak Korean':'Speak English'));
   if(autoSpeak)speak(t);
- }catch(e){ hint('오류 발생'); showErr('번역 오류: '+e.message); }
+ }catch(e){hint('Error');showErr('Translate error: '+e.message);}
 }
 function addMsg(src,tgt){
  var log=document.getElementById('log');
- var o=document.createElement('div'); o.className='msg out';
+ var o=document.createElement('div');o.className='msg out';
  o.innerHTML='<div class="o"></div><div></div>';
- o.children[0].textContent=src; o.children[1].textContent=tgt;
- o.onclick=function(){ speak(tgt); };
- log.appendChild(o); log.scrollTop=log.scrollHeight;
+ o.children[0].textContent=src;o.children[1].textContent=tgt;
+ o.onclick=function(){speak(tgt);};
+ log.appendChild(o);log.scrollTop=log.scrollHeight;
 }
-function sendText(){ var i=document.getElementById('textIn'); handleText(i.value); i.value=''; i.blur(); }
-/* ---------- mic: stays open through pauses, commits on tap ---------- */
-function toggleMic(){ wantListen?finishAndCommit():startLoop(); }
+function sendText(){var i=document.getElementById('textIn');handleText(i.value);i.value='';i.blur();}
+/* ---------- mic: open through pauses, tap again to commit ---------- */
+function toggleMic(){wantListen?finishAndCommit():startLoop();}
 function startLoop(){
  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!SR){ showErr('Chrome · Edge · Safari에서 열어주세요'); return; }
- try{ if('speechSynthesis' in window)speechSynthesis.cancel(); }catch(e){}
- wantListen=true; fullTxt=''; lastCommitted='';
+ if(!SR){showErr('Please open in Chrome, Edge, or Safari');return;}
+ try{if('speechSynthesis' in window)speechSynthesis.cancel();}catch(e){}
+ wantListen=true;fullTxt='';lastCommitted='';
  openRec();
 }
 function openRec(){
  if(!wantListen)return;
  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
- try{ if(rec){try{rec.abort();}catch(e){}} }catch(e){}
+ try{if(rec){try{rec.abort();}catch(e){}}}catch(e){}
  rec=new SR();
- rec.lang=SRC[dir]; rec.interimResults=true; rec.continuous=true;
- var seg='';
+ rec.lang=SRC[dir];rec.interimResults=true;rec.continuous=true;
  rec.onresult=function(e){
   var inter='';
   for(var i=e.resultIndex;i<e.results.length;i++){
    var tr=e.results[i][0].transcript;
-   if(e.results[i].isFinal){ seg+=' '+tr; fullTxt=(fullTxt+' '+tr).trim(); if(liveMode)commitSoon(); }
+   if(e.results[i].isFinal){fullTxt=(fullTxt+' '+tr).trim();if(liveMode)commitSoon();}
    else inter+=tr;
   }
   heardBox((fullTxt+' '+inter).trim());
  };
- rec.onend=function(){
-  setLive(false);
-  if(wantListen)setTimeout(function(){ if(wantListen)openRec(); },250);
- };
+ rec.onend=function(){setLive(false);if(wantListen)setTimeout(function(){if(wantListen)openRec();},250);};
  rec.onerror=function(e){
-  if(e.error==='not-allowed'||e.error==='service-not-allowed'){ wantListen=false; setLive(false); fullTxt=''; showErr('마이크 권한을 허용해주세요'); return; }
+  if(e.error==='not-allowed'||e.error==='service-not-allowed'){wantListen=false;setLive(false);fullTxt='';showErr('Please allow microphone access');return;}
   setLive(false);
-  if(wantListen)setTimeout(function(){ if(wantListen){ try{rec.start();}catch(x){ openRec(); } } },500);
+  if(wantListen)setTimeout(function(){if(wantListen){try{rec.start();}catch(x){openRec();}}},500);
  };
- try{ rec.start(); setLive(true); hint(liveMode?'듣는 중… 문장마다 번역됩니다':'듣는 중… 다시 탭하면 번역됩니다'); }
- catch(e){ showErr('마이크 시작 실패: '+e.message); wantListen=false; }
+ try{rec.start();setLive(true);hint(liveMode?'Listening… translates at pauses':'Listening… tap again to translate');}
+ catch(e){showErr('Mic failed: '+e.message);wantListen=false;}
 }
 function commitSoon(){
  clearTimeout(commitT);
  commitT=setTimeout(function(){
   var cur=fullTxt.trim();
-  if(cur&&cur!==lastCommitted){ lastCommitted=cur; handleText(cur); }
+  if(cur&&cur!==lastCommitted){lastCommitted=cur;handleText(cur);}
  },2500);
 }
-/* tap again → stop + translate everything heard */
 function finishAndCommit(){
- wantListen=false; clearTimeout(commitT);
- try{ if(rec)rec.abort(); }catch(e){}
- rec=null; setLive(false);
- var txt=fullTxt.trim(); fullTxt=''; heardBox('');
+ wantListen=false;clearTimeout(commitT);
+ try{if(rec)rec.abort();}catch(e){}
+ rec=null;setLive(false);
+ var txt=fullTxt.trim();fullTxt='';heardBox('');
  if(txt)handleText(txt);
- else hint(dir==='ko-en'?'한국어로 말하세요':'Speak in English');
+ else hint(dir==='ko-en'?'Speak Korean':'Speak English');
 }
 function setLive(on){
  document.getElementById('micBtn').classList.toggle('live',wantListen);
- document.getElementById('micBtn').innerHTML=wantListen?'⏹ 탭하여 번역하기':'🎤 탭하여 말하기';
+ document.getElementById('micBtn').innerHTML=wantListen?'⏹ Tap to translate':'🎤 Tap to speak';
  document.getElementById('liveTag').classList.toggle('on',wantListen);
  if(!wantListen&&!fullTxt)heardBox('');
 }
-function stopAll(){ wantListen=false; clearTimeout(commitT); fullTxt=''; try{if(rec)rec.abort();}catch(e){} rec=null; setLive(false); }
-/* init saved prefs */
+function stopAll(){wantListen=false;clearTimeout(commitT);fullTxt='';try{if(rec)rec.abort();}catch(e){}rec=null;setLive(false);}
+/* init */
 (function(){
  document.getElementById('dKoEn').classList.toggle('act',dir==='ko-en');
  document.getElementById('dEnKo').classList.toggle('act',dir==='en-ko');
- if(!autoSpeak){var a=document.getElementById('autoBtn');a.textContent='🔇 자동재생 OFF';a.classList.remove('on');}
- if(liveMode){var l=document.getElementById('liveBtn');l.textContent='⚡ 실시간번역 ON';l.classList.add('on');}
+ paintAuto();paintLive();
+ hint('Keeps listening through pauses · Tap again to translate');
 })();
 </script>
 </body>
