@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🎙️ Voice Studio</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--gold:#d4af37;--bg:#0b1220;--card:#151f33;--line:#24314d;--txt:#eef2f7;--dim:#8b98ad}
+body{font-family:-apple-system,'Segoe UI',Roboto,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--txt);max-width:480px;margin:0 auto;min-height:100dvh;padding-bottom:40px}
+header{padding:calc(env(safe-area-inset-top,0px) + 14px) 20px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
+header h1{font-size:17px;font-weight:800}
+header .st{margin-left:auto;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:#14532d;color:#86efac}
+header .st.off{background:#450a0a;color:#fca5a5}
+section{padding:14px 16px;border-bottom:1px solid var(--line)}
+h2{font-size:14px;margin-bottom:10px;color:var(--gold)}
+textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;color:#fff;padding:12px;font-size:15px;font-family:inherit;min-height:80px;outline:none;resize:vertical}
+textarea:focus{border-color:var(--gold)}
+input[type=text]{width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;color:#fff;padding:12px;font-size:15px;font-family:inherit;outline:none;margin-top:8px}
+input[type=text]:focus{border-color:var(--gold)}
+.row{display:flex;gap:8px;margin-top:10px}
+.row button{flex:1;border:none;border-radius:12px;background:var(--gold);color:#0b1220;font-size:15px;font-weight:800;padding:14px;cursor:pointer;font-family:inherit}
+.row button:disabled{opacity:.5}
+.row button.ghost{background:var(--card);border:1px solid var(--gold);color:var(--gold)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chips button{background:var(--card);border:1px solid var(--line);color:var(--dim);border-radius:20px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.chips button.act{background:var(--gold);color:#0b1220;border-color:var(--gold)}
+audio{width:100%;margin-top:10px}
+.hint{font-size:12px;color:var(--dim);margin-top:8px;line-height:1.5}
+#err{display:none;margin:10px 16px 0;background:#450a0a;color:#fca5a5;border-radius:10px;padding:10px 14px;font-size:13px}
+.filebox{border:1px dashed var(--gold);border-radius:12px;padding:14px;text-align:center;margin-top:8px;cursor:pointer;font-size:14px;color:var(--dim)}
+.filebox b{color:var(--gold)}
+.spin{display:inline-block;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header><span>🎙️</span><h1>Voice Studio</h1><span id="st" class="st off">● connecting…</span></header>
+<div id="err"></div>
+<section>
+<h2>1️⃣ Preset Voices</h2>
+<textarea id="t1" placeholder="✏️ Type text…">Hello, how can I help you with your golf tour today?</textarea>
+<div class="chips" id="lang1">
+<button data-v="en" class="act">🇺🇸 English</button>
+<button data-v="ko">🇰🇷 Korean</button>
+<button data-v="zh">🇨🇳 Chinese</button>
+<button data-v="ja">🇯🇵 Japanese</button>
+</div>
+<div class="chips" id="spk1">
+<button data-v="ryan" class="act">👨 Ryan</button>
+<button data-v="sohee">👩 Sohee</button>
+<button data-v="vivian">👩 Vivian</button>
+<button data-v="serena">👩 Serena</button>
+<button data-v="aiden">👨 Aiden</button>
+<button data-v="dylan">👨 Dylan</button>
+<button data-v="eric">👨 Eric</button>
+<button data-v="ono_anna">👩 Anna</button>
+<button data-v="uncle_fu">👨 Uncle Fu</button>
+</div>
+<div class="row"><button id="b1" onclick="genPreset()">▶ Generate</button></div>
+<audio id="a1" controls></audio>
+</section>
+<section>
+<h2>2️⃣ Voice Design <span style="font-weight:400;font-size:11px;color:var(--dim)">describe any voice</span></h2>
+<textarea id="t2" placeholder="✏️ Type text…">Welcome to our resort. We hope you enjoy your stay.</textarea>
+<input type="text" id="inst" placeholder="🎨 e.g. warm young female voice, slow and calm">
+<div class="chips" id="lang2">
+<button data-v="en" class="act">🇺🇸 English</button>
+<button data-v="ko">🇰🇷 Korean</button>
+<button data-v="zh">🇨🇳 Chinese</button>
+<button data-v="ja">🇯🇵 Japanese</button>
+</div>
+<div class="row"><button id="b2" onclick="genDesign()">🎨 Design + Generate</button></div>
+<audio id="a2" controls></audio>
+</section>
+<section>
+<h2>3️⃣ Voice Clone <span style="font-weight:400;font-size:11px;color:var(--dim)">record or upload 3+ sec</span></h2>
+<textarea id="t3" placeholder="✏️ Type text to speak in cloned voice…">This is my cloned voice speaking.</textarea>
+<div class="chips" id="lang3">
+<button data-v="en" class="act">🇺🇸 English</button>
+<button data-v="ko">🇰🇷 Korean</button>
+</div>
+<div class="row">
+<button id="recBtn" class="ghost" onclick="toggleRec()">⏺ Record sample</button>
+<button class="ghost" onclick="document.getElementById('up').click()">📎 Upload file</button>
+</div>
+<input type="file" id="up" accept="audio/*" style="display:none" onchange="filePicked(this)">
+<div class="filebox" id="fbox">No sample yet — record or upload</div>
+<audio id="refAud" controls style="display:none"></audio>
+<input type="text" id="refText" placeholder="📝 (optional) what the sample says — improves clone">
+<div class="row"><button id="b3" onclick="genClone()">🧬 Clone + Generate</button></div>
+<audio id="a3" controls></audio>
+<div class="hint">Tip: 5–15 sec clear speech works best. Funny voices welcome.</div>
+</section>
+<script>
+'use strict';
+var API = localStorage.getItem('studio_api') || 'https://kruger-builders-socks-commissions.trycloudflare.com';
+function showErr(s){var e=document.getElementById('err');e.style.display='block';e.textContent=s;setTimeout(function(){e.style.display='none';},6000);}
+function chipWire(id){var el=document.getElementById(id);el.addEventListener('click',function(e){if(e.target.tagName!=='BUTTON')return;[...el.children].forEach(function(b){b.classList.remove('act')});e.target.classList.add('act');});}
+['lang1','spk1','lang2','lang3'].forEach(chipWire);
+function sel(id){var a=document.querySelector('#'+id+' .act');return a?a.dataset.v:'';}
+async function health(){try{var r=await fetch(API+'/');if(r.ok){document.getElementById('st').textContent='● online';document.getElementById('st').classList.remove('off');return;}}catch(e){}document.getElementById('st').textContent='● offline';document.getElementById('st').classList.add('off');}
+health();setInterval(health,15000);
+async function playBlob(url,opt,aud,btn,label){
+ btn.disabled=true;var old=btn.innerHTML;btn.innerHTML='<span class="spin">⏳</span> Working…';
+ try{
+  var r=await fetch(API+url,opt);
+  if(!r.ok){var j=await r.json().catch(function(){return{}});throw new Error(j.error||('http '+r.status));}
+  var b=await r.blob();aud.src=URL.createObjectURL(b);aud.play();
+ }catch(e){showErr(label+' failed: '+e.message);}
+ btn.disabled=false;btn.innerHTML=old;
+}
+function genPreset(){
+ var t=document.getElementById('t1').value.trim();if(!t)return showErr('Type text first');
+ playBlob('/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t,lang:sel('lang1'),speaker:sel('spk1')})},document.getElementById('a1'),document.getElementById('b1'),'Generate');
+}
+function genDesign(){
+ var t=document.getElementById('t2').value.trim();if(!t)return showErr('Type text first');
+ var inst=document.getElementById('inst').value.trim()||'warm friendly voice';
+ playBlob('/design',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t,lang:sel('lang2'),instruct:inst})},document.getElementById('a2'),document.getElementById('b2'),'Design');
+}
+/* record */
+var mr=null,chunks=[],recing=false;
+function toggleRec(){
+ if(recing){mr.stop();return;}
+ navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
+  mr=new MediaRecorder(s);chunks=[];
+  mr.ondataavailable=function(e){chunks.push(e.data);};
+  mr.onstop=function(){setSample(new Blob(chunks,{type:'audio/webm'}));s.getTracks().forEach(function(t){t.stop();});};
+  mr.start();recing=true;
+  document.getElementById('recBtn').innerHTML='⏹ Stop';
+ }).catch(function(){showErr('Mic permission needed');});
+}
+var sampleBlob=null;
+function setSample(b){
+ sampleBlob=b;recing=false;
+ document.getElementById('recBtn').innerHTML='⏺ Record sample';
+ var a=document.getElementById('refAud');a.src=URL.createObjectURL(b);a.style.display='block';
+ document.getElementById('fbox').innerHTML='Sample ready: <b>'+Math.round(b.size/1024)+'KB</b> — tap play below to check';
+}
+function filePicked(inp){if(inp.files[0])setSample(inp.files[0]);}
+function genClone(){
+ var t=document.getElementById('t3').value.trim();if(!t)return showErr('Type text first');
+ if(!sampleBlob)return showErr('Record or upload a voice sample first');
+ var fd=new FormData();
+ fd.append('audio',sampleBlob,'sample.wav');
+ fd.append('text',t);fd.append('lang',sel('lang3'));
+ fd.append('ref_text',document.getElementById('refText').value.trim());
+ var btn=document.getElementById('b3'),aud=document.getElementById('a3');
+ btn.disabled=true;var old=btn.innerHTML;btn.innerHTML='<span class="spin">⏳</span> Cloning…';
+ fetch(API+'/clone',{method:'POST',body:fd}).then(function(r){
+  if(!r.ok)return r.json().then(function(j){throw new Error(j.error||('http '+r.status));});
+  return r.blob();
+ }).then(function(b){aud.src=URL.createObjectURL(b);aud.play();})
+ .catch(function(e){showErr('Clone failed: '+e.message);});
+ btn.disabled=false;btn.innerHTML=old;
+}
+</script>
+</body>
+</html>
