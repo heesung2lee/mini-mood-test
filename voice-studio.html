@@ -113,8 +113,8 @@ audio{width:100%;margin-top:10px}
 'use strict';
 var API = localStorage.getItem('studio_api') || 'https://filled-month-number-griffin.trycloudflare.com';
 function showErr(s){var e=document.getElementById('err');e.style.display='block';e.textContent=s;setTimeout(function(){e.style.display='none';},6000);}
-function chipWire(id){var el=document.getElementById(id);el.addEventListener('click',function(e){if(e.target.tagName!=='BUTTON')return;[...el.children].forEach(function(b){b.classList.remove('act')});e.target.classList.add('act');});}
-['lang1','spk1','lang2','lang3','dubDir'].forEach(chipWire);
+function chipWire(id){var el=document.getElementById(id);if(!el)return;el.addEventListener('click',function(e){if(e.target.tagName!=='BUTTON')return;[...el.children].forEach(function(b){b.classList.remove('act')});e.target.classList.add('act');});}
+['lang1','spk1','lang2','lang3','dubDir','ytTgt','lang6','spk6'].forEach(chipWire);
 function sel(id){var a=document.querySelector('#'+id+' .act');return a?a.dataset.v:'';}
 async function health(){try{var r=await fetch(API+'/');if(r.ok){document.getElementById('st').textContent='● online';document.getElementById('st').classList.remove('off');return;}}catch(e){}document.getElementById('st').textContent='● offline';document.getElementById('st').classList.add('off');}
 health();setInterval(health,15000);
@@ -192,6 +192,110 @@ function genDub(){
   aud.src=URL.createObjectURL(new Blob([arr],{type:'audio/wav'}));aud.play();
  }).catch(function(e){showErr('Dub failed: '+e.message);});
  btn.disabled=false;btn.innerHTML='🎬 Transcribe + Translate + Speak';
+}
+</script>
+<section>
+<h2>5️⃣ YouTube Transcribe <span style="font-weight:400;font-size:11px;color:var(--dim)">link → text file</span></h2>
+<input type="text" id="ytUrl" placeholder="🔗 YouTube link…">
+<div class="chips" id="ytTgt">
+<button data-v="ko" class="act">Translate → 🇰🇷 Korean</button>
+<button data-v="en">→ 🇺🇸 English (orig only)</button>
+<button data-v="none">📝 Transcribe only</button>
+</div>
+<div class="row"><button id="b5" onclick="genYt()">📥 Transcribe</button></div>
+<div class="hint" id="ytOut"></div>
+<div class="row" id="ytDl" style="display:none">
+<button class="ghost" onclick="dlText('txt')">⬇ .txt</button>
+<button class="ghost" onclick="dlText('srt')">⬇ .srt</button>
+</div>
+<div class="hint">Audio downloads to your Mac, transcribes with Whisper. Minutes for long videos.</div>
+</section>
+<section>
+<h2>6️⃣ Narrate Document <span style="font-weight:400;font-size:11px;color:var(--dim)">word/text → speech + timestamps</span></h2>
+<div class="row"><button class="ghost" onclick="document.getElementById('docUp').click()">📄 Pick .docx / .txt</button></div>
+<input type="file" id="docUp" accept=".docx,.txt,.md" style="display:none" onchange="docPicked(this)">
+<div class="filebox" id="docBox">Or paste text below</div>
+<textarea id="t6" placeholder="✏️ Paste article text…"></textarea>
+<div class="chips" id="lang6">
+<button data-v="en" class="act">🇺🇸 English</button>
+<button data-v="ko">🇰🇷 Korean</button>
+</div>
+<div class="chips" id="spk6">
+<button data-v="ryan" class="act">👨 Ryan</button>
+<button data-v="sohee">👩 Sohee</button>
+<button data-v="vivian">👩 Vivian</button>
+<button data-v="serena">👩 Serena</button>
+<button data-v="aiden">👨 Aiden</button>
+<button data-v="dylan">👨 Dylan</button>
+</div>
+<div class="row"><button id="b6" onclick="genNarrate()">🎙️ Narrate</button></div>
+<div class="hint" id="narOut"></div>
+<audio id="a6" controls></audio>
+<div class="row" id="narDl" style="display:none">
+<button class="ghost" onclick="dlNar('wav')">⬇ Audio .wav</button>
+<button class="ghost" onclick="dlNar('srt')">⬇ Timestamps .srt</button>
+</div>
+</section>
+<script>
+var ytData=null;
+function genYt(){
+ var u=document.getElementById('ytUrl').value.trim();
+ if(!u||(!u.includes('youtube.com')&&!u.includes('youtu.be')))return showErr('Paste a YouTube link');
+ var btn=document.getElementById('b5');
+ btn.disabled=true;btn.innerHTML='<span class="spin">⏳</span> Downloading + transcribing…';
+ fetch(API+'/ytdub',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u,tgt:sel('ytTgt')})})
+ .then(function(r){if(!r.ok)return r.json().then(function(j){throw new Error(j.error||('http '+r.status));});return r.json();})
+ .then(function(j){
+  var tgt=sel('ytTgt'),finalText=j.orig;
+  var done=function(txt){ytData={text:txt,detected:j.detected};document.getElementById('ytOut').textContent='['+j.detected+'] '+txt.slice(0,300)+(txt.length>300?'…':'');document.getElementById('ytDl').style.display='flex';};
+  if(tgt==='none')done(j.orig);
+  else if(tgt===j.detected||tgt==='en'&&j.detected==='en')done(j.orig);
+  else fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl='+j.detected+'&tl='+tgt+'&dt=t&q='+encodeURIComponent(j.orig.slice(0,4000))).then(function(r){return r.json();}).then(function(t){done(t[0].map(function(s){return s[0];}).join(''));}).catch(function(){done(j.orig);});
+ }).catch(function(e){showErr('YouTube failed: '+e.message);});
+ btn.disabled=false;btn.innerHTML='📥 Transcribe';
+}
+function dlText(fmt){
+ if(!ytData)return;
+ var txt=ytData.text,blob;
+ if(fmt==='srt'){
+  var words=txt.split(/\s+/),out='',t=0;
+  for(var i=0;i<words.length;i+=12){var ch=words.slice(i,i+12).join(' ');
+   out+=(i/12+1)+'\n00:'+String(Math.floor(t/60)).padStart(2,'0')+':'+String(Math.floor(t%60)).padStart(2,'0')+',000 --> 00:'+String(Math.floor((t+5)/60)).padStart(2,'0')+':'+String(Math.floor((t+5)%60)).padStart(2,'0')+',000\n'+ch+'\n\n';t+=5;}
+  txt=out;
+ }
+ blob=new Blob([txt],{type:'text/plain'});
+ var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='transcript.'+fmt;a.click();
+}
+/* narrate */
+function docPicked(inp){
+ var f=inp.files[0];if(!f)return;
+ document.getElementById('docBox').innerHTML='Reading: <b>'+f.name+'</b>…';
+ if(f.name.endsWith('.txt')||f.name.endsWith('.md')){f.text().then(function(t){document.getElementById('t6').value=t;document.getElementById('docBox').innerHTML='Loaded: <b>'+f.name+'</b>';});}
+ else{showErr('.docx reads on server — paste text for now, .docx server-parse coming');document.getElementById('docBox').innerHTML='⚠️ .docx: paste text below for now';}
+}
+var narData=null;
+function genNarrate(){
+ var t=document.getElementById('t6').value.trim();if(!t)return showErr('Paste text or pick a file first');
+ var btn=document.getElementById('b6'),aud=document.getElementById('a6');
+ btn.disabled=true;btn.innerHTML='<span class="spin">⏳</span> Narrating… (slow, stay open)';
+ fetch(API+'/narrate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t.slice(0,5000),lang:sel('lang6'),speaker:sel('spk6')})})
+ .then(function(r){if(!r.ok)return r.json().then(function(j){throw new Error(j.error||('http '+r.status));});return r.json();})
+ .then(function(j){
+  narData=j;
+  var bin=atob(j.wav),arr=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+  aud.src=URL.createObjectURL(new Blob([arr],{type:'audio/wav'}));aud.play();
+  document.getElementById('narOut').textContent='✅ '+j.marks.length+' segments with timestamps';
+  document.getElementById('narDl').style.display='flex';
+ }).catch(function(e){showErr('Narrate failed: '+e.message);});
+ btn.disabled=false;btn.innerHTML='🎙️ Narrate';
+}
+function dlNar(fmt){
+ if(!narData)return;
+ var blob,a=document.createElement('a');
+ if(fmt==='wav'){var bin=atob(narData.wav),arr=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);blob=new Blob([arr],{type:'audio/wav'});a.download='narration.wav';}
+ else{blob=new Blob([narData.srt],{type:'text/plain'});a.download='narration.srt';}
+ a.href=URL.createObjectURL(blob);a.click();
 }
 </script>
 </body>
