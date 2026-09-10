@@ -12,36 +12,37 @@
 :root{--gold:#d4af37;--bg:#0b1220;--card:#151f33;--line:#24314d;--txt:#eef2f7;--dim:#8b98ad}
 html,body{height:100%}
 body{font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--bg);color:var(--txt);display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height:100dvh}
-/* app header */
 header{padding:calc(env(safe-area-inset-top,0px) + 14px) 20px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
 header .dot{width:10px;height:10px;border-radius:50%;background:var(--gold)}
 header h1{font-size:17px;font-weight:800;letter-spacing:-.02em}
-header .live{margin-left:auto;font-size:11px;font-weight:700;color:#0b1220;background:var(--gold);border-radius:20px;padding:4px 10px;display:none}
-header .live.on{display:block}
-/* language switch: two big tabs */
+header .live{margin-left:auto;font-size:11px;font-weight:700;color:#0b1220;background:#ef4444;border-radius:20px;padding:4px 10px;display:none}
+header .live.on{display:block;animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.6}}
 #langbar{display:flex;gap:8px;padding:14px 16px 4px}
 #langbar button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--dim);border-radius:14px;padding:13px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
 #langbar button.act{background:var(--gold);color:#0b1220;border-color:var(--gold)}
 #langbar button small{display:block;font-size:11px;font-weight:600;margin-top:2px;opacity:.75}
-/* conversation */
 #log{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch}
 .msg{max-width:88%;padding:10px 14px;border-radius:16px;font-size:16px;line-height:1.5;cursor:pointer}
 .msg .o{font-size:12px;opacity:.6;margin-bottom:3px}
 .msg.out{align-self:flex-end;background:var(--gold);color:#0b1220;border-bottom-right-radius:6px}
-.msg.out .o{opacity:.6}
 .msg.in{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px}
-#heard{background:var(--card);border:1px dashed var(--line);border-radius:12px;margin:0 16px;padding:9px 14px;font-size:14px;color:var(--dim);min-height:38px;display:none}
+#heard{background:var(--card);border:1px dashed var(--gold);border-radius:12px;margin:0 16px;padding:9px 14px;font-size:14px;color:var(--txt);min-height:38px;display:none}
 #heard.on{display:block}
-/* bottom control deck */
 #deck{padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 16px);border-top:1px solid var(--line);background:#0d1526}
 #micBtn{width:100%;border:none;border-radius:16px;background:var(--gold);color:#0b1220;font-size:18px;font-weight:800;padding:17px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px}
-#micBtn.live{background:#ef4444;color:#fff;animation:pulse 1.4s infinite}
-@keyframes pulse{50%{opacity:.82}}
+#micBtn.live{background:#ef4444;color:#fff}
 #hint{text-align:center;font-size:12px;color:var(--dim);margin-top:8px;min-height:18px}
 #textRow{display:flex;gap:8px;margin-top:10px}
-#textIn{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;color:#fff;padding:13px 14px;font-size:16px;font-family:inherit;outline:none}
+#textIn{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;color:#fff;padding:13px 14px;font-size:16px;font-family:inherit;outline:none;min-width:0}
 #textIn:focus{border-color:var(--gold)}
-#sendBtn{background:var(--card);border:1px solid var(--gold);color:var(--gold);border-radius:12px;padding:0 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+#sendBtn{background:var(--card);border:1px solid var(--gold);color:var(--gold);border-radius:12px;padding:0 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap}
+/* voice + style row */
+#voiceRow{display:flex;gap:8px;margin-top:10px;align-items:stretch}
+#voiceBtn{flex:1.4;background:var(--card);border:1px solid var(--gold);color:var(--gold);border-radius:12px;padding:10px 8px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#rateWrap{flex:1;display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:0 10px}
+#rateWrap span{font-size:11px;color:var(--dim);white-space:nowrap}
+#rate{flex:1;accent-color:var(--gold);min-width:0}
 #utilRow{display:flex;gap:8px;margin-top:10px}
 #utilRow button{flex:1;background:none;border:1px solid var(--line);color:var(--dim);border-radius:10px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
 #utilRow button.on{color:var(--gold);border-color:var(--gold)}
@@ -59,34 +60,96 @@ header .live.on{display:block}
 <div id="heard"></div>
 <div id="deck">
 <button id="micBtn" onclick="toggleMic()">🎤 탭하여 말하기</button>
-<div id="hint">멈춰도 계속 듣습니다 · 다시 탭하면 종료</div>
+<div id="hint">멈춰도 계속 듣습니다 · 다시 탭하면 번역됩니다</div>
 <div id="textRow">
 <input id="textIn" placeholder="텍스트 입력…" enterkeyhint="send" onkeydown="if(event.key==='Enter')sendText()">
 <button id="sendBtn" onclick="sendText()">전송</button>
 </div>
+<div id="voiceRow">
+<button id="voiceBtn" onclick="cycleVoice()">🔊 목소리 불러오는 중…</button>
+<div id="rateWrap"><span>속도</span><input id="rate" type="range" min="0.6" max="1.3" step="0.05" value="0.95" oninput="saveRate()"></div>
+</div>
 <div id="utilRow">
 <button id="autoBtn" class="on" onclick="toggleAuto()">🔊 자동재생 ON</button>
+<button id="liveBtn" onclick="toggleLiveMode()">⚡ 실시간번역 OFF</button>
 <button onclick="clearLog()">지우기</button>
 </div>
 </div>
 <script>
 'use strict';
-var dir='ko-en', rec=null, listening=false, wantListen=false, autoSpeak=true, heardTimer=null;
+var dir=localStorage.getItem('interp_dir')||'ko-en';
+var listening=false, wantListen=false, autoSpeak=localStorage.getItem('interp_auto')!=='0';
+var liveMode=localStorage.getItem('interp_live')==='1';
+var rec=null, fullTxt='', voiceIdx=0, voicesCache=[], commitT=null, lastCommitted='';
 var SRC={'ko-en':'ko-KR','en-ko':'en-US'};
 var TGT={'ko-en':'en-US','en-ko':'ko-KR'};
 var TGTLANG={'ko-en':'en','en-ko':'ko'};
-function setDir(d){ dir=d;
+var VKEY=function(){return 'interp_voice_'+TGTLANG[dir];};
+/* ---------- voices ---------- */
+function targetVoices(){
+ var code=TGT[dir].toLowerCase().slice(0,2);
+ var all=speechSynthesis?speechSynthesis.getVoices():[];
+ return all.filter(function(v){return v.lang&&v.lang.replace('_','-').toLowerCase().indexOf(code)===0;});
+}
+function refreshVoices(){
+ if(!('speechSynthesis' in window))return;
+ voicesCache=targetVoices();
+ if(!voicesCache.length){ document.getElementById('voiceBtn').textContent='🔇 해당 언어 목소리 없음'; return; }
+ var saved=localStorage.getItem(VKEY), i=0;
+ if(saved){ for(var k=0;k<voicesCache.length;k++){ if(voicesCache[k].name===saved){i=k;break;} } }
+ voiceIdx=i;
+ paintVoice();
+}
+function paintVoice(){
+ var b=document.getElementById('voiceBtn');
+ if(!voicesCache.length){b.textContent='🔇 해당 언어 목소리 없음';return;}
+ b.textContent='🔊 '+(voicesCache.length>1?('◂ '+voicesCache[voiceIdx].name+' ▸'):voicesCache[voiceIdx].name);
+}
+function cycleVoice(){
+ if(voicesCache.length<2){refreshVoices();return;}
+ voiceIdx=(voiceIdx+1)%voicesCache.length;
+ localStorage.setItem(VKEY,voicesCache[voiceIdx].name);
+ paintVoice();
+ previewVoice();
+}
+var previewT=null;
+function previewVoice(){
+ clearTimeout(previewT);
+ previewT=setTimeout(function(){
+  try{
+   speechSynthesis.cancel();
+   var hello=TGTLANG[dir]==='ko'?'안녕하세요':"Hello, how can I help you?";
+   var u=new SpeechSynthesisUtterance(hello);
+   u.lang=TGT[dir]; u.rate=parseFloat(document.getElementById('rate').value)||0.95;
+   if(voicesCache[voiceIdx])u.voice=voicesCache[voiceIdx];
+   speechSynthesis.speak(u);
+  }catch(e){}
+ },350);
+}
+if('speechSynthesis' in window){
+ speechSynthesis.getVoices();
+ if(speechSynthesis.onvoiceschanged!==undefined)speechSynthesis.onvoiceschanged=refreshVoices;
+ setTimeout(refreshVoices,500); setTimeout(refreshVoices,2000);
+}
+function saveRate(){ localStorage.setItem('interp_rate',document.getElementById('rate').value); }
+(function(){ var r=localStorage.getItem('interp_rate'); if(r)document.getElementById('rate').value=r; })();
+/* ---------- ui ---------- */
+function setDir(d){ dir=d; localStorage.setItem('interp_dir',d);
  document.getElementById('dKoEn').classList.toggle('act',d==='ko-en');
  document.getElementById('dEnKo').classList.toggle('act',d==='en-ko');
- stopAll();
+ stopAll(); refreshVoices();
  hint(d==='ko-en'?'한국어로 말하세요':'Speak in English');
 }
 function hint(s){ document.getElementById('hint').textContent=s; }
-function showErr(s){ var e=document.getElementById('err'); e.style.display='block'; e.textContent=s; setTimeout(function(){e.style.display='none'},4000); }
-function toggleAuto(){ autoSpeak=!autoSpeak; var b=document.getElementById('autoBtn'); b.textContent=autoSpeak?'🔊 자동재생 ON':'🔇 자동재생 OFF'; b.classList.toggle('on',autoSpeak); }
+function showErr(s){ var e=document.getElementById('err'); e.style.display='block'; e.textContent=s; setTimeout(function(){e.style.display='none'},4500); }
+function toggleAuto(){ autoSpeak=!autoSpeak; localStorage.setItem('interp_auto',autoSpeak?'1':'0');
+ var b=document.getElementById('autoBtn'); b.textContent=autoSpeak?'🔊 자동재생 ON':'🔇 자동재생 OFF'; b.classList.toggle('on',autoSpeak); }
+function toggleLiveMode(){ liveMode=!liveMode; localStorage.setItem('interp_live',liveMode?'1':'0');
+ var b=document.getElementById('liveBtn'); b.textContent=liveMode?'⚡ 실시간번역 ON':'⚡ 실시간번역 OFF'; b.classList.toggle('on',liveMode);
+ hint(liveMode?'문장 끝날 때마다 바로 번역됩니다':'다시 탭할 때까지 듣기만 합니다'); }
 function clearLog(){ document.getElementById('log').innerHTML=''; }
 function heardBox(txt){ var h=document.getElementById('heard'); if(!txt){h.classList.remove('on');h.textContent='';return;} h.classList.add('on'); h.textContent='… '+txt; }
-/* translation: Google gtx primary, MyMemory fallback */
+/* ---------- translation: Google gtx primary, MyMemory fallback ---------- */
 async function translate(text){
  var tl=TGTLANG[dir], sl=dir==='ko-en'?'ko':'en';
  try{
@@ -104,21 +167,19 @@ async function translate(text){
 function speak(text){
  try{
   speechSynthesis.cancel();
-  var u=new SpeechSynthesisUtterance(text); u.lang=TGT[dir]; u.rate=.95;
-  var vs=speechSynthesis.getVoices().filter(function(v){return v.lang&&v.lang.replace('_','-').toLowerCase().indexOf(TGT[dir].toLowerCase().slice(0,2))===0});
-  var p=vs.find(function(v){return /google|natural|samantha|yuna|zira|david/i.test(v.name)});
-  u.voice=p||vs[0]||null;
+  var u=new SpeechSynthesisUtterance(text); u.lang=TGT[dir];
+  u.rate=parseFloat(document.getElementById('rate').value)||0.95;
+  if(voicesCache[voiceIdx])u.voice=voicesCache[voiceIdx];
   speechSynthesis.speak(u);
  }catch(e){ showErr('음성재생 미지원: '+e.message); }
 }
-if('speechSynthesis' in window){ speechSynthesis.getVoices(); }
 async function handleText(text){
  text=(text||'').trim(); if(!text)return;
  hint('번역 중…');
  try{
   var t=await translate(text);
   addMsg(text,t);
-  hint(listening?'계속 듣는 중…':(dir==='ko-en'?'한국어로 말하세요':'Speak in English'));
+  hint(wantListen?'계속 듣는 중…':(dir==='ko-en'?'한국어로 말하세요':'Speak in English'));
   if(autoSpeak)speak(t);
  }catch(e){ hint('오류 발생'); showErr('번역 오류: '+e.message); }
 }
@@ -131,12 +192,14 @@ function addMsg(src,tgt){
  log.appendChild(o); log.scrollTop=log.scrollHeight;
 }
 function sendText(){ var i=document.getElementById('textIn'); handleText(i.value); i.value=''; i.blur(); }
-/* mic: continuous — auto-restart on silence until user taps stop */
-function toggleMic(){ wantListen?stopAll():startLoop(); }
+/* ---------- mic: stays open through pauses, commits on tap ---------- */
+function toggleMic(){ wantListen?finishAndCommit():startLoop(); }
 function startLoop(){
  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
  if(!SR){ showErr('Chrome · Edge · Safari에서 열어주세요'); return; }
- wantListen=true; openRec();
+ try{ if('speechSynthesis' in window)speechSynthesis.cancel(); }catch(e){}
+ wantListen=true; fullTxt=''; lastCommitted='';
+ openRec();
 }
 function openRec(){
  if(!wantListen)return;
@@ -149,37 +212,53 @@ function openRec(){
   var inter='';
   for(var i=e.resultIndex;i<e.results.length;i++){
    var tr=e.results[i][0].transcript;
-   if(e.results[i].isFinal){ seg+=' '+tr; commitSoon(); }
+   if(e.results[i].isFinal){ seg+=' '+tr; fullTxt=(fullTxt+' '+tr).trim(); if(liveMode)commitSoon(); }
    else inter+=tr;
   }
-  heardBox((seg+' '+inter).trim());
+  heardBox((fullTxt+' '+inter).trim());
  };
- rec.onend=function(){ setLive(false); if(wantListen){ try{rec.start();}catch(e){ setTimeout(openRec,300); } } };
- rec.onerror=function(e){
-  if(e.error==='not-allowed'||e.error==='service-not-allowed'){ wantListen=false; setLive(false); showErr('마이크 권한을 허용해주세요'); return; }
-  /* network/no-speech 등: 루프 유지, 조용히 재시작 */
+ rec.onend=function(){
   setLive(false);
-  if(wantListen)setTimeout(function(){ try{rec.start();}catch(x){ openRec(); } },400);
+  if(wantListen)setTimeout(function(){ if(wantListen)openRec(); },250);
  };
- try{ rec.start(); setLive(true); hint('듣는 중… 다시 탭하면 종료'); }
+ rec.onerror=function(e){
+  if(e.error==='not-allowed'||e.error==='service-not-allowed'){ wantListen=false; setLive(false); fullTxt=''; showErr('마이크 권한을 허용해주세요'); return; }
+  setLive(false);
+  if(wantListen)setTimeout(function(){ if(wantListen){ try{rec.start();}catch(x){ openRec(); } } },500);
+ };
+ try{ rec.start(); setLive(true); hint(liveMode?'듣는 중… 문장마다 번역됩니다':'듣는 중… 다시 탭하면 번역됩니다'); }
  catch(e){ showErr('마이크 시작 실패: '+e.message); wantListen=false; }
 }
-var commitT=null, lastCommitted='';
 function commitSoon(){
  clearTimeout(commitT);
  commitT=setTimeout(function(){
-  var full=document.getElementById('heard').textContent.replace(/^…\s*/,'').trim();
-  if(full&&full!==lastCommitted){ lastCommitted=full; handleText(full); heardBox(''); }
- },1600);
+  var cur=fullTxt.trim();
+  if(cur&&cur!==lastCommitted){ lastCommitted=cur; handleText(cur); }
+ },2500);
+}
+/* tap again → stop + translate everything heard */
+function finishAndCommit(){
+ wantListen=false; clearTimeout(commitT);
+ try{ if(rec)rec.abort(); }catch(e){}
+ rec=null; setLive(false);
+ var txt=fullTxt.trim(); fullTxt=''; heardBox('');
+ if(txt)handleText(txt);
+ else hint(dir==='ko-en'?'한국어로 말하세요':'Speak in English');
 }
 function setLive(on){
- listening=on||wantListen;
  document.getElementById('micBtn').classList.toggle('live',wantListen);
- document.getElementById('micBtn').innerHTML=wantListen?'⏹ 탭하여 종료':'🎤 탭하여 말하기';
+ document.getElementById('micBtn').innerHTML=wantListen?'⏹ 탭하여 번역하기':'🎤 탭하여 말하기';
  document.getElementById('liveTag').classList.toggle('on',wantListen);
- if(!wantListen)heardBox('');
+ if(!wantListen&&!fullTxt)heardBox('');
 }
-function stopAll(){ wantListen=false; clearTimeout(commitT); try{if(rec)rec.abort();}catch(e){} rec=null; setLive(false); }
+function stopAll(){ wantListen=false; clearTimeout(commitT); fullTxt=''; try{if(rec)rec.abort();}catch(e){} rec=null; setLive(false); }
+/* init saved prefs */
+(function(){
+ document.getElementById('dKoEn').classList.toggle('act',dir==='ko-en');
+ document.getElementById('dEnKo').classList.toggle('act',dir==='en-ko');
+ if(!autoSpeak){var a=document.getElementById('autoBtn');a.textContent='🔇 자동재생 OFF';a.classList.remove('on');}
+ if(liveMode){var l=document.getElementById('liveBtn');l.textContent='⚡ 실시간번역 ON';l.classList.add('on');}
+})();
 </script>
 </body>
 </html>
