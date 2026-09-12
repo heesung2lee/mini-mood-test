@@ -150,7 +150,8 @@ function showTab(t){document.querySelectorAll('#tabs button').forEach(function(b
 <audio id="aDub" controls></audio>
 <div class="row" id="dubDl" style="display:none">
 <button class="ghost" onclick="dlDub('wav')">⬇ Dubbed voice .wav</button>
-<button class="ghost" onclick="dlDub('srt')">⬇ Transcript .srt ⏱</button>
+<button class="ghost" onclick="dlDub('orig')">⬇ Orig transcript .srt ⏱</button>
+<button class="ghost" onclick="dlDub('trans')">⬇ Translated .srt ⏱</button>
 </div>
 <div class="hint">Whisper → translate → Qwen voice. All with timestamps. Results also auto-sent to Telegram.</div>
 </section>
@@ -271,7 +272,8 @@ function dlDub(fmt){
  if(!dubData)return;
  var a=document.createElement('a'),blob;
  if(fmt==='wav'){var bin=atob(dubData.wav),arr=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);blob=new Blob([arr],{type:'audio/wav'});a.download='dubbed.wav';}
- else{blob=new Blob([dubData.srt],{type:'text/plain'});a.download='transcript.srt';}
+ else if(fmt==='orig'){blob=new Blob([dubData.orig_srt],{type:'text/plain'});a.download='transcript_orig.srt';}
+ else{blob=new Blob([dubData.srt],{type:'text/plain'});a.download='transcript_translated.srt';}
  a.href=URL.createObjectURL(blob);a.click();
 }
 </script>
