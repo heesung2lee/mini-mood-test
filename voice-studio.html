@@ -38,18 +38,8 @@ audio{width:100%;margin-top:10px}
 </head>
 <body>
 <header><span>🎙️</span><h1>Voice Studio</h1><span id="st" class="st off">● connecting…</span></header>
-<nav id="tabs">
-<button data-t="speak" class="act" onclick="showTab('speak')">🎙️ Speak</button>
-<button data-t="dub" onclick="showTab('dub')">🎬 Dub</button>
-</nav>
-<style>#tabs{display:flex;gap:8px;padding:10px 16px 0;background:var(--bg);position:sticky;top:57px;z-index:4}
-#tabs button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--dim);border-radius:12px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit}
-#tabs button.act{background:var(--gold);color:#0b1220;border-color:var(--gold)}
-.tabpage{display:none}.tabpage.act{display:block}</style>
-<script>(function(){var t=localStorage.getItem('studio_tab');if(t)setTimeout(function(){showTab(t)},100);})();
-function showTab(t){document.querySelectorAll('#tabs button').forEach(function(b){b.classList.toggle('act',b.dataset.t===t)});document.querySelectorAll('.tabpage').forEach(function(p){p.classList.toggle('act',p.id==='pg-'+t)});localStorage.setItem('studio_tab',t);}</script>
 <div id="err"></div>
-<div class="tabpage act" id="pg-speak"><section>
+<section>
 <h2>1️⃣ Preset Voices</h2>
 <textarea id="t1" placeholder="✏️ Type text…">Hello, how can I help you with your golf tour today?</textarea>
 <div class="chips" id="lang1">
@@ -105,7 +95,181 @@ function showTab(t){document.querySelectorAll('#tabs button').forEach(function(b
 <div class="hint">Tip: 5–15 sec clear speech works best. Funny voices welcome.</div>
 </section>
 <section>
-<h2>4️⃣ Narrate Document <span style="font-weight:400;font-size:11px;color:var(--dim)">word/text → speech + timestamps</span></h2>
+<h2>4️⃣ Video Dub <span style="font-weight:400;font-size:11px;color:var(--dim)">EN video → KO voice</span></h2>
+<div class="row"><button class="ghost" onclick="document.getElementById('dubUp').click()">🎬 Pick video / audio file</button></div>
+<input type="file" id="dubUp" accept="video/*,audio/*" style="display:none" onchange="dubPicked(this)">
+<div class="filebox" id="dubBox">No file yet</div>
+<div class="chips" id="dubDir">
+<button data-v="en-ko" class="act">🇺🇸→🇰🇷 EN→KO</button>
+<button data-v="ko-en">🇰🇷→🇺🇸 KO→EN</button>
+</div>
+<div class="row"><button id="b4" onclick="genDub()">🎬 Transcribe + Translate + Speak</button></div>
+<div class="hint" id="dubOrig"></div>
+<div class="hint" id="dubTrans"></div>
+<audio id="a4" controls></audio>
+<div class="chips" id="dubFmt">
+<button data-v="wav" class="act">WAV</button>
+<button data-v="mp3">MP3</button>
+<button data-v="m4a">M4A</button>
+</div>
+<div class="row" id="dubDl" style="display:none">
+<button class="ghost" onclick="dlDub('aud')">⬇ Dubbed voice</button>
+<button class="ghost" onclick="dlDub('orig')">⬇ Orig .srt ⏱</button>
+<button class="ghost" onclick="dlDub('trans')">⬇ Translated .srt ⏱</button>
+</div>
+<div class="hint">Runs Whisper large-v3 on your Mac (~1-2 min per 10 min). Keep the page open.</div>
+</section>
+<script>
+'use strict';
+var API = localStorage.getItem('studio_api') || 'https://filled-month-number-griffin.trycloudflare.com';
+function showErr(s){var e=document.getElementById('err');e.style.display='block';e.textContent=s;setTimeout(function(){e.style.display='none';},6000);}
+function chipWire(id){var el=document.getElementById(id);if(!el)return;el.addEventListener('click',function(e){if(e.target.tagName!=='BUTTON')return;[...el.children].forEach(function(b){b.classList.remove('act')});e.target.classList.add('act');});}
+['lang1','spk1','lang2','lang3','dubDir','dubFmt','ytTgt','lang6','spk6','trLang'].forEach(chipWire);
+function sel(id){var a=document.querySelector('#'+id+' .act');return a?a.dataset.v:'';}
+async function health(){try{var r=await fetch(API+'/');if(r.ok){document.getElementById('st').textContent='● online';document.getElementById('st').classList.remove('off');return;}}catch(e){}document.getElementById('st').textContent='● offline';document.getElementById('st').classList.add('off');}
+health();setInterval(health,15000);
+async function playBlob(url,opt,aud,btn,label){
+ btn.disabled=true;var old=btn.innerHTML;btn.innerHTML='<span class="spin">⏳</span> Working…';
+ try{
+  var r=await fetch(API+url,opt);
+  if(!r.ok){var j=await r.json().catch(function(){return{}});throw new Error(j.error||('http '+r.status));}
+  var b=await r.blob();aud.src=URL.createObjectURL(b);aud.play();
+ }catch(e){showErr(label+' failed: '+e.message);}
+ btn.disabled=false;btn.innerHTML=old;
+}
+function genPreset(){
+ var t=document.getElementById('t1').value.trim();if(!t)return showErr('Type text first');
+ playBlob('/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t,lang:sel('lang1'),speaker:sel('spk1')})},document.getElementById('a1'),document.getElementById('b1'),'Generate');
+}
+function genDesign(){
+ var t=document.getElementById('t2').value.trim();if(!t)return showErr('Type text first');
+ var inst=document.getElementById('inst').value.trim()||'warm friendly voice';
+ playBlob('/design',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t,lang:sel('lang2'),instruct:inst})},document.getElementById('a2'),document.getElementById('b2'),'Design');
+}
+/* record */
+var mr=null,chunks=[],recing=false;
+function toggleRec(){
+ if(recing){mr.stop();return;}
+ navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
+  mr=new MediaRecorder(s);chunks=[];
+  mr.ondataavailable=function(e){chunks.push(e.data);};
+  mr.onstop=function(){setSample(new Blob(chunks,{type:'audio/webm'}));s.getTracks().forEach(function(t){t.stop();});};
+  mr.start();recing=true;
+  document.getElementById('recBtn').innerHTML='⏹ Stop';
+ }).catch(function(){showErr('Mic permission needed');});
+}
+var sampleBlob=null;
+function setSample(b){
+ sampleBlob=b;recing=false;
+ document.getElementById('recBtn').innerHTML='⏺ Record sample';
+ var a=document.getElementById('refAud');a.src=URL.createObjectURL(b);a.style.display='block';
+ document.getElementById('fbox').innerHTML='Sample ready: <b>'+Math.round(b.size/1024)+'KB</b> — tap play below to check';
+}
+function filePicked(inp){if(inp.files[0])setSample(inp.files[0]);}
+function genClone(){
+ var t=document.getElementById('t3').value.trim();if(!t)return showErr('Type text first');
+ if(!sampleBlob)return showErr('Record or upload a voice sample first');
+ var fd=new FormData();
+ fd.append('audio',sampleBlob,'sample.wav');
+ fd.append('text',t);fd.append('lang',sel('lang3'));
+ fd.append('ref_text',document.getElementById('refText').value.trim());
+ var btn=document.getElementById('b3'),aud=document.getElementById('a3');
+ btn.disabled=true;var old=btn.innerHTML;btn.innerHTML='<span class="spin">⏳</span> Cloning…';
+ fetch(API+'/clone',{method:'POST',body:fd}).then(function(r){
+  if(!r.ok)return r.json().then(function(j){throw new Error(j.error||('http '+r.status));});
+  return r.blob();
+ }).then(function(b){aud.src=URL.createObjectURL(b);aud.play();})
+ .catch(function(e){showErr('Clone failed: '+e.message);});
+ btn.disabled=false;btn.innerHTML=old;
+}
+
+var dubFile=null,dubData=null;
+function dlDub(fmt){
+ if(!dubData)return;
+ var a=document.createElement('a'),blob;
+ if(fmt==='aud'){
+  var f=sel('dubFmt');
+  var bin=atob(dubData.wav),arr=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+  var raw=new Blob([arr],{type:'audio/wav'});
+  if(f==='wav'){blob=raw;a.download='dubbed.wav';}
+  else{showErr('Converting to '+f.toUpperCase()+'…');convAudio(raw,f,function(b,ext){var u=URL.createObjectURL(b);a.href=u;a.download='dubbed.'+ext;a.click();});return;}
+ } else if(fmt==='orig'){blob=new Blob([dubData.orig_srt||''],{type:'text/plain'});a.download='transcript_orig.srt';}
+ else{blob=new Blob([dubData.srt||''],{type:'text/plain'});a.download='transcript_translated.srt';}
+ a.href=URL.createObjectURL(blob);a.click();
+}
+function convAudio(blob,fmt,cb){
+ var ctx=new (window.AudioContext||window.webkitAudioContext)();
+ var reader=new FileReader();
+ reader.onload=function(){
+  ctx.decodeAudioData(reader.result).then(function(buf){
+   var dest=ctx.createMediaStreamDestination();
+   var src=ctx.createBufferSource();src.buffer=buf;src.connect(dest);
+   var rec=new MediaRecorder(dest.stream,{mimeType:fmt==='mp3'?'audio/mpeg':'audio/mp4'});
+   var ch=[];rec.ondataavailable=function(e){ch.push(e.data);};
+   rec.onstop=function(){cb(new Blob(ch,{type:rec.mimeType}),fmt);};
+   rec.start();src.start();
+   setTimeout(function(){rec.stop();},Math.ceil(buf.duration*1000)+500);
+  }).catch(function(e){showErr('Convert failed: '+e.message);});
+ };
+ reader.readAsArrayBuffer(blob);
+}
+function dubPicked(inp){if(!inp.files[0])return;dubFile=inp.files[0];document.getElementById('dubBox').innerHTML='Ready: <b>'+inp.files[0].name+'</b> ('+Math.round(inp.files[0].size/1024)+'KB)';}
+function genDub(){
+ if(!dubFile)return showErr('Pick a video/audio file first');
+ var dd=sel('dubDir').split('-');
+ var fd=new FormData();fd.append('video',dubFile);fd.append('src',dd[0]);fd.append('tgt',dd[1]);
+ var btn=document.getElementById('b4'),aud=document.getElementById('a4');
+ btn.disabled=true;btn.innerHTML='<span class="spin">⏳</span> Transcribing… (minutes)';
+ fetch(API+'/dub',{method:'POST',body:fd}).then(function(r){
+  if(!r.ok)return r.json().then(function(j){throw new Error(j.error||('http '+r.status));});
+  return r.json();
+ }).then(function(j){
+  dubData=j;
+  var oh=j.orig_segs?j.orig_segs.map(function(s){return s.text;}).join(' '):j.orig;
+  document.getElementById('dubOrig').textContent='📝 Heard: '+(oh||'').slice(0,300);
+  document.getElementById('dubTrans').textContent='🌐 Translated: '+(j.trans||'').slice(0,300);
+  document.getElementById('dubDl').style.display='flex';
+  var bin=atob(j.wav),arr=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+  aud.src=URL.createObjectURL(new Blob([arr],{type:'audio/wav'}));aud.play();
+ }).catch(function(e){showErr('Dub failed: '+e.message);});
+ btn.disabled=false;btn.innerHTML='🎬 Transcribe + Translate + Speak';
+}
+
+var trFile=null;
+function trPicked(inp){if(!inp.files[0])return;trFile=inp.files[0];document.getElementById('trBox').innerHTML='Ready: <b>'+inp.files[0].name+'</b> ('+Math.round(inp.files[0].size/1024)+'KB)';}
+function genTr(){
+ if(!trFile)return showErr('Pick a file first');
+ var fd=new FormData();fd.append('media',trFile);fd.append('lang',sel('trLang'));
+ var btn=document.getElementById('b7');
+ btn.disabled=true;btn.innerHTML='<span class="spin">⏳</span> Transcribing… (sent to Telegram too)';
+ fetch(API+'/transcribe',{method:'POST',body:fd}).then(function(r){
+  if(!r.ok)return r.json().then(function(j){throw new Error(j.error||('http '+r.status));});
+  return r.json();
+ }).then(function(j){
+  document.getElementById('trOut').textContent='['+j.detected+'] '+j.orig.slice(0,300)+(j.orig.length>300?'…':'')+' — full .txt sent to Telegram ⬆';
+ }).catch(function(e){showErr('Transcribe failed: '+e.message);});
+ btn.disabled=false;btn.innerHTML='📝 Transcribe to .txt';
+}
+</script>
+<section>
+<h2>5️⃣ YouTube Transcribe <span style="font-weight:400;font-size:11px;color:var(--dim)">link → text file</span></h2>
+<input type="text" id="ytUrl" placeholder="🔗 YouTube link…">
+<div class="chips" id="ytTgt">
+<button data-v="ko" class="act">Translate → 🇰🇷 Korean</button>
+<button data-v="en">→ 🇺🇸 English (orig only)</button>
+<button data-v="none">📝 Transcribe only</button>
+</div>
+<div class="row"><button id="b5" onclick="genYt()">📥 Transcribe</button></div>
+<div class="hint" id="ytOut"></div>
+<div class="row" id="ytDl" style="display:none">
+<button class="ghost" onclick="dlText('txt')">⬇ .txt</button>
+<button class="ghost" onclick="dlText('srt')">⬇ .srt</button>
+</div>
+<div class="hint">Audio downloads to your Mac, transcribes with Whisper. Minutes for long videos.</div>
+</section>
+<section>
+<h2>6️⃣ Narrate Document <span style="font-weight:400;font-size:11px;color:var(--dim)">word/text → speech + timestamps</span></h2>
 <div class="row"><button class="ghost" onclick="document.getElementById('docUp').click()">📄 Pick .docx / .txt</button></div>
 <input type="file" id="docUp" accept=".docx,.txt,.md" style="display:none" onchange="docPicked(this)">
 <div class="filebox" id="docBox">Or paste text below</div>
@@ -129,31 +293,19 @@ function showTab(t){document.querySelectorAll('#tabs button').forEach(function(b
 <button class="ghost" onclick="dlNar('wav')">⬇ Audio .wav</button>
 <button class="ghost" onclick="dlNar('srt')">⬇ Timestamps .srt</button>
 </div>
-</section><section>
-</div><div class="tabpage" id="pg-dub"><section>
-<h2>🎬 Dubbing <span style="font-weight:400;font-size:11px;color:var(--dim)">youtube link or upload → KO voice + timestamped transcript</span></h2>
-<div class="row"><button class="ghost" id="dubTabYt" onclick="dubTab('yt')">🔗 YouTube link</button><button class="ghost" id="dubTabUp" onclick="dubTab('up')">🎞️ Upload file</button></div>
-<div id="dubYtBox">
-<input type="text" id="dubUrl" placeholder="🔗 YouTube link…">
+</section>
+<section>
+<h2>7️⃣ Media → Transcript <span style="font-weight:400;font-size:11px;color:var(--dim)">upload audio/video → .txt file</span></h2>
+<div class="row"><button class="ghost" onclick="document.getElementById('trUp').click()">🎞️ Pick audio / video file</button></div>
+<input type="file" id="trUp" accept="audio/*,video/*" style="display:none" onchange="trPicked(this)">
+<div class="filebox" id="trBox">No file yet</div>
+<div class="chips" id="trLang">
+<button data-v="auto" class="act">🌐 Auto-detect</button>
+<button data-v="en">🇺🇸 English</button>
+<button data-v="ko">🇰🇷 Korean</button>
 </div>
-<div id="dubUpBox" style="display:none">
-<div class="row"><button class="ghost" onclick="document.getElementById('dubUp').click()">🎞️ Pick audio / video</button></div>
-<input type="file" id="dubUp" accept="audio/*,video/*" style="display:none" onchange="dubPicked(this)">
-<div class="filebox" id="dubBox">No file yet</div>
-</div>
-<div class="chips" id="dubTgt">
-<button data-v="ko" class="act">→ 🇰🇷 Korean</button>
-<button data-v="en">→ 🇺🇸 English</button>
-</div>
-<div class="row"><button id="bDub" onclick="genDub2()">🎬 Dub it</button></div>
-<div class="hint" id="dubOut"></div>
-<audio id="aDub" controls></audio>
-<div class="row" id="dubDl" style="display:none">
-<button class="ghost" onclick="dlDub('wav')">⬇ Dubbed voice .wav</button>
-<button class="ghost" onclick="dlDub('orig')">⬇ Orig transcript .srt ⏱</button>
-<button class="ghost" onclick="dlDub('trans')">⬇ Translated .srt ⏱</button>
-</div>
-<div class="hint">Whisper → translate → Qwen voice. All with timestamps. Results also auto-sent to Telegram.</div>
+<div class="row"><button id="b7" onclick="genTr()">📝 Transcribe to .txt</button></div>
+<div class="hint" id="trOut"></div>
 </section>
 <script>
 var ytData=null;
@@ -231,50 +383,6 @@ function genTr(){
   document.getElementById('trOut').textContent='['+j.detected+'] '+j.orig.slice(0,300)+(j.orig.length>300?'…':'')+' — full .txt sent to Telegram ⬆';
  }).catch(function(e){showErr('Transcribe failed: '+e.message);});
  btn.disabled=false;btn.innerHTML='📝 Transcribe to .txt';
-}
-
-var dubMode='yt',dubFile=null;
-function dubTab(m){dubMode=m;
- document.getElementById('dubYtBox').style.display=m==='yt'?'block':'none';
- document.getElementById('dubUpBox').style.display=m==='up'?'block':'none';
- document.getElementById('dubTabYt').style.borderColor=m==='yt'?'var(--gold)':'';
- document.getElementById('dubTabUp').style.borderColor=m==='up'?'var(--gold)':'';
-}
-function dubPicked(inp){if(!inp.files[0])return;dubFile=inp.files[0];document.getElementById('dubBox').innerHTML='Ready: <b>'+inp.files[0].name+'</b> ('+Math.round(inp.files[0].size/1024)+'KB)';}
-var dubData=null;
-function genDub2(){
- var tgt=sel('dubTgt');
- var btn=document.getElementById('bDub'),aud=document.getElementById('aDub');
- btn.disabled=true;btn.innerHTML='<span class="spin">⏳</span> Working… (minutes, stay open)';
- var done=function(j){
-  dubData=j;
-  var bin=atob(j.wav),arr=new Uint8Array(bin.length);
-  for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
-  aud.src=URL.createObjectURL(new Blob([arr],{type:'audio/wav'}));aud.play();
-  document.getElementById('dubOut').textContent='✅ '+j.trans_segs.length+' segments with timestamps — also sent to Telegram ⬆';
-  document.getElementById('dubDl').style.display='flex';
-  btn.disabled=false;btn.innerHTML='🎬 Dub it';
- };
- var fail=function(e){showErr('Dub failed: '+e.message);btn.disabled=false;btn.innerHTML='🎬 Dub it';};
- if(dubMode==='yt'){
-  var u=document.getElementById('dubUrl').value.trim();
-  if(!u||(!u.includes('youtube.com')&&!u.includes('youtu.be')))return fail({message:'Paste a YouTube link'});
-  fetch(API+'/ytdub',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u,tgt:tgt})})
-  .then(function(r){if(!r.ok)return r.json().then(function(x){throw new Error(x.error||('http '+r.status));});return r.json();}).then(done).catch(fail);
- }else{
-  if(!dubFile)return fail({message:'Pick a file first'});
-  var fd=new FormData();fd.append('video',dubFile);fd.append('src','auto');fd.append('tgt',tgt);
-  fetch(API+'/dub',{method:'POST',body:fd})
-  .then(function(r){if(!r.ok)return r.json().then(function(x){throw new Error(x.error||('http '+r.status));});return r.json();}).then(done).catch(fail);
- }
-}
-function dlDub(fmt){
- if(!dubData)return;
- var a=document.createElement('a'),blob;
- if(fmt==='wav'){var bin=atob(dubData.wav),arr=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);blob=new Blob([arr],{type:'audio/wav'});a.download='dubbed.wav';}
- else if(fmt==='orig'){blob=new Blob([dubData.orig_srt],{type:'text/plain'});a.download='transcript_orig.srt';}
- else{blob=new Blob([dubData.srt],{type:'text/plain'});a.download='transcript_translated.srt';}
- a.href=URL.createObjectURL(blob);a.click();
 }
 </script>
 <nav style="position:sticky;bottom:0;background:#0d1526;border-top:1px solid var(--line);display:flex;padding:10px 12px;gap:8px">
