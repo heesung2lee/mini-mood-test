@@ -114,7 +114,7 @@ audio{width:100%;margin-top:10px}
 var API = localStorage.getItem('studio_api') || 'https://filled-month-number-griffin.trycloudflare.com';
 function showErr(s){var e=document.getElementById('err');e.style.display='block';e.textContent=s;setTimeout(function(){e.style.display='none';},6000);}
 function chipWire(id){var el=document.getElementById(id);if(!el)return;el.addEventListener('click',function(e){if(e.target.tagName!=='BUTTON')return;[...el.children].forEach(function(b){b.classList.remove('act')});e.target.classList.add('act');});}
-['lang1','spk1','lang2','lang3','dubDir','ytTgt','lang6','spk6'].forEach(chipWire);
+['lang1','spk1','lang2','lang3','dubDir','ytTgt','lang6','spk6','trLang'].forEach(chipWire);
 function sel(id){var a=document.querySelector('#'+id+' .act');return a?a.dataset.v:'';}
 async function health(){try{var r=await fetch(API+'/');if(r.ok){document.getElementById('st').textContent='● online';document.getElementById('st').classList.remove('off');return;}}catch(e){}document.getElementById('st').textContent='● offline';document.getElementById('st').classList.add('off');}
 health();setInterval(health,15000);
@@ -193,6 +193,22 @@ function genDub(){
  }).catch(function(e){showErr('Dub failed: '+e.message);});
  btn.disabled=false;btn.innerHTML='🎬 Transcribe + Translate + Speak';
 }
+
+var trFile=null;
+function trPicked(inp){if(!inp.files[0])return;trFile=inp.files[0];document.getElementById('trBox').innerHTML='Ready: <b>'+inp.files[0].name+'</b> ('+Math.round(inp.files[0].size/1024)+'KB)';}
+function genTr(){
+ if(!trFile)return showErr('Pick a file first');
+ var fd=new FormData();fd.append('media',trFile);fd.append('lang',sel('trLang'));
+ var btn=document.getElementById('b7');
+ btn.disabled=true;btn.innerHTML='<span class="spin">⏳</span> Transcribing… (sent to Telegram too)';
+ fetch(API+'/transcribe',{method:'POST',body:fd}).then(function(r){
+  if(!r.ok)return r.json().then(function(j){throw new Error(j.error||('http '+r.status));});
+  return r.json();
+ }).then(function(j){
+  document.getElementById('trOut').textContent='['+j.detected+'] '+j.orig.slice(0,300)+(j.orig.length>300?'…':'')+' — full .txt sent to Telegram ⬆';
+ }).catch(function(e){showErr('Transcribe failed: '+e.message);});
+ btn.disabled=false;btn.innerHTML='📝 Transcribe to .txt';
+}
 </script>
 <section>
 <h2>5️⃣ YouTube Transcribe <span style="font-weight:400;font-size:11px;color:var(--dim)">link → text file</span></h2>
@@ -235,6 +251,19 @@ function genDub(){
 <button class="ghost" onclick="dlNar('wav')">⬇ Audio .wav</button>
 <button class="ghost" onclick="dlNar('srt')">⬇ Timestamps .srt</button>
 </div>
+</section>
+<section>
+<h2>7️⃣ Media → Transcript <span style="font-weight:400;font-size:11px;color:var(--dim)">upload audio/video → .txt file</span></h2>
+<div class="row"><button class="ghost" onclick="document.getElementById('trUp').click()">🎞️ Pick audio / video file</button></div>
+<input type="file" id="trUp" accept="audio/*,video/*" style="display:none" onchange="trPicked(this)">
+<div class="filebox" id="trBox">No file yet</div>
+<div class="chips" id="trLang">
+<button data-v="auto" class="act">🌐 Auto-detect</button>
+<button data-v="en">🇺🇸 English</button>
+<button data-v="ko">🇰🇷 Korean</button>
+</div>
+<div class="row"><button id="b7" onclick="genTr()">📝 Transcribe to .txt</button></div>
+<div class="hint" id="trOut"></div>
 </section>
 <script>
 var ytData=null;
@@ -296,6 +325,22 @@ function dlNar(fmt){
  if(fmt==='wav'){var bin=atob(narData.wav),arr=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);blob=new Blob([arr],{type:'audio/wav'});a.download='narration.wav';}
  else{blob=new Blob([narData.srt],{type:'text/plain'});a.download='narration.srt';}
  a.href=URL.createObjectURL(blob);a.click();
+}
+
+var trFile=null;
+function trPicked(inp){if(!inp.files[0])return;trFile=inp.files[0];document.getElementById('trBox').innerHTML='Ready: <b>'+inp.files[0].name+'</b> ('+Math.round(inp.files[0].size/1024)+'KB)';}
+function genTr(){
+ if(!trFile)return showErr('Pick a file first');
+ var fd=new FormData();fd.append('media',trFile);fd.append('lang',sel('trLang'));
+ var btn=document.getElementById('b7');
+ btn.disabled=true;btn.innerHTML='<span class="spin">⏳</span> Transcribing… (sent to Telegram too)';
+ fetch(API+'/transcribe',{method:'POST',body:fd}).then(function(r){
+  if(!r.ok)return r.json().then(function(j){throw new Error(j.error||('http '+r.status));});
+  return r.json();
+ }).then(function(j){
+  document.getElementById('trOut').textContent='['+j.detected+'] '+j.orig.slice(0,300)+(j.orig.length>300?'…':'')+' — full .txt sent to Telegram ⬆';
+ }).catch(function(e){showErr('Transcribe failed: '+e.message);});
+ btn.disabled=false;btn.innerHTML='📝 Transcribe to .txt';
 }
 </script>
 <nav style="position:sticky;bottom:0;background:#0d1526;border-top:1px solid var(--line);display:flex;padding:10px 12px;gap:8px">
