@@ -123,8 +123,8 @@ audio{width:100%;margin-top:10px}
 'use strict';
 var API = localStorage.getItem('studio_api') || 'https://filled-month-number-griffin.trycloudflare.com';
 function showErr(s){var e=document.getElementById('err');e.style.display='block';e.textContent=s;setTimeout(function(){e.style.display='none';},6000);}
-function chipWire(id){var el=document.getElementById(id);if(!el)return;el.addEventListener('click',function(e){if(e.target.tagName!=='BUTTON')return;[...el.children].forEach(function(b){b.classList.remove('act')});e.target.classList.add('act');});}
-['lang1','spk1','lang2','lang3','dubDir','dubFmt','ytTgt','lang6','spk6','trLang'].forEach(chipWire);
+document.addEventListener('click',function(e){var b=e.target&&e.target.closest?e.target.closest('.chips button'):null;if(!b)return;var el=b.parentElement;var cs=el.children;for(var i=0;i<cs.length;i++)cs[i].classList.remove('act');b.classList.add('act');});
+function chip(el,btn){var cs=el.children;for(var i=0;i<cs.length;i++)cs[i].classList.remove('act');btn.classList.add('act');}
 function sel(id){var a=document.querySelector('#'+id+' .act');return a?a.dataset.v:'';}
 async function health(){try{var r=await fetch(API+'/');if(r.ok){document.getElementById('st').textContent='● online';document.getElementById('st').classList.remove('off');return;}}catch(e){}document.getElementById('st').textContent='● offline';document.getElementById('st').classList.add('off');}
 health();setInterval(health,15000);
@@ -260,11 +260,13 @@ function genTr(){
 <button data-v="en">→ 🇺🇸 English (orig only)</button>
 <button data-v="none">📝 Transcribe only</button>
 </div>
-<div class="row"><button id="b5" onclick="genYt()">📥 Transcribe</button></div>
+<div class="row"><button id="b5" onclick="genYt()">📥 Transcribe + Dub</button></div>
 <div class="hint" id="ytOut"></div>
+<audio id="aYt" controls style="display:none"></audio>
 <div class="row" id="ytDl" style="display:none">
-<button class="ghost" onclick="dlText('txt')">⬇ .txt</button>
-<button class="ghost" onclick="dlText('srt')">⬇ .srt</button>
+<button class="ghost" onclick="dlYt('orig')">⬇ Orig .srt ⏱</button>
+<button class="ghost" onclick="dlYt('trans')">⬇ Translated .srt ⏱</button>
+<button class="ghost" onclick="dlYt('wav')">⬇ Dubbed voice</button>
 </div>
 <div class="hint">Audio downloads to your Mac, transcribes with Whisper. Minutes for long videos.</div>
 </section>
@@ -317,13 +319,24 @@ function genYt(){
  fetch(API+'/ytdub',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u,tgt:sel('ytTgt')})})
  .then(function(r){if(!r.ok)return r.json().then(function(j){throw new Error(j.error||('http '+r.status));});return r.json();})
  .then(function(j){
-  var tgt=sel('ytTgt'),finalText=j.orig;
-  var done=function(txt){ytData={text:txt,detected:j.detected};document.getElementById('ytOut').textContent='['+j.detected+'] '+txt.slice(0,300)+(txt.length>300?'…':'');document.getElementById('ytDl').style.display='flex';};
-  if(tgt==='none')done(j.orig);
-  else if(tgt===j.detected||tgt==='en'&&j.detected==='en')done(j.orig);
-  else fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl='+j.detected+'&tl='+tgt+'&dt=t&q='+encodeURIComponent(j.orig.slice(0,4000))).then(function(r){return r.json();}).then(function(t){done(t[0].map(function(s){return s[0];}).join(''));}).catch(function(){done(j.orig);});
+  ytData=j;
+  var tgt=sel('ytTgt');
+  var origTxt=(j.orig_segs||[]).map(function(s){return s.text;}).join(' ').slice(0,300);
+  document.getElementById('ytOut').textContent='['+j.detected+'→'+tgt+'] '+origTxt+(origTxt.length>=300?'…':'');
+  var bin=atob(j.wav),arr=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+  var aud=document.getElementById('aYt');aud.src=URL.createObjectURL(new Blob([arr],{type:'audio/wav'}));aud.style.display='block';
+  document.getElementById('ytDl').style.display='flex';
  }).catch(function(e){showErr('YouTube failed: '+e.message);});
  btn.disabled=false;btn.innerHTML='📥 Transcribe';
+}
+function dlYt(fmt){
+ if(!ytData)return;
+ var a=document.createElement('a'),blob;
+ if(fmt==='wav'){var bin=atob(ytData.wav),arr=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);blob=new Blob([arr],{type:'audio/wav'});a.download='yt_dubbed.wav';}
+ else if(fmt==='orig'){blob=new Blob([ytData.orig_srt||''],{type:'text/plain'});a.download='yt_orig.srt';}
+ else{blob=new Blob([ytData.srt||''],{type:'text/plain'});a.download='yt_translated.srt';}
+ a.href=URL.createObjectURL(blob);a.click();
 }
 function dlText(fmt){
  if(!ytData)return;
