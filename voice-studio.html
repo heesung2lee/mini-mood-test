@@ -38,8 +38,18 @@ audio{width:100%;margin-top:10px}
 </head>
 <body>
 <header><span>🎙️</span><h1>Voice Studio</h1><span id="st" class="st off">● connecting…</span></header>
+<nav id="tabs">
+<button data-t="speak" class="act" onclick="showTab('speak')">🎙️ Speak</button>
+<button data-t="dub" onclick="showTab('dub')">🎬 Dub</button>
+</nav>
+<style>#tabs{display:flex;gap:8px;padding:10px 16px 0;background:var(--bg);position:sticky;top:57px;z-index:4}
+#tabs button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--dim);border-radius:12px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit}
+#tabs button.act{background:var(--gold);color:#0b1220;border-color:var(--gold)}
+.tabpage{display:none}.tabpage.act{display:block}</style>
+<script>(function(){var t=localStorage.getItem('studio_tab');if(t)setTimeout(function(){showTab(t)},100);})();
+function showTab(t){document.querySelectorAll('#tabs button').forEach(function(b){b.classList.toggle('act',b.dataset.t===t)});document.querySelectorAll('.tabpage').forEach(function(p){p.classList.toggle('act',p.id==='pg-'+t)});localStorage.setItem('studio_tab',t);}</script>
 <div id="err"></div>
-<section>
+<div class="tabpage act" id="pg-speak"><section>
 <h2>1️⃣ Preset Voices</h2>
 <textarea id="t1" placeholder="✏️ Type text…">Hello, how can I help you with your golf tour today?</textarea>
 <div class="chips" id="lang1">
@@ -95,7 +105,7 @@ audio{width:100%;margin-top:10px}
 <div class="hint">Tip: 5–15 sec clear speech works best. Funny voices welcome.</div>
 </section>
 <section>
-<h2>6️⃣ Narrate Document <span style="font-weight:400;font-size:11px;color:var(--dim)">word/text → speech + timestamps</span></h2>
+<h2>4️⃣ Narrate Document <span style="font-weight:400;font-size:11px;color:var(--dim)">word/text → speech + timestamps</span></h2>
 <div class="row"><button class="ghost" onclick="document.getElementById('docUp').click()">📄 Pick .docx / .txt</button></div>
 <input type="file" id="docUp" accept=".docx,.txt,.md" style="display:none" onchange="docPicked(this)">
 <div class="filebox" id="docBox">Or paste text below</div>
@@ -120,7 +130,8 @@ audio{width:100%;margin-top:10px}
 <button class="ghost" onclick="dlNar('srt')">⬇ Timestamps .srt</button>
 </div>
 </section><section>
-<h2>4️⃣ Dubbing <span style="font-weight:400;font-size:11px;color:var(--dim)">youtube link or upload → KO voice + timestamped transcript</span></h2>
+</div><div class="tabpage" id="pg-dub"><section>
+<h2>🎬 Dubbing <span style="font-weight:400;font-size:11px;color:var(--dim)">youtube link or upload → KO voice + timestamped transcript</span></h2>
 <div class="row"><button class="ghost" id="dubTabYt" onclick="dubTab('yt')">🔗 YouTube link</button><button class="ghost" id="dubTabUp" onclick="dubTab('up')">🎞️ Upload file</button></div>
 <div id="dubYtBox">
 <input type="text" id="dubUrl" placeholder="🔗 YouTube link…">
