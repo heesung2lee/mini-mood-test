@@ -38,6 +38,10 @@ audio{width:100%;margin-top:10px}
 </head>
 <body>
 <header><span>🎙️</span><h1>Voice Studio</h1><span id="st" class="st off">● connecting…</span></header>
+<div id="jobbar" style="display:none;margin:10px 16px 0;background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:10px 14px;font-size:13px">
+<div id="jobtxt">…</div>
+<div style="height:6px;background:var(--line);border-radius:3px;margin-top:8px"><div id="jobfill" style="height:6px;width:5%;background:var(--gold);border-radius:3px;transition:width 1s"></div></div>
+</div>
 <div id="err"></div>
 <section>
 <h2>1️⃣ Preset Voices</h2>
@@ -137,6 +141,11 @@ async function playBlob(url,opt,aud,btn,label){
  }catch(e){showErr(label+' failed: '+e.message);}
  btn.disabled=false;btn.innerHTML=old;
 }
+var jobTimer=null,jobStart=0;
+function jobShow(txt){var b=document.getElementById('jobbar');b.style.display='block';document.getElementById('jobtxt').textContent=txt;jobStart=Date.now();clearInterval(jobTimer);jobTimer=setInterval(jobTick,2000);}
+function jobTick(){var s=Math.floor((Date.now()-jobStart)/1000);var pct=Math.min(95,5+Math.floor(s/3));document.getElementById('jobfill').style.width=pct+'%';var t=document.getElementById('jobtxt');if(!/✅|❌/.test(t.textContent))t.textContent=t.textContent.replace(/\(\d+s\)/,'')+' ('+s+'s)';}
+function jobDone(txt){clearInterval(jobTimer);document.getElementById('jobfill').style.width='100%';document.getElementById('jobtxt').textContent='✅ '+txt;setTimeout(function(){document.getElementById('jobbar').style.display='none';},8000);}
+function jobFail(txt){clearInterval(jobTimer);document.getElementById('jobtxt').textContent='❌ '+txt;}
 function genPreset(){
  var t=document.getElementById('t1').value.trim();if(!t)return showErr('Type text first');
  playBlob('/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t,lang:sel('lang1'),speaker:sel('spk1')})},document.getElementById('a1'),document.getElementById('b1'),'Generate');
@@ -228,11 +237,11 @@ function genDub(){
   var oh=j.orig_segs?j.orig_segs.map(function(s){return s.text;}).join(' '):j.orig;
   document.getElementById('dubOrig').textContent='📝 Heard: '+(oh||'').slice(0,300);
   document.getElementById('dubTrans').textContent='🌐 Translated: '+(j.trans||'').slice(0,300);
-  document.getElementById('dubDl').style.display='flex';
+  document.getElementById('dubDl').style.display='flex';jobDone('Dub done — files below + Telegram ⬆');
   var bin=atob(j.wav),arr=new Uint8Array(bin.length);
   for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
   aud.src=URL.createObjectURL(new Blob([arr],{type:'audio/wav'}));aud.play();
- }).catch(function(e){showErr('Dub failed: '+e.message);});
+ }).catch(function(e){showErr('Dub failed: '+e.message);jobFail('Dub failed: '+e.message);});
  btn.disabled=false;btn.innerHTML='🎬 Transcribe + Translate + Speak';
 }
 
@@ -242,13 +251,13 @@ function genTr(){
  if(!trFile)return showErr('Pick a file first');
  var fd=new FormData();fd.append('media',trFile);fd.append('lang',sel('trLang'));
  var btn=document.getElementById('b7');
- btn.disabled=true;btn.innerHTML='<span class="spin">⏳</span> Transcribing… (sent to Telegram too)';
+ btn.disabled=true;btn.innerHTML='<span class="spin">⏳</span> Transcribing…';jobShow('📝 Whisper transcribing upload… (auto-sent to Telegram)');
  fetch(API+'/transcribe',{method:'POST',body:fd}).then(function(r){
   if(!r.ok)return r.json().then(function(j){throw new Error(j.error||('http '+r.status));});
   return r.json();
  }).then(function(j){
   document.getElementById('trOut').textContent='['+j.detected+'] '+j.orig.slice(0,300)+(j.orig.length>300?'…':'')+' — full .txt sent to Telegram ⬆';
- }).catch(function(e){showErr('Transcribe failed: '+e.message);});
+ }).catch(function(e){showErr('Transcribe failed: '+e.message);jobFail('Transcribe failed: '+e.message);});
  btn.disabled=false;btn.innerHTML='📝 Transcribe to .txt';
 }
 </script>
@@ -315,7 +324,7 @@ function genYt(){
  var u=document.getElementById('ytUrl').value.trim();
  if(!u||(!u.includes('youtube.com')&&!u.includes('youtu.be')))return showErr('Paste a YouTube link');
  var btn=document.getElementById('b5');
- btn.disabled=true;btn.innerHTML='<span class="spin">⏳</span> Downloading + transcribing…';
+ btn.disabled=true;btn.innerHTML='<span class="spin">⏳</span> Downloading + transcribing…';jobShow('📥 YouTube downloading + Whisper transcribing…');
  fetch(API+'/ytdub',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u,tgt:sel('ytTgt')})})
  .then(function(r){if(!r.ok)return r.json().then(function(j){throw new Error(j.error||('http '+r.status));});return r.json();})
  .then(function(j){
@@ -326,8 +335,8 @@ function genYt(){
   var bin=atob(j.wav),arr=new Uint8Array(bin.length);
   for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
   var aud=document.getElementById('aYt');aud.src=URL.createObjectURL(new Blob([arr],{type:'audio/wav'}));aud.style.display='block';
-  document.getElementById('ytDl').style.display='flex';
- }).catch(function(e){showErr('YouTube failed: '+e.message);});
+  document.getElementById('ytDl').style.display='flex';jobDone('YouTube done — files below + Telegram ⬆');
+ }).catch(function(e){showErr('YouTube failed: '+e.message);jobFail('YouTube failed: '+e.message);});
  btn.disabled=false;btn.innerHTML='📥 Transcribe';
 }
 function dlYt(fmt){
@@ -394,7 +403,7 @@ function genTr(){
   return r.json();
  }).then(function(j){
   document.getElementById('trOut').textContent='['+j.detected+'] '+j.orig.slice(0,300)+(j.orig.length>300?'…':'')+' — full .txt sent to Telegram ⬆';
- }).catch(function(e){showErr('Transcribe failed: '+e.message);});
+ }).catch(function(e){showErr('Transcribe failed: '+e.message);jobFail('Transcribe failed: '+e.message);});
  btn.disabled=false;btn.innerHTML='📝 Transcribe to .txt';
 }
 </script>
