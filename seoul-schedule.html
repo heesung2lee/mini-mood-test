@@ -83,6 +83,7 @@ footer{text-align:center;color:var(--dim);font-size:11px;margin-top:20px}
 
 <div class="toolbar">
 <button class="primary" onclick="shareLink()">🔗 Copy Share Link</button>
+<button onclick="showHistory()">🕘 History</button>
 <button onclick="resetAll()">↩ Reset to Default</button>
 <button onclick="toggleExport()">{} Export / Import JSON</button>
 </div>
@@ -141,7 +142,26 @@ var DEFAULTS = {
 
 var state = load() || JSON.parse(JSON.stringify(DEFAULTS));
 function load(){ try{ var h=location.hash.match(/s=([^&]+)/); if(h){ return JSON.parse(decodeURIComponent(escape(atob(h[1])))); } var l=localStorage.getItem('seoul25'); if(l) return JSON.parse(l); }catch(e){} return null; }
-function persist(){ try{ localStorage.setItem('seoul25', JSON.stringify(state)); }catch(e){} }
+function persist(){ try{ localStorage.setItem('seoul25', JSON.stringify(state)); pushHistory(); }catch(e){} }
+// 히스토리: 최근 20개 자동 저장 (리셋·실수 대비)
+function pushHistory(){
+ try{
+  var h=JSON.parse(localStorage.getItem('seoul25_hist')||'[]');
+  var snap=JSON.stringify(state);
+  if(h.length&&h[0].snap===snap) return; // 동일하면 스킵
+  h.unshift({at:new Date().toISOString().slice(0,16).replace('T',' '),snap:snap});
+  localStorage.setItem('seoul25_hist', JSON.stringify(h.slice(0,20)));
+ }catch(e){}
+}
+function showHistory(){
+ var h=[]; try{ h=JSON.parse(localStorage.getItem('seoul25_hist')||'[]'); }catch(e){}
+ if(!h.length){ alert('No history yet.'); return; }
+ var list=h.map(function(x,i){ return (i+1)+'. '+x.at+' ('+countSlots(JSON.parse(x.snap))+' stops)'; }).join('\n');
+ var pick=prompt('Restore which version? (number)\n'+list);
+ var i=parseInt(pick,10)-1;
+ if(h[i]){ if(!confirm('Replace current with #'+pick+'?'))return; state=JSON.parse(h[i].snap); location.hash=''; render(); }
+}
+function countSlots(s){ var n=0; (s.days||[]).forEach(function(d){n+=d.slots.length;}); return n; }
 
 // ── Render ──
 function slotHTML(s, di, si){
@@ -257,7 +277,7 @@ function shareLink(){
  var url=location.href.split('#')[0]+'#s='+s;
  (navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(function(){alert('Share link copied — anyone opening it sees + edits this schedule.');},function(){prompt('Copy this link:',url);});
 }
-function resetAll(){ if(!confirm('Reset to default schedule?'))return; state=JSON.parse(JSON.stringify(DEFAULTS)); location.hash=''; render(); }
+function resetAll(){ if(!confirm('Reset to default schedule? Current is saved in History.'))return; state=JSON.parse(JSON.stringify(DEFAULTS)); location.hash=''; render(); }
 function toggleExport(){ var p=document.getElementById('export'); if(p.style.display==='block'){p.style.display='none';return;} p.textContent=JSON.stringify(state,null,1).slice(0,6000); p.style.display='block'; }
 render();
 </script>
