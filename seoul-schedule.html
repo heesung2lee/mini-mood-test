@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Seoul Stay Sep 21–25 — Interactive Schedule & Map</title>
+<title>Wendi & John Zapanta Seoul Schedule Sep 21–25</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <style>
-:root{--bg:#0b1420;--card:#101c30;--line:#1e3050;--txt:#e8e6e1;--dim:#8899b4;--gold:#d4af37;--green:#3fb950;--red:#ef4444;--blue:#4a9eff}
+:root{--bg:#f4f6fa;--card:#ffffff;--line:#d8e0ec;--txt:#1a2333;--dim:#64748b;--gold:#b8860b;--green:#3fb950;--red:#ef4444;--blue:#4a9eff}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--txt);font-family:-apple-system,'Segoe UI',Roboto,'Noto Sans KR',sans-serif;line-height:1.55;padding:14px 12px 80px;max-width:1100px;margin:0 auto}
 header{text-align:center;margin-bottom:10px}
@@ -19,9 +19,9 @@ h1{font-size:22px;font-weight:800}
 /* Map */
 .map-wrap{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:12px 0}
 .map-label{font-size:11px;color:var(--dim);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase}
-#map{width:100%;height:380px;border-radius:8px;background:#0b1420}
+#map{width:100%;height:380px;border-radius:8px;background:#eef2f7}
 @media(min-width:640px){#map{height:440px}}
-.leaflet-container{background:#0b1420}
+.leaflet-container{background:#eef2f7}
 .leaflet-control-zoom a{background:#101c30!important;color:#e8e6e1!important;border-color:#1e3050!important}
 .leaflet-control-attribution{background:rgba(11,20,32,.8)!important;color:#5a7a9a!important;font-size:9px!important}
 .leaflet-control-attribution a{color:#8899b4!important}
@@ -35,10 +35,10 @@ h1{font-size:22px;font-weight:800}
 .legend{display:flex;gap:12px;font-size:11px;color:var(--dim);margin-top:6px;flex-wrap:wrap}
 /* Days */
 .day{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden}
-.day-h{padding:10px 14px;background:#0d1830;border-bottom:1px solid var(--line);font-weight:800;font-size:14px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+.day-h{padding:10px 14px;background:#eaf0f8;border-bottom:1px solid var(--line);font-weight:800;font-size:14px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
 .day-h .cnt{font-size:11px;color:var(--dim);font-weight:400}
 .slots{min-height:60px;padding:8px}
-.slot{background:#16263f;border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:7px;cursor:grab;font-size:13px;position:relative}
+.slot{background:#f0f4fa;border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:7px;cursor:grab;font-size:13px;position:relative}
 .slot:active{cursor:grabbing}
 .slot.sortable-ghost{opacity:.4;background:var(--gold)}
 .slot .t{color:var(--gold);font-weight:700;font-size:12px}
@@ -54,20 +54,20 @@ h1{font-size:22px;font-weight:800}
 .pool h3{font-size:13px;margin-bottom:8px}
 .pool .slots{padding:0}
 .addbox{display:flex;gap:6px;margin-top:8px}
-.addbox input{flex:1;background:#0b1420;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px;font-size:12px}
+.addbox input{flex:1;background:#fff;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px;font-size:12px}
 .addbox button{background:var(--gold);border:0;border-radius:8px;padding:8px 12px;font-weight:800;cursor:pointer}
 /* Toolbar */
 .toolbar{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
 .toolbar button{flex:1;min-width:140px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-weight:700;cursor:pointer;font-size:13px}
-.toolbar button.primary{background:var(--gold);color:#0b1420;border-color:var(--gold)}
+.toolbar button.primary{background:var(--gold);color:#fff;border-color:var(--gold)}
 pre#export{background:#000;color:#8f8;padding:10px;border-radius:8px;font-size:10px;overflow:auto;max-height:200px;display:none}
 footer{text-align:center;color:var(--dim);font-size:11px;margin-top:20px}
 </style>
 </head>
 <body>
 <header>
-<div class="logo">Seoul Stay</div>
-<h1>Sep 21–25 · Schedule & Map</h1>
+<div class="logo">Wendi &amp; John Zapanta</div>
+<h1>Seoul Schedule · Sep 21–25</h1>
 <div class="sub">Drag cards between days · Tap ✕ to remove · Add your own spots below</div>
 </header>
 
@@ -90,9 +90,9 @@ footer{text-align:center;color:var(--dim);font-size:11px;margin-top:20px}
 
 <div class="pools">
 <div class="pool"><h3>🍽 Restaurant Pool (drag onto a day)</h3><div class="slots" id="pool-food"></div>
-<div class="addbox"><input id="newFood" placeholder="Add restaurant…"><button onclick="addCustom('food')">+</button></div></div>
+<div class="addbox"><input type="time" id="newFoodT" style="max-width:90px"><input id="newFood" placeholder="Add restaurant…"><button onclick="addCustom('food')">+</button></div></div>
 <div class="pool"><h3>📍 Spots Pool (drag onto a day)</h3><div class="slots" id="pool-spots"></div>
-<div class="addbox"><input id="newSpot" placeholder="Add spot…"><button onclick="addCustom('spot')">+</button></div></div>
+<div class="addbox"><input type="time" id="newSpotT" style="max-width:90px"><input id="newSpot" placeholder="Add spot…"><button onclick="addCustom('spot')">+</button></div></div>
 </div>
 
 <footer>Times are estimates with transit buffer. Philippine Airlines T1 confirmed.</footer>
@@ -113,7 +113,7 @@ var DEFAULTS = {
  days: [
   {id:"d21",label:"Sun Sep 21 — Arrival",slots:[
    {t:"19:15",n:"Arrive ICN T1 (인천공항 1터미널)",d:"Philippine Airlines lands 19:15 at T1. ~40 min immigration+bags.",g:"icn",cat:"move"},
-   {t:"20:30",n:"Airport Limo → Andaz (안다즈 서울 강남)",d:"Limo bus 6006 to Gangnam ≈ 70–90 min. Last buses run past midnight.",g:"icn",cat:"move"},
+   {t:"20:30",n:"Airport Bus 6703 → Andaz (안다즈 서울 강남)",d:"Airport bus 6703 to Gangnam ≈ 70–90 min. Get off at Eulji Hospital / Four Points Gangnam & Hotel Sunshine stop.",g:"icn",cat:"move"},
    {t:"22:00",n:"Check in — Andaz Seoul Gangnam, by Hyatt (안다즈 서울 강남)",d:"Base for all 5 nights. Apgujeong Rodeo area, late-night convenience nearby.",g:"andaz",cat:"hotel"}]},
   {id:"d22",label:"Mon Sep 22 — Rest + Hotel Spa",slots:[
    {t:"10:00",n:"Slow morning (arrival recovery)",d:"Jet lag day. Late checkout-style rest at Andaz.",g:"andaz",cat:"hotel"},
@@ -122,7 +122,6 @@ var DEFAULTS = {
    {t:"20:30",n:"Shinsegae Gangnam (신세계백화점 강남점)",d:"House of Shinsegae — premium night-dining social space, wine cellar, Suite Park desserts. Open till 10pm.",g:"shinsegae",cat:"spot"}]},
   {id:"d23",label:"Tue Sep 23 — Beauty + Seongsu + COEX + Tower",slots:[
    {t:"10:00",n:"Korean Celebrity Skin Clinic (메종프리베 클리닉)",d:"Beauty-aging spot for routine skincare and wellness, visited regularly by global celebs and K-pop idols. Morning session ≈ 2 hrs. Book ahead.",g:"cheongdam",cat:"spot"},
-   {t:"13:00",n:"Lunch break (Cheongdam)",d:"Light lunch between sessions. Drag a restaurant from the pool.",g:"cheongdam",cat:"food"},
    {t:"14:30",n:"Hwanggeumhee Aesthetics Cheongdam (황금희에스테틱 청담본점)",d:"30-year esthetic house popular with celebrities. Afternoon course ≈ 90 min–2 hrs.",g:"hwang",cat:"spot"},
    {t:"17:00",n:"Seongsu-dong (성수동)",d:"aka Brooklyn of Seoul / Gangnam of young Koreans. New+retro vibe, popup stores. ~20 min from Cheongdam.",g:"seongsu",cat:"spot"},
    {t:"18:00",n:"Olive Young N Seongsu (올리브영N 성수)",d:"Biggest Olive Young in Korea. Flagship exclusives + photo zones.",g:"seongsu",cat:"spot"},
@@ -133,15 +132,10 @@ var DEFAULTS = {
    {t:"14:00",n:"Hyundai Dept Main (현대백화점 본점)",d:"B1 food court, classic quiet shopping, premium grocery + bakery corners.",g:"hyundai",cat:"spot"},
    {t:"17:00",n:"N Seoul Tower (서울타워)",d:"Sunset view. Cable car up. ~25 min from Apgujeong.",g:"ntower",cat:"spot"}]},
   {id:"d25",label:"Thu Sep 25 — Departure",slots:[
-   {t:"15:00",n:"Lobby checkout + limo prep",d:"Pack, settle incidentals. Limo to ICN ≈ 70–90 min.",g:"andaz",cat:"hotel"},
+   {t:"15:00",n:"Lobby checkout + limo prep",d:"Pack, settle incidentals. Airport bus 6703 to ICN ≈ 70–90 min (same stop, reverse).",g:"andaz",cat:"hotel"},
    {t:"18:00",n:"Depart ICN T1 (인천공항 1터미널) 20:30",d:"Philippine Airlines 20:30 from T1. Arrive 2.5 hrs prior = 18:00 at airport.",g:"icn",cat:"move"}]}
  ],
- food: [
-  {t:"",n:"Myeongdong Kyoja (명동교자)",d:"Michelin kalguksu + mandu. Myeongdong main store.",g:"myeongdong",cat:"food"},
-  {t:"",n:"Gwanghwamun Jip (광화문집)",d:"Black pork + cold buckwheat. Near Gwanghwamun.",g:"gwanghwamun",cat:"food"},
-  {t:"",n:"Mokmyeoksanbang (목멱산방)",d:"Bibimbap with N Seoul Tower view.",g:"ntower",cat:"food"},
-  {t:"",n:"Downtowner Hannam (다운타우너 한남)",d:"Trendy burgers, Hannam hotspot.",g:"hannam",cat:"food"}
- ],
+ food: [],
  spots: [
   {t:"",n:"Myeongdong (명동)",d:"Street food + beauty shopping.",g:"myeongdong",cat:"spot"},
   {t:"",n:"Gwanghwamun Square (광화문)",d:"Palace + square stroll.",g:"gwanghwamun",cat:"spot"},
@@ -183,9 +177,10 @@ function rmSlot(e, di, si){ e.stopPropagation(); state.days[di].slots.splice(si,
 function rmPool(e, kind, i){ e.stopPropagation(); state[kind==='food'?'food':'spots'].splice(i,1); render(); }
 function addCustom(kind){
  var inp = document.getElementById(kind==='food'?'newFood':'newSpot');
+ var tm = document.getElementById(kind==='food'?'newFoodT':'newSpotT');
  var v = inp.value.trim(); if(!v) return;
- state[kind==='food'?'food':'spots'].push({t:'',n:v,d:'Custom stop — add note by editing JSON.',g:'andaz',cat:kind==='food'?'food':'spot'});
- inp.value=''; render();
+ state[kind==='food'?'food':'spots'].push({t:(tm&&tm.value)||'',n:v,d:'Custom stop — add note by editing JSON.',g:'andaz',cat:kind==='food'?'food':'spot'});
+ inp.value=''; if(tm)tm.value=''; render();
 }
 // ── Drag & drop (mouse + touch) ──
 function initSortable(){
@@ -228,7 +223,7 @@ var map, layerGroup, routeLines=[];
 function drawMap(){
  if(!map){
   map=L.map('map',{center:[37.53,127.02],zoom:11,scrollWheelZoom:false});
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OSM © CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OSM © CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
   map.on('click',function(){map.scrollWheelZoom.enable();});
  }
  if(layerGroup) layerGroup.clearLayers(); else layerGroup=L.layerGroup().addTo(map);
