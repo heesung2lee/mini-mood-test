@@ -72,9 +72,9 @@ footer{text-align:center;color:var(--dim);font-size:11px;margin-top:20px}
 </header>
 
 <div class="map-wrap">
-<div class="map-label">Live Map — updates when you add / move / remove stops</div>
+<div class="map-label">Live Map — <span id="mapDayBtns"></span></div>
 <div id="map"></div>
-<div class="legend"><span>● gold = stop</span><span style="color:var(--green)">● green = restaurant</span><span style="color:var(--blue)">● blue = hotel</span><span>— line = day route</span></div>
+<div class="legend"><span>● gold = stop</span><span style="color:var(--green)">● green = restaurant</span><span style="color:var(--blue)">● blue = hotel</span></div>
 </div>
 
 <div class="hint">Times include transit + buffer. Airport limo ICN↔Gangnam ≈ 70–90 min. Subway/bus between Gangnam spots ≈ 15–30 min. Adjust freely — map follows.</div>
@@ -112,35 +112,31 @@ GEO.shinsegae = [37.5045,127.0049];
 var DEFAULTS = {
  days: [
   {id:"d21",label:"Sun Sep 21 — Arrival",slots:[
-   {t:"19:15",n:"Arrive ICN T1 (인천공항 1터미널)",d:"Philippine Airlines lands 19:15 at T1. ~40 min immigration+bags.",g:"icn",cat:"move"},
-   {t:"20:30",n:"Airport Bus 6703 → Andaz (안다즈 서울 강남)",d:"Airport bus 6703 to Gangnam ≈ 70–90 min. Get off at Eulji Hospital / Four Points Gangnam & Hotel Sunshine stop.",g:"icn",cat:"move"},
-   {t:"22:00",n:"Check in — Andaz Seoul Gangnam, by Hyatt (안다즈 서울 강남)",d:"Base for all 5 nights. Apgujeong Rodeo area, late-night convenience nearby.",g:"andaz",cat:"hotel"}]},
+   {t:"",n:"Arrive ICN T1 (인천공항 1터미널)",d:"Philippine Airlines lands 19:15 at T1. ~40 min immigration+bags.",g:"icn",cat:"move"},
+   {t:"",n:"Airport Bus 6703 → Andaz (안다즈 서울 강남)",d:"Airport bus 6703 to Gangnam ≈ 70–90 min. Get off at Eulji Hospital / Four Points Gangnam & Hotel Sunshine stop.",g:"icn",cat:"move"},
+   {t:"",n:"Check in — Andaz Seoul Gangnam, by Hyatt (안다즈 서울 강남)",d:"Base for all 5 nights. Apgujeong Rodeo area, late-night convenience nearby.",g:"andaz",cat:"hotel"}]},
   {id:"d22",label:"Mon Sep 22 — Rest + Hotel Spa",slots:[
-   {t:"10:00",n:"Slow morning (arrival recovery)",d:"Jet lag day. Late checkout-style rest at Andaz.",g:"andaz",cat:"hotel"},
-   {t:"14:00",n:"Ocellas at Andaz B2 (오셀라스 안다즈 서울 강남점)",d:"In-hotel facial + sauna. No transit — go downstairs. Afternoon wind-down.",g:"andaz",cat:"spot"},
-   {t:"17:00",n:"Prima Spa (프리마스파)",d:"One of the most high-end quality spas open to the general public. Evening slot near Cheongdam.",g:"cheongdam",cat:"spot"},
-   {t:"20:30",n:"Shinsegae Gangnam (신세계백화점 강남점)",d:"House of Shinsegae — premium night-dining social space, wine cellar, Suite Park desserts. Open till 10pm.",g:"shinsegae",cat:"spot"}]},
+   {t:"",n:"Slow morning (arrival recovery)",d:"Jet lag day. Late checkout-style rest at Andaz.",g:"andaz",cat:"hotel"},
+   {t:"",n:"Ocellas at Andaz B2 (오셀라스 안다즈 서울 강남점)",d:"In-hotel facial + sauna. No transit — go downstairs. Afternoon wind-down.",g:"andaz",cat:"spot"},
+   {t:"",n:"Prima Spa (프리마스파)",d:"One of the most high-end quality spas open to the general public. Evening slot near Cheongdam.",g:"cheongdam",cat:"spot"},
+   {t:"",n:"Shinsegae Gangnam (신세계백화점 강남점)",d:"House of Shinsegae — premium night-dining social space, wine cellar, Suite Park desserts. Open till 10pm.",g:"shinsegae",cat:"spot"}]},
   {id:"d23",label:"Tue Sep 23 — Beauty + Seongsu + COEX + Tower",slots:[
-   {t:"10:00",n:"Korean Celebrity Skin Clinic (메종프리베 클리닉)",d:"Beauty-aging spot for routine skincare and wellness, visited regularly by global celebs and K-pop idols. Morning session ≈ 2 hrs. Book ahead.",g:"cheongdam",cat:"spot"},
-   {t:"14:30",n:"Hwanggeumhee Aesthetics Cheongdam (황금희에스테틱 청담본점)",d:"30-year esthetic house popular with celebrities. Afternoon course ≈ 90 min–2 hrs.",g:"hwang",cat:"spot"},
-   {t:"17:00",n:"Seongsu-dong (성수동)",d:"aka Brooklyn of Seoul / Gangnam of young Koreans. New+retro vibe, popup stores. ~20 min from Cheongdam.",g:"seongsu",cat:"spot"},
-   {t:"18:00",n:"Olive Young N Seongsu (올리브영N 성수)",d:"Biggest Olive Young in Korea. Flagship exclusives + photo zones.",g:"seongsu",cat:"spot"},
-   {t:"19:00",n:"Starfield COEX Mall",d:"Massive book wall (Starfield Library). ~10 min from Seongsu.",g:"coex",cat:"spot"},
-   {t:"20:00",n:"Lotte World Tower (롯데타워)",d:"Seoul Sky Observatory floors 117–123 (night view). Base: Avenuel, aquarium, cinema, concert hall. ~15 min from COEX.",g:"lotte",cat:"spot"}]},
+   {t:"",n:"Korean Celebrity Skin Clinic (메종프리베 클리닉)",d:"Beauty-aging spot for routine skincare and wellness, visited regularly by global celebs and K-pop idols. Morning session ≈ 2 hrs. Book ahead.",g:"cheongdam",cat:"spot"},
+   {t:"",n:"Hwanggeumhee Aesthetics Cheongdam (황금희에스테틱 청담본점)",d:"30-year esthetic house popular with celebrities. Afternoon course ≈ 90 min–2 hrs.",g:"hwang",cat:"spot"},
+   {t:"",n:"Seongsu-dong (성수동)",d:"aka Brooklyn of Seoul / Gangnam of young Koreans. New+retro vibe, popup stores. ~20 min from Cheongdam.",g:"seongsu",cat:"spot"},
+   {t:"",n:"Olive Young N Seongsu (올리브영N 성수)",d:"Biggest Olive Young in Korea. Flagship exclusives + photo zones.",g:"seongsu",cat:"spot"},
+   {t:"",n:"Starfield COEX Mall",d:"Massive book wall (Starfield Library). ~10 min from Seongsu.",g:"coex",cat:"spot"},
+   {t:"",n:"Lotte World Tower (롯데타워)",d:"Seoul Sky Observatory floors 117–123 (night view). Base: Avenuel, aquarium, cinema, concert hall. ~15 min from COEX.",g:"lotte",cat:"spot"}]},
   {id:"d24",label:"Wed Sep 24 — Culture + Shopping",slots:[
-   {t:"10:00",n:"National Museum of Korea (국립중앙박물관)",d:"Gift shop a must-visit. 2–3 hrs. ~30 min from Andaz.",g:"museum",cat:"spot"},
-   {t:"14:00",n:"Hyundai Dept Main (현대백화점 본점)",d:"B1 food court, classic quiet shopping, premium grocery + bakery corners.",g:"hyundai",cat:"spot"},
-   {t:"17:00",n:"N Seoul Tower (서울타워)",d:"Sunset view. Cable car up. ~25 min from Apgujeong.",g:"ntower",cat:"spot"}]},
+   {t:"",n:"National Museum of Korea (국립중앙박물관)",d:"Gift shop a must-visit. 2–3 hrs. ~30 min from Andaz.",g:"museum",cat:"spot"},
+   {t:"",n:"Hyundai Dept Main (현대백화점 본점)",d:"B1 food court, classic quiet shopping, premium grocery + bakery corners.",g:"hyundai",cat:"spot"},
+   {t:"",n:"N Seoul Tower (서울타워)",d:"Sunset view. Cable car up. ~25 min from Apgujeong.",g:"ntower",cat:"spot"}]},
   {id:"d25",label:"Thu Sep 25 — Departure",slots:[
-   {t:"15:00",n:"Lobby checkout + limo prep",d:"Pack, settle incidentals. Airport bus 6703 to ICN ≈ 70–90 min (same stop, reverse).",g:"andaz",cat:"hotel"},
-   {t:"18:00",n:"Depart ICN T1 (인천공항 1터미널) 20:30",d:"Philippine Airlines 20:30 from T1. Arrive 2.5 hrs prior = 18:00 at airport.",g:"icn",cat:"move"}]}
+   {t:"",n:"Lobby checkout + limo prep",d:"Pack, settle incidentals. Airport bus 6703 to ICN ≈ 70–90 min (same stop, reverse).",g:"andaz",cat:"hotel"},
+   {t:"",n:"Depart ICN T1 (인천공항 1터미널) 20:30",d:"Philippine Airlines 20:30 from T1. Arrive 2.5 hrs prior = 18:00 at airport.",g:"icn",cat:"move"}]}
  ],
  food: [],
- spots: [
-  {t:"",n:"Myeongdong (명동)",d:"Street food + beauty shopping.",g:"myeongdong",cat:"spot"},
-  {t:"",n:"Gwanghwamun Square (광화문)",d:"Palace + square stroll.",g:"gwanghwamun",cat:"spot"},
-  {t:"",n:"Hannam-dong (한남동)",d:"Galleries + cafes.",g:"hannam",cat:"spot"}
- ]
+ spots: []
 };
 
 var state = load() || JSON.parse(JSON.stringify(DEFAULTS));
@@ -218,8 +214,8 @@ function syncFromDOM(){
  render();
 }
 function collectDaySlots(){ var a=[]; state.days.forEach(function(d){d.slots.forEach(function(s){a.push(s);});}); return a; }
-// ── Map ──
-var map, layerGroup, routeLines=[];
+// ── Map: one day at a time ──
+var map, layerGroup, mapDay = 0;
 function drawMap(){
  if(!map){
   map=L.map('map',{center:[37.53,127.02],zoom:11,scrollWheelZoom:false});
@@ -227,21 +223,32 @@ function drawMap(){
   map.on('click',function(){map.scrollWheelZoom.enable();});
  }
  if(layerGroup) layerGroup.clearLayers(); else layerGroup=L.layerGroup().addTo(map);
- routeLines.forEach(function(l){map.removeLayer(l);}); routeLines=[];
- var n=0, allPts=[];
- var colors=['#d4af37','#4a9eff','#3fb950','#ef4444','#c678dd'];
- state.days.forEach(function(d,di){
-  var pts=[];
-  d.slots.forEach(function(s){
-   var g=GEO[s.g]||GEO.andaz; n++;
-   var cls=s.cat==='food'?'food':(s.cat==='hotel'?'hotel':(s.cat==='move'?'move':''));
-   var icon=L.divIcon({className:'',html:'<div class="mk '+cls+'">'+n+'</div>',iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-14]});
-   L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>'+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
-   pts.push(g); allPts.push(g);
+ // day buttons
+ var bb=document.getElementById('mapDayBtns');
+ if(bb){
+  bb.innerHTML='';
+  state.days.forEach(function(d,di){
+   var b=document.createElement('button');
+   b.textContent=(di+1);
+   b.title=d.label;
+   b.style.cssText='margin:0 3px;padding:2px 10px;border-radius:12px;border:1px solid '+(di===mapDay?'#b8860b':'#d8e0ec')+';background:'+(di===mapDay?'#b8860b':'#fff')+';color:'+(di===mapDay?'#fff':'#64748b')+';cursor:pointer;font-size:12px;font-weight:700';
+   b.onclick=function(){mapDay=di;drawMap();};
+   bb.appendChild(b);
   });
-  if(pts.length>1){ var l=L.polyline(pts,{color:colors[di%colors.length],weight:2.5,dashArray:'6 4',opacity:.8}).addTo(map); routeLines.push(l); }
+ }
+ if(mapDay>=state.days.length) mapDay=0;
+ var d=state.days[mapDay];
+ if(!d) return;
+ var n=0, pts=[];
+ d.slots.forEach(function(s){
+  var g=GEO[s.g]||GEO.andaz; n++;
+  var cls=s.cat==='food'?'food':(s.cat==='hotel'?'hotel':(s.cat==='move'?'move':''));
+  var icon=L.divIcon({className:'',html:'<div class="mk '+cls+'">'+n+'</div>',iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-14]});
+  L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>'+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
+  pts.push(g);
  });
- if(allPts.length) map.fitBounds(L.latLngBounds(allPts),{padding:[30,30]});
+ if(pts.length>1){ L.polyline(pts,{color:'#b8860b',weight:2.5,dashArray:'6 4',opacity:.8}).addTo(layerGroup); }
+ if(pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[40,40]});
 }
 // ── Share / reset / export ──
 function shareLink(){
