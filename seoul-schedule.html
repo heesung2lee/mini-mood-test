@@ -223,6 +223,7 @@ function slotHTML(s, di, si, mapNum){
  +'<span class="x" onclick="rmSlot(event,'+di+','+si+')">✕</span></div>';
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function setStatus(s){ var el=document.getElementById('fbStatus'); if(el) el.textContent=s; setTimeout(fbStatus, 3000); }
 var collapsed = {};
 function render(){
  var w = document.getElementById('days'); w.innerHTML='';
