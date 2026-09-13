@@ -132,18 +132,21 @@ var DEFAULTS = {
    {t:"",n:"Olive Young N Seongsu (올리브영N 성수)",d:"Biggest Olive Young in Korea. Flagship exclusives + photo zones.",g:"seongsu",cat:"spot"},
    {t:"",n:"Starfield COEX Mall",d:"Massive book wall (Starfield Library). ~10 min from Seongsu.",g:"coex",cat:"spot"},
    {t:"",n:"Lotte World Tower (롯데타워)",d:"Seoul Sky Observatory floors 117–123 (night view). Base: Avenuel, aquarium, cinema, concert hall. ~15 min from COEX.",g:"lotte",cat:"spot"}]},
-  {id:"d24",label:"Wed Sep 24 — Culture + Shopping",slots:[
-   {t:"",n:"National Museum of Korea (국립중앙박물관)",d:"Gift shop a must-visit. 2–3 hrs. ~30 min from Andaz.",g:"museum",cat:"spot"},
-   {t:"",n:"Hyundai Dept Main (현대백화점 본점)",d:"B1 food court, classic quiet shopping, premium grocery + bakery corners.",g:"hyundai",cat:"spot"},
-   {t:"",n:"N Seoul Tower (서울타워)",d:"Sunset view. Cable car up. ~25 min from Apgujeong.",g:"ntower",cat:"spot"}]},
+  {id:"d24",label:"Wed Sep 24 — Festival + Palace",slots:[
+   {t:"",n:"Gwanghwamun Square Bitmorak Autumn Festival (광화문광장 빛모락 가을축제)",d:"10am-2pm, lunch at food stands. ~30 min from Andaz.",g:"gwanghwamun",cat:"spot"},
+   {t:"",n:"Gyeongbokgung Palace (경복궁)",d:"3-6pm palace visit. Next to Gwanghwamun Square, walkable.",g:"gyeongbok",cat:"spot"}]},
   {id:"d25",label:"Thu Sep 25 — Departure",slots:[
    {t:"",n:"Lobby checkout + limo prep",d:"Pack, settle incidentals. Airport bus 6703 to ICN ≈ 70–90 min (same stop, reverse).",g:"andaz",cat:"hotel"},
    {t:"",n:"Depart ICN T1 (인천공항 1터미널) 20:30",d:"Philippine Airlines 20:30 from T1. Arrive 2.5 hrs prior = 18:00 at airport.",g:"icn",cat:"move"}]}
  ],
- food: [],
- spots: [
+ food: [
+  {t:"",n:"Traditional Korean Dining (한정식)",d:"Full-course Korean set meal.",g:"andaz",cat:"food"},
+  {t:"",n:"Korean Beef, fresh cut never frozen chilled (한우고기)",d:"Premium hanwoo BBQ.",g:"andaz",cat:"food"},
+  {t:"",n:"Market (시장)",d:"Street food + local stalls.",g:"gwanghwamun",cat:"food"},
+  {t:"",n:"Korea House (한국의집)",d:"Traditional performance + dining. Chungmuro.",g:"chungmuro",cat:"food"},
   {t:"",n:"Jinju Hoegwan (진주회관)",d:"Jung-gu kongguksu + kimchi. Near Seoul Plaza.",g:"jinju",cat:"food"}
- ]
+ ],
+ spots: []
 };
 
 var state = load() || JSON.parse(JSON.stringify(DEFAULTS));
@@ -306,8 +309,11 @@ function drawMap(){
  if(viewSlots[viewSlots.length-1].cat!=='hotel') viewSlots.push(HOTEL);
  var n=0, pts=[];
  var numMap={}; // _id -> 지도 번호
+ var jit=0;
  viewSlots.forEach(function(s){
-  var g=GEO[s.g]||GEO.andaz; n++;
+  var g=GEO[s.g]||GEO.andaz;
+  if(!GEO[s.g]||s.g==='andaz'){ jit++; g=[g[0]+jit*0.004, g[1]+jit*0.006]; }
+  n++;
   if(s._id) numMap[s._id]=n;
   var cls=s.cat==='food'?'food':(s.cat==='hotel'?'hotel':(s.cat==='move'?'move':''));
   var label=(s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':String(n));
