@@ -154,20 +154,20 @@ var DEFAULTS = {
 };
 
 var state = load() || JSON.parse(JSON.stringify(DEFAULTS));
-function load(){ try{ var h=location.hash.match(/s=([^&]+)/); var s=null; if(h){ s=JSON.parse(decodeURIComponent(escape(atob(h[1])))); } else { var l=localStorage.getItem('seoul25'); if(l) s=JSON.parse(l); } if(s){ if(s.geoC){ GEO_C=s.geoC; for(var k in s.geoC) GEO[k]=s.geoC[k]; } return s; } }catch(e){} return null; }
-function persist(){ try{ state.geoC=GEO_C; localStorage.setItem('seoul25', JSON.stringify(state)); pushHistory(); }catch(e){} }
+function load(){ try{ var h=location.hash.match(/s=([^&]+)/); var s=null; if(h){ s=JSON.parse(decodeURIComponent(escape(atob(h[1])))); } else { var l=localStorage.getItem('seoul25v2'); if(l) s=JSON.parse(l); } if(s){ if(s.geoC){ GEO_C=s.geoC; for(var k in s.geoC) GEO[k]=s.geoC[k]; } return s; } }catch(e){} return null; }
+function persist(){ try{ state.geoC=GEO_C; localStorage.setItem('seoul25v2', JSON.stringify(state)); pushHistory(); }catch(e){} }
 // 히스토리: 최근 20개 자동 저장 (리셋·실수 대비)
 function pushHistory(){
  try{
-  var h=JSON.parse(localStorage.getItem('seoul25_hist')||'[]');
+  var h=JSON.parse(localStorage.getItem('seoul25v2_hist')||'[]');
   var snap=JSON.stringify(state);
   if(h.length&&h[0].snap===snap) return; // 동일하면 스킵
   h.unshift({at:new Date().toISOString().slice(0,16).replace('T',' '),snap:snap});
-  localStorage.setItem('seoul25_hist', JSON.stringify(h.slice(0,20)));
+  localStorage.setItem('seoul25v2_hist', JSON.stringify(h.slice(0,20)));
  }catch(e){}
 }
 function showHistory(){
- var h=[]; try{ h=JSON.parse(localStorage.getItem('seoul25_hist')||'[]'); }catch(e){}
+ var h=[]; try{ h=JSON.parse(localStorage.getItem('seoul25v2_hist')||'[]'); }catch(e){}
  if(!h.length){ alert('No history yet.'); return; }
  var list=h.map(function(x,i){ return (i+1)+'. '+x.at+' ('+countSlots(JSON.parse(x.snap))+' stops)'; }).join('\n');
  var pick=prompt('Restore which version? (number)\n'+list);
@@ -284,7 +284,7 @@ var map, layerGroup, mapDay = 0;
 function drawMap(){
  if(!map){
   map=L.map('map',{center:[37.53,127.02],zoom:11,scrollWheelZoom:false});
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OSM © CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);
   map.on('click',function(){map.scrollWheelZoom.enable();});
  }
  if(layerGroup) layerGroup.clearLayers(); else layerGroup=L.layerGroup().addTo(map);
