@@ -44,7 +44,7 @@ h1{font-size:22px;font-weight:800}
 .slot .t{color:var(--gold);font-weight:700;font-size:12px}
 .slot .n{font-weight:700}
 .slot .d{color:var(--dim);font-size:12px}
-.slot .x{position:absolute;top:6px;right:8px;color:var(--dim);cursor:pointer;font-size:14px;padding:2px 6px}
+.slot .x{position:absolute;top:6px;left:8px;color:var(--dim);cursor:pointer;font-size:14px;padding:2px 6px}
 .slot .x:hover{color:var(--red)}
 .slot.move{border-style:dashed;opacity:.85}
 /* Pools */
@@ -177,7 +177,7 @@ function render(){
  var w = document.getElementById('days'); w.innerHTML='';
  state.days.forEach(function(d, di){
   var el = document.createElement('div'); el.className='day';
-  el.innerHTML = '<div class="day-h">'+esc(d.label)+'<span class="cnt">'+d.slots.length+' stops</span></div><div class="slots" id="slots-'+d.id+'"></div>';
+  el.innerHTML = '<div class="day-h" onclick="toggleDay(\''+d.id+'\')" style="cursor:pointer">'+esc(d.label)+'<span class="cnt">'+d.slots.length+' stops <span id="tog-'+d.id+'">▾</span></span></div><div class="slots" id="slots-'+d.id+'"></div>';
   var box = el.querySelector('.slots');
   d.slots.forEach(function(s, si){ box.insertAdjacentHTML('beforeend', slotHTML(s, di, si)); });
   w.appendChild(el);
@@ -190,8 +190,9 @@ function renderPool(id, arr, kind){
  var box = document.getElementById(id); box.innerHTML='';
  arr.forEach(function(s, i){ box.insertAdjacentHTML('beforeend','<div class="slot '+s.cat+'" data-p="'+kind+'" data-i="'+i+'"><div class="n">'+esc(s.n)+'</div><div class="d">'+esc(s.d)+'</div><span class="x" onclick="rmPool(event,\''+kind+'\','+i+')">✕</span></div>'); });
 }
-function rmSlot(e, di, si){ e.stopPropagation(); state.days[di].slots.splice(si,1); render(); }
-function rmPool(e, kind, i){ e.stopPropagation(); state[kind==='food'?'food':'spots'].splice(i,1); render(); }
+function rmSlot(e, di, si){ e.stopPropagation(); var s=state.days[di].slots[si]; if(!confirm('Remove "'+(s.n||'').slice(0,40)+'" to Spots Pool?'))return; state.days[di].slots.splice(si,1); state.spots.push(s); render(); }
+function toggleDay(id){ var box=document.getElementById('slots-'+id); var t=document.getElementById('tog-'+id); if(!box)return; var hid=box.style.display==='none'; box.style.display=hid?'':'none'; if(t)t.textContent=hid?'▾':'▸'; }
+function rmPool(e, kind, i){ e.stopPropagation(); if(!confirm('Delete this permanently?'))return; state[kind==='food'?'food':'spots'].splice(i,1); render(); }
 function addCustom(kind){
  var inp = document.getElementById(kind==='food'?'newFood':'newSpot');
  var tm = document.getElementById(kind==='food'?'newFoodT':'newSpotT');
@@ -280,8 +281,13 @@ function drawMap(){
  if(mapDay>=state.days.length) mapDay=0;
  var d=state.days[mapDay];
  if(!d) return;
+ // 호텔 앵커: 첫/마지막에 호텔 없으면 지도에만 Andaz 추가 (일정 건드리지 않음)
+ var viewSlots=d.slots.slice();
+ var HOTEL={t:"",n:"Andaz Seoul Gangnam (안다즈 서울 강남) — base",d:"Hotel base (map anchor).",g:"andaz",cat:"hotel"};
+ if(!viewSlots.length||viewSlots[0].cat!=='hotel') viewSlots.unshift(HOTEL);
+ if(viewSlots[viewSlots.length-1].cat!=='hotel') viewSlots.push(HOTEL);
  var n=0, pts=[];
- d.slots.forEach(function(s){
+ viewSlots.forEach(function(s){
   var g=GEO[s.g]||GEO.andaz; n++;
   var cls=s.cat==='food'?'food':(s.cat==='hotel'?'hotel':(s.cat==='move'?'move':''));
   var label=(s.cat==='hotel')?'🏠':String(n);
