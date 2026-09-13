@@ -321,7 +321,7 @@ var map, layerGroup, mapDay = 0;
 function drawMap(){
  if(!map){
   map=L.map('map',{center:[37.53,127.02],zoom:11,scrollWheelZoom:false});
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);
+  L.tileLayer('https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors, Tiles style by Humanitarian OSM Team',maxZoom:18}).addTo(map);
   map.on('click',function(){map.scrollWheelZoom.enable();});
  }
  if(layerGroup) layerGroup.clearLayers(); else layerGroup=L.layerGroup().addTo(map);
