@@ -178,7 +178,7 @@ function slotHTML(s, di, si, mapNum){
  if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9);
  var badge = (s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':String(mapNum));
  return '<div class="slot '+s.cat+'" data-uid="'+s._id+'" data-d="'+di+'" data-s="'+si+'">'
- +'<span class="num">'+badge+'</span>'
+ +'<span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">'+badge+'</span>'
  +(s.t?'<div class="t">'+esc(s.t)+'</div>':'')
  +'<div class="n">'+esc(s.n)+'</div>'
  +(s.d?'<div class="d">'+esc(s.d)+'</div>':'')
@@ -327,6 +327,28 @@ function drawMap(){
  if(pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[40,40]});
  // 일정 카드에 지도 번호 반영
  window._numMap=numMap; refreshNums();
+}
+function editAddr(e, id){
+ e.stopPropagation();
+ var s=findSlotById(id); if(!s) return;
+ var cur=s.addr||'';
+ var v=prompt('Address (Korean OK) for map pin:\n'+s.n, cur);
+ if(v===null) return;
+ s.addr=v.trim();
+ if(!s.addr){ setStatus('Address cleared.'); render(); return; }
+ setStatus('Searching location…');
+ fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(s.addr)) 
+ .then(function(r){return r.json();})
+ .then(function(j){
+  if(j&&j.length){
+   var key='c_'+Date.now();
+   GEO[key]=[parseFloat(j[0].lat),parseFloat(j[0].lon)]; GEO_C[key]=GEO[key];
+   s.g=key;
+   setStatus('Pinned ✓ '+j[0].display_name.split(',').slice(0,2).join(','));
+  } else setStatus('Not found — kept anyway. Try more detail (e.g. 중구 세종대로 82).');
+  render();
+ })
+ .catch(function(){ setStatus('Search failed — kept anyway.'); render(); });
 }
 function refreshNums(){
  var m=window._numMap||{};
