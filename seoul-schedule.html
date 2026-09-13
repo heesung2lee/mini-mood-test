@@ -315,10 +315,11 @@ function drawMap(){
  viewSlots.forEach(function(s){
   var g=GEO[s.g]||GEO.andaz;
   if(!GEO[s.g]||s.g==='andaz'){ jit++; g=[g[0]+jit*0.004, g[1]+jit*0.006]; }
-  n++;
-  if(s._id) numMap[s._id]=n;
+  var isNum=(s.cat!=='hotel'&&s.cat!=='move');
+  if(isNum){ n++; if(s._id) numMap[s._id]=n; }
+  else if(s._id) numMap[s._id]=0;
   var cls=s.cat==='food'?'food':(s.cat==='hotel'?'hotel':(s.cat==='move'?'move':''));
-  var label=(s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':String(n));
+  var label=(s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':String(numMap[s._id]||''));
   var icon=L.divIcon({className:'',html:'<div class="mk '+cls+'">'+label+'</div>',iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-14]});
   L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>'+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
   pts.push(g);
