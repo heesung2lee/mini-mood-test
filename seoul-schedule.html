@@ -95,12 +95,12 @@ footer{text-align:center;color:var(--dim);font-size:11px;margin-top:20px}
 <div class="addbox"><input id="newSpot" placeholder="Add spot…"><button onclick="addCustom('spot')">+</button></div></div>
 </div>
 
-<footer>Times are estimates with transit buffer. Philippine Airlines T1/T2 — confirm on ticket (PR usually T1).</footer>
+<footer>Times are estimates with transit buffer. Philippine Airlines T1 confirmed.</footer>
 
 <script>
 // ── Place data: [key, lat, lng] ──
 var GEO = {
- icn:[37.4496,126.4521], andaz:[37.5255,127.0289], cheongdam:[37.5258,127.0523],
+ icn:[37.4473,126.4505], andaz:[37.5255,127.0289], cheongdam:[37.5258,127.0523],
  hwang:[37.5191,127.0517], shinsegae:[37.5126,127.1067], hyundai:[37.5274,127.0275],
  seongsu:[37.5446,127.0561], coex:[37.5119,127.0591], lotte:[37.5126,127.1027],
  museum:[37.524,126.9803], ntower:[37.535,126.9871], myeongdong:[37.5609,126.9864],
@@ -112,7 +112,7 @@ GEO.shinsegae = [37.5045,127.0049];
 var DEFAULTS = {
  days: [
   {id:"d21",label:"Sun Sep 21 — Arrival",slots:[
-   {t:"19:15",n:"Arrive ICN (인천공항)",d:"Philippine Airlines lands 19:15. Confirm T1/T2 on ticket (PR usually T1). ~40 min immigration+bags.",g:"icn",cat:"move"},
+   {t:"19:15",n:"Arrive ICN T1 (인천공항 1터미널)",d:"Philippine Airlines lands 19:15 at T1. ~40 min immigration+bags.",g:"icn",cat:"move"},
    {t:"20:30",n:"Airport Limo → Andaz (안다즈 서울 강남)",d:"Limo bus 6006 to Gangnam ≈ 70–90 min. Last buses run past midnight.",g:"icn",cat:"move"},
    {t:"22:00",n:"Check in — Andaz Seoul Gangnam, by Hyatt (안다즈 서울 강남)",d:"Base for all 5 nights. Apgujeong Rodeo area, late-night convenience nearby.",g:"andaz",cat:"hotel"}]},
   {id:"d22",label:"Mon Sep 22 — Rest + Hotel Spa",slots:[
@@ -134,7 +134,7 @@ var DEFAULTS = {
    {t:"17:00",n:"N Seoul Tower (서울타워)",d:"Sunset view. Cable car up. ~25 min from Apgujeong.",g:"ntower",cat:"spot"}]},
   {id:"d25",label:"Thu Sep 25 — Departure",slots:[
    {t:"15:00",n:"Lobby checkout + limo prep",d:"Pack, settle incidentals. Limo to ICN ≈ 70–90 min.",g:"andaz",cat:"hotel"},
-   {t:"18:00",n:"Depart ICN (인천공항) 20:30",d:"Philippine Airlines 20:30. Arrive 2.5 hrs prior = 18:00 at airport.",g:"icn",cat:"move"}]}
+   {t:"18:00",n:"Depart ICN T1 (인천공항 1터미널) 20:30",d:"Philippine Airlines 20:30 from T1. Arrive 2.5 hrs prior = 18:00 at airport.",g:"icn",cat:"move"}]}
  ],
  food: [
   {t:"",n:"Myeongdong Kyoja (명동교자)",d:"Michelin kalguksu + mandu. Myeongdong main store.",g:"myeongdong",cat:"food"},
