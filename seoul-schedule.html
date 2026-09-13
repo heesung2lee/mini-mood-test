@@ -19,8 +19,9 @@ h1{font-size:22px;font-weight:800}
 /* Map */
 .map-wrap{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:12px 0}
 .map-label{font-size:11px;color:var(--dim);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase}
-#map{width:100%;height:380px;border-radius:8px;background:#eef2f7}
-@media(min-width:640px){#map{height:440px}}
+#map{width:100%;height:220px;border-radius:8px;background:#eef2f7}
+@media(min-width:640px){#map{height:230px}}
+.map-wrap.collapsed #map{display:none}
 .leaflet-container{background:#eef2f7}
 .leaflet-control-zoom a{background:#101c30!important;color:#e8e6e1!important;border-color:#1e3050!important}
 .leaflet-control-attribution{background:rgba(11,20,32,.8)!important;color:#5a7a9a!important;font-size:9px!important}
@@ -75,7 +76,7 @@ footer{text-align:center;color:var(--dim);font-size:11px;margin-top:20px}
 </header>
 
 <div class="map-wrap">
-<div class="map-label">Live Map — <span id="mapDayBtns"></span></div>
+<div class="map-label" style="display:flex;justify-content:space-between;align-items:center">Live Map — <span id="mapDayBtns"></span><button onclick="document.querySelector('.map-wrap').classList.toggle('collapsed')" style="border:1px solid var(--line);background:#fff;border-radius:8px;padding:2px 10px;cursor:pointer;font-size:12px">_</button></div>
 <div id="map"></div>
 <div class="legend"><span>● gold = stop</span><span style="color:var(--green)">● green = restaurant</span><span>🏠 = hotel</span><span>✈️ = airport</span></div>
 </div>
@@ -234,7 +235,8 @@ async function geocodeAddr(addr, slot){
 }
 // ── Drag & drop (mouse + touch) ──
 function initSortable(){
- var groups = {group:{name:'sched',pull:true,put:true},animation:150,ghostClass:'sortable-ghost',delay:120,delayOnTouchOnly:true,
+ var groups = {group:{name:'sched',pull:true,put:true},animation:150,ghostClass:'sortable-ghost',delay:250,delayOnTouchOnly:false,
+  handle:'.slot',forceFallback:true,fallbackTolerance:5,
   onEnd:function(){ syncFromDOM(); }};
  state.days.forEach(function(d){ var el=document.getElementById('slots-'+d.id); if(el&&!el._s) el._s=new Sortable(el,groups); });
  ['pool-food','pool-spots'].forEach(function(id){ var el=document.getElementById(id); if(el&&!el._s) el._s=new Sortable(el,Object.assign({},groups)); });
