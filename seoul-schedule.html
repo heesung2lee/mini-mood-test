@@ -75,7 +75,7 @@ footer{text-align:center;color:var(--dim);font-size:11px;margin-top:20px}
 <div class="map-wrap">
 <div class="map-label">Live Map — <span id="mapDayBtns"></span></div>
 <div id="map"></div>
-<div class="legend"><span>● gold = stop</span><span style="color:var(--green)">● green = restaurant</span><span>🏠 = hotel</span></div>
+<div class="legend"><span>● gold = stop</span><span style="color:var(--green)">● green = restaurant</span><span>🏠 = hotel</span><span>✈️ = airport</span></div>
 </div>
 
 <div class="hint">Times include transit + buffer. Airport limo ICN↔Gangnam ≈ 70–90 min. Subway/bus between Gangnam spots ≈ 15–30 min. Adjust freely — map follows.</div>
@@ -300,7 +300,7 @@ function drawMap(){
  viewSlots.forEach(function(s){
   var g=GEO[s.g]||GEO.andaz; n++;
   var cls=s.cat==='food'?'food':(s.cat==='hotel'?'hotel':(s.cat==='move'?'move':''));
-  var label=(s.cat==='hotel')?'🏠':String(n);
+  var label=(s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':String(n));
   var icon=L.divIcon({className:'',html:'<div class="mk '+cls+'">'+label+'</div>',iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-14]});
   L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>'+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
   pts.push(g);
