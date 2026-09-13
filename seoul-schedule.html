@@ -249,7 +249,8 @@ function drawMap(){
   bb.innerHTML='';
   state.days.forEach(function(d,di){
    var b=document.createElement('button');
-   b.textContent=(di+1);
+   var lbl=['Sun 21','Mon 22','Tue 23','Wed 24','Thu 25'][di]||('Day '+(di+1));
+   b.textContent=lbl;
    b.title=d.label;
    b.style.cssText='margin:0 3px;padding:2px 10px;border-radius:12px;border:1px solid '+(di===mapDay?'#b8860b':'#d8e0ec')+';background:'+(di===mapDay?'#b8860b':'#fff')+';color:'+(di===mapDay?'#fff':'#64748b')+';cursor:pointer;font-size:12px;font-weight:700';
    b.onclick=function(){mapDay=di;drawMap();};
