@@ -45,6 +45,8 @@ h1{font-size:22px;font-weight:800}
 .slot .n{font-weight:700}
 .slot .d{color:var(--dim);font-size:12px}
 .slot{padding-left:30px}
+.slot .num{position:absolute;top:8px;left:30px;font-size:11px;font-weight:800;color:var(--gold);background:#fff;border:1px solid var(--gold);border-radius:10px;padding:0 7px;line-height:18px}
+.slot .n{margin-top:20px}
 .slot .x{position:absolute;top:6px;left:8px;color:var(--dim);cursor:pointer;font-size:14px;padding:2px 6px}
 .slot .x:hover{color:var(--red)}
 .slot.move{border-style:dashed;opacity:.85}
@@ -168,34 +170,38 @@ function showHistory(){
 function countSlots(s){ var n=0; (s.days||[]).forEach(function(d){n+=d.slots.length;}); return n; }
 
 // ── Render ──
-function slotHTML(s, di, si){
+function slotHTML(s, di, si, mapNum){
  if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9);
+ var badge = (s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':String(mapNum));
  return '<div class="slot '+s.cat+'" data-uid="'+s._id+'" data-d="'+di+'" data-s="'+si+'">'
+ +'<span class="num">'+badge+'</span>'
  +(s.t?'<div class="t">'+esc(s.t)+'</div>':'')
  +'<div class="n">'+esc(s.n)+'</div>'
  +(s.d?'<div class="d">'+esc(s.d)+'</div>':'')
  +'<span class="x" onclick="rmSlot(event,'+di+','+si+')">✕</span></div>';
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+var collapsed = {};
 function render(){
  var w = document.getElementById('days'); w.innerHTML='';
  state.days.forEach(function(d, di){
-  var el = document.createElement('div'); el.className='day';
-  el.innerHTML = '<div class="day-h" onclick="toggleDay(\''+d.id+'\')" style="cursor:pointer">'+esc(d.label)+'<span class="cnt">'+d.slots.length+' stops <span id="tog-'+d.id+'">▾</span></span></div><div class="slots" id="slots-'+d.id+'"></div>';
+  var el = document.createElement('div'); el.className='day'; el.id='day-'+d.id;
+  var hid = !!collapsed[d.id];
+  el.innerHTML = '<div class="day-h" onclick="toggleDay(\''+d.id+'\')" style="cursor:pointer">'+esc(d.label)+'<span class="cnt">'+d.slots.length+' stops <span id="tog-'+d.id+'">'+(hid?'▸':'▾')+'</span></span></div><div class="slots" id="slots-'+d.id+'"'+(hid?' style="display:none"':'')+'></div>';
   var box = el.querySelector('.slots');
-  d.slots.forEach(function(s, si){ box.insertAdjacentHTML('beforeend', slotHTML(s, di, si)); });
+  d.slots.forEach(function(s, si){ box.insertAdjacentHTML('beforeend', slotHTML(s, di, si, 0)); });
   w.appendChild(el);
  });
  renderPool('pool-food', state.food, 'food');
  renderPool('pool-spots', state.spots, 'spot');
- initSortable(); drawMap(); persist();
+ initSortable(); drawMap(); setupScrollSpy(); persist();
 }
 function renderPool(id, arr, kind){
  var box = document.getElementById(id); box.innerHTML='';
  arr.forEach(function(s, i){ if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9); box.insertAdjacentHTML('beforeend','<div class="slot '+s.cat+'" data-uid="'+s._id+'" data-p="'+kind+'" data-i="'+i+'"><div class="n">'+esc(s.n)+'</div><div class="d">'+esc(s.d)+'</div><span class="x" onclick="rmPool(event,\''+kind+'\','+i+')">✕</span></div>'); });
 }
 function rmSlot(e, di, si){ e.stopPropagation(); var s=state.days[di].slots[si]; if(!confirm('Remove "'+(s.n||'').slice(0,40)+'" to Spots Pool?'))return; state.days[di].slots.splice(si,1); state.spots.push(s); render(); }
-function toggleDay(id){ var box=document.getElementById('slots-'+id); var t=document.getElementById('tog-'+id); if(!box)return; var hid=box.style.display==='none'; box.style.display=hid?'':'none'; if(t)t.textContent=hid?'▾':'▸'; }
+function toggleDay(id){ collapsed[id]=!collapsed[id]; var box=document.getElementById('slots-'+id); var t=document.getElementById('tog-'+id); if(!box)return; var hid=!!collapsed[id]; box.style.display=hid?'none':''; if(t)t.textContent=hid?'▸':'▾'; }
 function rmPool(e, kind, i){ e.stopPropagation(); if(!confirm('Delete this permanently?'))return; state[kind==='food'?'food':'spots'].splice(i,1); render(); }
 function addCustom(kind){
  var inp = document.getElementById(kind==='food'?'newFood':'newSpot');
@@ -291,14 +297,18 @@ function drawMap(){
  if(mapDay>=state.days.length) mapDay=0;
  var d=state.days[mapDay];
  if(!d) return;
- // 호텔 앵커: 첫/마지막에 호텔 없으면 지도에만 Andaz 추가 (일정 건드리지 않음)
+ // 호텔+공항 앵커: 지도에만 추가 (일정 건드리지 않음)
  var viewSlots=d.slots.slice();
  var HOTEL={t:"",n:"Andaz Seoul Gangnam (안다즈 서울 강남) — base",d:"Hotel base (map anchor).",g:"andaz",cat:"hotel"};
+ var hasHotel=viewSlots.some(function(x){return x.cat==='hotel';});
+ var hasMove=viewSlots.some(function(x){return x.cat==='move';});
  if(!viewSlots.length||viewSlots[0].cat!=='hotel') viewSlots.unshift(HOTEL);
  if(viewSlots[viewSlots.length-1].cat!=='hotel') viewSlots.push(HOTEL);
  var n=0, pts=[];
+ var numMap={}; // _id -> 지도 번호
  viewSlots.forEach(function(s){
   var g=GEO[s.g]||GEO.andaz; n++;
+  if(s._id) numMap[s._id]=n;
   var cls=s.cat==='food'?'food':(s.cat==='hotel'?'hotel':(s.cat==='move'?'move':''));
   var label=(s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':String(n));
   var icon=L.divIcon({className:'',html:'<div class="mk '+cls+'">'+label+'</div>',iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-14]});
@@ -307,6 +317,42 @@ function drawMap(){
  });
  if(pts.length>1){ L.polyline(pts,{color:'#b8860b',weight:2.5,dashArray:'6 4',opacity:.8}).addTo(layerGroup); }
  if(pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[40,40]});
+ // 일정 카드에 지도 번호 반영
+ window._numMap=numMap; refreshNums();
+}
+function refreshNums(){
+ var m=window._numMap||{};
+ document.querySelectorAll('#days .slot').forEach(function(el){
+  var b=el.querySelector('.num'); if(!b) return;
+  var id=el.dataset.uid; var s=findSlotById(id); if(!s) return;
+  var n=m[id];
+  b.textContent=(s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':(n!=null?String(n):'•'));
+ });
+}
+function findSlotById(id){
+ for(var di=0;di<state.days.length;di++) for(var si=0;si<state.days[di].slots.length;si++)
+  if(state.days[di].slots[si]._id===id) return state.days[di].slots[si];
+ for(var k of ['food','spots']) for(var i=0;i<state[k].length;i++)
+  if(state[k][i]._id===id) return state[k][i];
+ return null;
+}
+// 스크롤 따라 지도 요일 자동 전환 + 지도 상단 고정
+function setupScrollSpy(){
+ var wrap=document.querySelector('.map-wrap');
+ if(wrap&&!wrap.dataset.sticky){ wrap.dataset.sticky='1'; wrap.style.position='sticky'; wrap.style.top='0'; wrap.style.zIndex='10'; }
+ if('IntersectionObserver' in window){
+  if(window._dayObs) window._dayObs.disconnect();
+  window._dayObs=new IntersectionObserver(function(es){
+   es.forEach(function(e){
+    if(e.isIntersecting){
+     var id=(e.target.id||'').replace('day-','');
+     var di=state.days.findIndex(function(x){return x.id===id;});
+     if(di>=0&&di!==mapDay){ mapDay=di; drawMap(); }
+    }
+   });
+  },{rootMargin:'-30% 0px -55% 0px'});
+  state.days.forEach(function(d){ var el=document.getElementById('day-'+d.id); if(el) window._dayObs.observe(el); });
+ }
 }
 // ── Share / reset / export ──
 function shareLink(){
