@@ -120,7 +120,8 @@ function fbPush(){
 function fbStart(){
  if(!fbRef||fbOn) return; fbOn=true;
  fbRef.on('value', function(snap){
-  var v=snap.val(); if(!v||!v.days) return;
+  var v=snap.val(); if(!v||!v.days||!v.days.length) return; // 빈 DB 무시
+  if(!v.food) v.food=[]; if(!v.spots) v.spots=[];
   if(v.updatedAt&&state.updatedAt&&v.updatedAt<=state.updatedAt) return;
   state=v; if(state.geoC){ GEO_C=state.geoC; for(var k in state.geoC) GEO[k]=state.geoC[k]; }
   render();
@@ -240,8 +241,8 @@ function render(){
  clearTimeout(fbTimer); fbTimer=setTimeout(fbPush, 1000);
 }
 function renderPool(id, arr, kind){
- var box = document.getElementById(id); box.innerHTML='';
- arr.forEach(function(s, i){ if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9); box.insertAdjacentHTML('beforeend','<div class="slot '+s.cat+'" data-uid="'+s._id+'" data-p="'+kind+'" data-i="'+i+'"><div class="n">'+esc(s.n)+'</div><div class="d">'+esc(s.d)+'</div><span class="x" onclick="rmPool(event,\''+kind+'\','+i+')">✕</span></div>'); });
+ var box = document.getElementById(id); if(!box) return; box.innerHTML='';
+ (arr||[]).forEach(function(s, i){ if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9); box.insertAdjacentHTML('beforeend','<div class="slot '+s.cat+'" data-uid="'+s._id+'" data-p="'+kind+'" data-i="'+i+'"><div class="n">'+esc(s.n)+'</div><div class="d">'+esc(s.d)+'</div><span class="x" onclick="rmPool(event,\''+kind+'\','+i+')">✕</span></div>'); });
 }
 function rmSlot(e, di, si){ e.stopPropagation(); var s=state.days[di].slots[si]; if(!confirm('Remove "'+(s.n||'').slice(0,40)+'" to Spots Pool?'))return; state.days[di].slots.splice(si,1); state.spots.push(s); render(); }
 function toggleDay(id){ collapsed[id]=!collapsed[id]; var box=document.getElementById('slots-'+id); var t=document.getElementById('tog-'+id); if(!box)return; var hid=!!collapsed[id]; box.style.display=hid?'none':''; if(t)t.textContent=hid?'▸':'▾'; }
@@ -275,7 +276,7 @@ async function geocodeAddr(addr, slot){
 // ── Drag & drop (mouse + touch) ──
 function initSortable(){
  var groups = {group:{name:'sched',pull:true,put:true},animation:150,ghostClass:'sortable-ghost',delay:250,delayOnTouchOnly:false,
-  handle:'.slot',forceFallback:true,fallbackTolerance:5,
+  forceFallback:true,fallbackTolerance:5,
   onEnd:function(){ syncFromDOM(); }};
  state.days.forEach(function(d){ var el=document.getElementById('slots-'+d.id); if(el&&!el._s) el._s=new Sortable(el,Object.assign({},groups,{filter:'.locked',onMove:function(e){return !e.dragged.classList.contains('locked');}})); });
  ['pool-food','pool-spots'].forEach(function(id){ var el=document.getElementById(id); if(el&&!el._s) el._s=new Sortable(el,Object.assign({},groups)); });
