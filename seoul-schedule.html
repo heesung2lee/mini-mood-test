@@ -91,9 +91,9 @@ footer{text-align:center;color:var(--dim);font-size:11px;margin-top:20px}
 
 <div class="pools">
 <div class="pool"><h3>🍽 Restaurant Pool (drag onto a day)</h3><div class="slots" id="pool-food"></div>
-<div class="addbox"><input type="time" id="newFoodT" style="max-width:90px"><input id="newFood" placeholder="Add restaurant…"><button onclick="addCustom('food')">+</button></div></div>
+<div class="addbox"><input type="time" id="newFoodT" style="max-width:80px"><input id="newFood" placeholder="Add restaurant…"><input id="newFoodA" placeholder="address/area" style="max-width:110px"><button onclick="addCustom('food')">+</button></div></div>
 <div class="pool"><h3>📍 Spots Pool (drag onto a day)</h3><div class="slots" id="pool-spots"></div>
-<div class="addbox"><input type="time" id="newSpotT" style="max-width:90px"><input id="newSpot" placeholder="Add spot…"><button onclick="addCustom('spot')">+</button></div></div>
+<div class="addbox"><input type="time" id="newSpotT" style="max-width:80px"><input id="newSpot" placeholder="Add spot…"><input id="newSpotA" placeholder="address/area" style="max-width:110px"><button onclick="addCustom('spot')">+</button></div></div>
 </div>
 
 <footer>Times are estimates with transit buffer. Philippine Airlines T1 confirmed.</footer>
@@ -109,6 +109,7 @@ var GEO = {
 };
 // Shinsegae Gangnam approx (Express Bus Terminal)
 GEO.shinsegae = [37.5045,127.0049];
+var GEO_C = {};
 
 var DEFAULTS = {
  days: [
@@ -141,8 +142,8 @@ var DEFAULTS = {
 };
 
 var state = load() || JSON.parse(JSON.stringify(DEFAULTS));
-function load(){ try{ var h=location.hash.match(/s=([^&]+)/); if(h){ return JSON.parse(decodeURIComponent(escape(atob(h[1])))); } var l=localStorage.getItem('seoul25'); if(l) return JSON.parse(l); }catch(e){} return null; }
-function persist(){ try{ localStorage.setItem('seoul25', JSON.stringify(state)); pushHistory(); }catch(e){} }
+function load(){ try{ var h=location.hash.match(/s=([^&]+)/); var s=null; if(h){ s=JSON.parse(decodeURIComponent(escape(atob(h[1])))); } else { var l=localStorage.getItem('seoul25'); if(l) s=JSON.parse(l); } if(s){ if(s.geoC){ GEO_C=s.geoC; for(var k in s.geoC) GEO[k]=s.geoC[k]; } return s; } }catch(e){} return null; }
+function persist(){ try{ state.geoC=GEO_C; localStorage.setItem('seoul25', JSON.stringify(state)); pushHistory(); }catch(e){} }
 // 히스토리: 최근 20개 자동 저장 (리셋·실수 대비)
 function pushHistory(){
  try{
@@ -194,9 +195,28 @@ function rmPool(e, kind, i){ e.stopPropagation(); state[kind==='food'?'food':'sp
 function addCustom(kind){
  var inp = document.getElementById(kind==='food'?'newFood':'newSpot');
  var tm = document.getElementById(kind==='food'?'newFoodT':'newSpotT');
+ var ad = document.getElementById(kind==='food'?'newFoodA':'newSpotA');
  var v = inp.value.trim(); if(!v) return;
- state[kind==='food'?'food':'spots'].push({t:(tm&&tm.value)||'',n:v,d:'Custom stop — add note by editing JSON.',g:'andaz',cat:kind==='food'?'food':'spot'});
- inp.value=''; if(tm)tm.value=''; render();
+ var addr = (ad&&ad.value.trim())||'';
+ var slot = {t:(tm&&tm.value)||'',n:v,d:'Custom stop — add note by editing JSON.',g:'andaz',cat:kind==='food'?'food':'spot'};
+ state[kind==='food'?'food':'spots'].push(slot);
+ inp.value=''; if(tm)tm.value=''; if(ad)ad.value='';
+ if(addr){ geocodeAddr(addr, slot); setStatus('Searching location…'); } else render();
+}
+// 주소 → 좌표 (Nominatim). 찾으면 지도에 찍힘, 못 찾으면 Andaz에 + 주소 표시
+async function geocodeAddr(addr, slot){
+ try{
+  var r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(addr+', Seoul'));
+  var j = await r.json();
+  if(j&&j.length){
+   var key='c_'+Date.now();
+   GEO[key]=[parseFloat(j[0].lat),parseFloat(j[0].lon)]; GEO_C[key]=GEO[key];
+   slot.g=key;
+   slot.d=j[0].display_name.split(',').slice(0,3).join(',');
+   setStatus('Pinned ✓');
+  } else { slot.d='('+addr+') — not found, edit manually.'; setStatus('Address not found — added anyway.'); }
+ }catch(e){ slot.d='('+addr+')'; setStatus('Search failed — added anyway.'); }
+ render();
 }
 // ── Drag & drop (mouse + touch) ──
 function initSortable(){
