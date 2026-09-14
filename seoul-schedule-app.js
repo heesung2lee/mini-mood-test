@@ -74,7 +74,7 @@ function countSlots(s){ var n=0; (s.days||[]).forEach(function(d){n+=d.slots.len
 // ── Render ──
 function slotHTML(s, di, si, mapNum){
  if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9);
- var badge = s.lock?'🔒':((s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':String(mapNum)));
+ var badge = (s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':String(mapNum));
  return '<div class="slot '+s.cat+(s.lock?' locked':'')+'" data-uid="'+s._id+'" data-d="'+di+'" data-s="'+si+'" onclick="tapSlot(event,\''+s._id+'\')"'
  +'<span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">'+badge+'</span>'
  +(s.addr?'<div class="ad">📍 '+esc(s.addr)+'</div>':'')
@@ -287,7 +287,7 @@ function refreshNums(){
   var b=el.querySelector('.num'); if(!b) return;
   var id=el.dataset.uid; var s=findSlotById(id); if(!s) return;
   var n=m[id];
-  b.textContent=s.lock?'🔒':((s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':(n!=null?String(n):'•')));
+  b.textContent=(s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':(n!=null?String(n):'•'));
  });
 }
 function findSlotById(id){
