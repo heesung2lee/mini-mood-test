@@ -217,8 +217,8 @@ function slotHTML(s, di, si, mapNum){
  return '<div class="slot '+s.cat+(s.lock?' locked':'')+'" data-uid="'+s._id+'" data-d="'+di+'" data-s="'+si+'">'
  +'<span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">'+badge+'</span>'
  +(s.t?'<div class="t">'+esc(s.t)+'</div>':'')
- +'<div class="n">'+esc(s.n)+'</div>'
- +(s.d?'<div class="d">'+esc(s.d)+'</div>':'')
+ +'<div class="n" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.n)+'</div>'
+ +(s.d?'<div class="d" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.d)+'</div>':'')
  +'<span class="x" onclick="rmSlot(event,'+di+','+si+')">✕</span></div>';
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -365,6 +365,16 @@ function drawMap(){
  if(pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[40,40]});
  // 일정 카드에 지도 번호 반영
  window._numMap=numMap; refreshNums();
+}
+function editText(e, id){
+ e.stopPropagation();
+ var s=findSlotById(id); if(!s||s.lock) return;
+ var nn=prompt('Title:', s.n||'');
+ if(nn===null) return;
+ var dd=prompt('Description:', s.d||'');
+ if(dd===null) return;
+ s.n=nn.trim(); s.d=dd.trim();
+ render();
 }
 function editAddr(e, id){
  e.stopPropagation();
