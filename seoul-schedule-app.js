@@ -75,8 +75,9 @@ function countSlots(s){ var n=0; (s.days||[]).forEach(function(d){n+=d.slots.len
 function slotHTML(s, di, si, mapNum){
  if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9);
  var badge = s.lock?'🔒':((s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':String(mapNum)));
- return '<div class="slot '+s.cat+(s.lock?' locked':'')+'" data-uid="'+s._id+'" data-d="'+di+'" data-s="'+si+'">'
+ return '<div class="slot '+s.cat+(s.lock?' locked':'')+'" data-uid="'+s._id+'" data-d="'+di+'" data-s="'+si+'" onclick="tapSlot(event,\''+s._id+'\')"'
  +'<span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">'+badge+'</span>'
+ +(s.addr?'<div class="ad">📍 '+esc(s.addr)+'</div>':'')
  +(s.t?'<div class="t">'+esc(s.t)+'</div>':'')
  +'<div class="n" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.n)+'</div>'
  +(s.d?'<div class="d" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.d)+'</div>':'')
@@ -106,7 +107,23 @@ function renderPool(id, arr, kind){
  (arr||[]).forEach(function(s, i){ if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9); box.insertAdjacentHTML('beforeend','<div class="slot '+s.cat+'" data-uid="'+s._id+'" data-p="'+kind+'" data-i="'+i+'"><span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">📍</span><div class="n">'+esc(s.n)+'</div><div class="d">'+esc(s.d)+'</div><span class="x" onclick="rmPool(event,\''+kind+'\','+i+')">✕</span></div>'); });
 }
 function rmSlot(e, di, si){ e.stopPropagation(); var s=state.days[di].slots[si]; if(!confirm('Remove "'+(s.n||'').slice(0,40)+'" to Spots Pool?'))return; state.days[di].slots.splice(si,1); state.spots.push(s); render(); }
-function toggleDay(id){ collapsed[id]=!collapsed[id]; var box=document.getElementById('slots-'+id); var t=document.getElementById('tog-'+id); if(!box)return; var hid=!!collapsed[id]; box.style.display=hid?'none':''; if(t)t.textContent=hid?'▸':'▾'; }
+function toggleDay(id){ collapsed[id]=!collapsed[id]; var box=document.getElementById('slots-'+id); var t=document.getElementById('tog-'+id); if(!box)return; var hid=!!collapsed[id]; box.style.display=hid?'none':''; if(t)t.textContent=hid?'▸':'▾';
+ // 요일 탭 누르면 지도도 해당일로
+ var di=state.days.findIndex(function(x){return x.id===id;}); if(di>=0&&!hid){ mapDay=di; drawMap(); scrollSpyOff=Date.now()+5000; }
+}
+// 일정 1번 탭: 지도 해당일로 (화면 이동 없음). 2번 탭: 지도 스크롤 + 팝업
+var lastTapId=null, lastTapT=0;
+function tapSlot(e, id){
+ e.stopPropagation();
+ var di=state.days.findIndex(function(d){return d.slots.some(function(s){return s._id===id;});});
+ if(di>=0&&di!==mapDay){ mapDay=di; drawMap(); }
+ var now=Date.now();
+ if(lastTapId===id&&now-lastTapT<2500){
+  lastTapId=null;
+  document.querySelector('.map-wrap').scrollIntoView({behavior:'smooth'});
+  setTimeout(function(){ var mk=(window._markers||{})[id]; if(mk) mk.openPopup(); }, 500);
+ } else { lastTapId=id; lastTapT=now; }
+}
 function rmPool(e, kind, i){ e.stopPropagation(); if(!confirm('Delete this permanently?'))return; state[kind==='food'?'food':'spots'].splice(i,1); render(); }
 function addCustom(kind){
  var inp = document.getElementById(kind==='food'?'newFood':'newSpot');
@@ -197,6 +214,8 @@ function drawMap(){
    b.title=d.label;
    b.style.cssText='margin:0 3px;padding:2px 10px;border-radius:12px;border:1px solid '+(di===mapDay?'#b8860b':'#d8e0ec')+';background:'+(di===mapDay?'#b8860b':'#fff')+';color:'+(di===mapDay?'#fff':'#64748b')+';cursor:pointer;font-size:12px;font-weight:700';
    b.onclick=function(){mapDay=di;drawMap();scrollSpyOff=Date.now()+5000;};
+   // swipe 좌우로 요일 전환
+   b.ontouchstart=function(e){var x=e.touches[0].clientX;var h=function(ev){var dx=ev.changedTouches[0].clientX-x;if(Math.abs(dx)>30){var nd=di+(dx<0?1:-1);if(nd>=0&&nd<state.days.length){mapDay=nd;drawMap();}scrollSpyOff=Date.now()+5000;}document.removeEventListener('touchend',h);};document.addEventListener('touchend',h);};
    bb.appendChild(b);
   });
  }
@@ -208,7 +227,7 @@ function drawMap(){
  var HOTEL={t:"",n:"Andaz Seoul Gangnam (안다즈 서울 강남) — base",d:"Hotel base (map anchor).",g:"andaz",cat:"hotel"};
  if(!viewSlots.some(function(x){return x.cat==='hotel';})) viewSlots.push(HOTEL);
  var n=0, pts=[];
- var numMap={}; // _id -> 지도 번호
+ var numMap={}; var markerById={}; window._markers=markerById;
  var jit=0;
  viewSlots.forEach(function(s){
   var g=GEO[s.g]||GEO.andaz;
@@ -219,7 +238,8 @@ function drawMap(){
   var cls=s.cat==='food'?'food':(s.cat==='hotel'?'hotel':(s.cat==='move'?'move':''));
   var label=(s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':String(numMap[s._id]||''));
   var icon=L.divIcon({className:'',html:'<div class="mk '+cls+'">'+label+'</div>',iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-14]});
-  L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>'+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
+  var mk=L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>'+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
+  if(s._id) markerById[s._id]=mk;
   pts.push(g);
  });
  if(pts.length>1){ L.polyline(pts,{color:'#b8860b',weight:2.5,dashArray:'6 4',opacity:.8}).addTo(layerGroup); }
