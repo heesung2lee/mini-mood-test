@@ -76,7 +76,7 @@ footer{text-align:center;color:var(--dim);font-size:11px;margin-top:20px}
 </header>
 
 <div class="map-wrap">
-<div class="map-label" style="display:flex;justify-content:space-between;align-items:center">Live Map — <span id="mapDayBtns"></span><button onclick="document.querySelector('.map-wrap').classList.toggle('collapsed')" style="border:1px solid var(--line);background:#fff;border-radius:8px;padding:2px 10px;cursor:pointer;font-size:12px">_</button></div>
+<div class="map-label" style="display:flex;justify-content:space-between;align-items:center">Live Map — <span id="mapDayBtns"></span></div>
 <div id="map"></div>
 <div class="legend"><span>● gold = stop</span><span style="color:var(--green)">● green = restaurant</span><span>🏠 = hotel</span><span>✈️ = airport</span></div>
 </div>
@@ -153,9 +153,9 @@ var GEO_C = {};
 var DEFAULTS = {
  days: [
   {id:"d21",label:"Sun Sep 21 — Arrival",slots:[
-   {t:"",n:"Arrive ICN T1 (인천공항 1터미널)",d:"Philippine Airlines lands 19:15 at T1. ~40 min immigration+bags.",g:"icn",cat:"move"},
-   {t:"",n:"Airport Bus 6703 → Andaz (안다즈 서울 강남)",d:"Airport bus 6703 to Gangnam ≈ 70–90 min. Get off at Eulji Hospital / Four Points Gangnam & Hotel Sunshine stop.",g:"icn",cat:"move"},
-   {t:"",n:"Check in — Andaz Seoul Gangnam, by Hyatt (안다즈 서울 강남)",d:"Base for all 5 nights. Apgujeong Rodeo area, late-night convenience nearby.",g:"andaz",cat:"hotel"}]},
+   {t:"",n:"Arrive ICN T1 (인천공항 1터미널)",d:"Philippine Airlines lands 19:15 at T1. ~40 min immigration+bags.",g:"icn",cat:"move",lock:1},
+   {t:"",n:"Airport Bus 6703 → Andaz (안다즈 서울 강남)",d:"Airport bus 6703 to Gangnam ≈ 70–90 min. Get off at Eulji Hospital / Four Points Gangnam & Hotel Sunshine stop.",g:"icn",cat:"move",lock:1},
+   {t:"",n:"Check in — Andaz Seoul Gangnam, by Hyatt (안다즈 서울 강남)",d:"Base for all 5 nights. Apgujeong Rodeo area, late-night convenience nearby.",g:"andaz",cat:"hotel",lock:1}]},
   {id:"d22",label:"Mon Sep 22 — Rest + Hotel Spa",slots:[
    {t:"",n:"Slow morning (arrival recovery)",d:"Jet lag day. Late checkout-style rest at Andaz.",g:"andaz",cat:"hotel"},
    {t:"",n:"Ocellas at Andaz B2 (오셀라스 안다즈 서울 강남점)",d:"In-hotel facial + sauna. No transit — go downstairs. Afternoon wind-down.",g:"andaz",cat:"spot"},
@@ -214,7 +214,7 @@ function countSlots(s){ var n=0; (s.days||[]).forEach(function(d){n+=d.slots.len
 // ── Render ──
 function slotHTML(s, di, si, mapNum){
  if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9);
- var badge = (s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':String(mapNum));
+ var badge = s.lock?'🔒':((s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':String(mapNum)));
  return '<div class="slot '+s.cat+(s.lock?' locked':'')+'" data-uid="'+s._id+'" data-d="'+di+'" data-s="'+si+'">'
  +'<span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">'+badge+'</span>'
  +(s.t?'<div class="t">'+esc(s.t)+'</div>':'')
@@ -243,7 +243,7 @@ function render(){
 }
 function renderPool(id, arr, kind){
  var box = document.getElementById(id); if(!box) return; box.innerHTML='';
- (arr||[]).forEach(function(s, i){ if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9); box.insertAdjacentHTML('beforeend','<div class="slot '+s.cat+'" data-uid="'+s._id+'" data-p="'+kind+'" data-i="'+i+'"><div class="n">'+esc(s.n)+'</div><div class="d">'+esc(s.d)+'</div><span class="x" onclick="rmPool(event,\''+kind+'\','+i+')">✕</span></div>'); });
+ (arr||[]).forEach(function(s, i){ if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9); box.insertAdjacentHTML('beforeend','<div class="slot '+s.cat+'" data-uid="'+s._id+'" data-p="'+kind+'" data-i="'+i+'"><span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">📍</span><div class="n">'+esc(s.n)+'</div><div class="d">'+esc(s.d)+'</div><span class="x" onclick="rmPool(event,\''+kind+'\','+i+')">✕</span></div>'); });
 }
 function rmSlot(e, di, si){ e.stopPropagation(); var s=state.days[di].slots[si]; if(!confirm('Remove "'+(s.n||'').slice(0,40)+'" to Spots Pool?'))return; state.days[di].slots.splice(si,1); state.spots.push(s); render(); }
 function toggleDay(id){ collapsed[id]=!collapsed[id]; var box=document.getElementById('slots-'+id); var t=document.getElementById('tog-'+id); if(!box)return; var hid=!!collapsed[id]; box.style.display=hid?'none':''; if(t)t.textContent=hid?'▸':'▾'; }
@@ -322,7 +322,7 @@ var map, layerGroup, mapDay = 0;
 function drawMap(){
  if(!map){
   map=L.map('map',{center:[37.53,127.02],zoom:11,scrollWheelZoom:false});
-  L.tileLayer('https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors, Tiles style by Humanitarian OSM Team',maxZoom:18}).addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',subdomains:'abc',maxZoom:19}).addTo(map);
   map.on('click',function(){map.scrollWheelZoom.enable();});
  }
  if(layerGroup) layerGroup.clearLayers(); else layerGroup=L.layerGroup().addTo(map);
@@ -336,7 +336,7 @@ function drawMap(){
    b.textContent=lbl;
    b.title=d.label;
    b.style.cssText='margin:0 3px;padding:2px 10px;border-radius:12px;border:1px solid '+(di===mapDay?'#b8860b':'#d8e0ec')+';background:'+(di===mapDay?'#b8860b':'#fff')+';color:'+(di===mapDay?'#fff':'#64748b')+';cursor:pointer;font-size:12px;font-weight:700';
-   b.onclick=function(){mapDay=di;drawMap();};
+   b.onclick=function(){mapDay=di;drawMap();scrollSpyOff=Date.now()+5000;};
    bb.appendChild(b);
   });
  }
@@ -395,7 +395,7 @@ function refreshNums(){
   var b=el.querySelector('.num'); if(!b) return;
   var id=el.dataset.uid; var s=findSlotById(id); if(!s) return;
   var n=m[id];
-  b.textContent=(s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':(n!=null?String(n):'•'));
+  b.textContent=s.lock?'🔒':((s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':(n!=null?String(n):'•')));
  });
 }
 function findSlotById(id){
@@ -405,10 +405,11 @@ function findSlotById(id){
   if(state[k][i]._id===id) return state[k][i];
  return null;
 }
-// 스크롤 따라 지도 요일 자동 전환 + 지도 상단 고정
+// 스크롤 따라 지도 요일 자동 전환 (수동 버튼 터치 후 5초간 비활성 — 리셋 방지)
+var scrollSpyOff = 0;
 function setupScrollSpy(){
  var wrap=document.querySelector('.map-wrap');
- if(wrap&&!wrap.dataset.sticky){ wrap.dataset.sticky='1'; wrap.style.position='sticky'; wrap.style.top='0'; wrap.style.zIndex='10'; }
+ if(wrap&&!wrap.dataset.sticky){ wrap.dataset.sticky='1';  }
  if('IntersectionObserver' in window){
   if(window._dayObs) window._dayObs.disconnect();
   window._dayObs=new IntersectionObserver(function(es){
@@ -416,7 +417,7 @@ function setupScrollSpy(){
     if(e.isIntersecting){
      var id=(e.target.id||'').replace('day-','');
      var di=state.days.findIndex(function(x){return x.id===id;});
-     if(di>=0&&di!==mapDay){ mapDay=di; drawMap(); }
+     if(di>=0&&di!==mapDay&&Date.now()>scrollSpyOff){ mapDay=di; drawMap(); }
     }
    });
   },{rootMargin:'-30% 0px -55% 0px'});
