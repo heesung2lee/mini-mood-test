@@ -42,6 +42,7 @@ h1{font-size:22px;font-weight:800}
 .slot .n{margin-top:20px}
 .slot .x{position:absolute;top:6px;left:8px;color:var(--dim);cursor:pointer;font-size:14px;padding:2px 6px}
 .slot .x:hover{color:var(--red)}
+.slot .lk{position:absolute;top:6px;right:8px;color:var(--dim);cursor:pointer;font-size:13px;padding:2px 6px}
 .slot.move{border-style:dashed;opacity:.85}
 /* Pools */
 .pools{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}

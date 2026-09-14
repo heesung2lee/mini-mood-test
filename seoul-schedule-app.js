@@ -81,7 +81,7 @@ function slotHTML(s, di, si, mapNum){
  +(s.t?'<div class="t">'+esc(s.t)+'</div>':'')
  +'<div class="n" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.n)+'</div>'
  +(s.d?'<div class="d" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.d)+'</div>':'')
- +'<span class="x" onclick="rmSlot(event,'+di+','+si+')">✕</span></div>';
+ +'<span class="x" onclick="rmSlot(event,'+di+','+si+')">✕</span><span class="lk" onclick="toggleLock(event,\''+s._id+'\')" title="lock/unlock" style="cursor:pointer">'+(s.lock?'🔒':'🔓')+'</span></div>';
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function setStatus(s){ var el=document.getElementById('fbStatus'); if(el) el.textContent=s; setTimeout(fbStatus, 3000); }
@@ -104,9 +104,10 @@ function render(){
 }
 function renderPool(id, arr, kind){
  var box = document.getElementById(id); if(!box) return; box.innerHTML='';
- (arr||[]).forEach(function(s, i){ if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9); box.insertAdjacentHTML('beforeend','<div class="slot '+s.cat+'" data-uid="'+s._id+'" data-p="'+kind+'" data-i="'+i+'"><span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">📍</span><div class="n" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.n)+'</div><div class="d" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.d)+'</div><span class="x" onclick="rmPool(event,\''+kind+'\','+i+')">✕</span></div>'); });
+ (arr||[]).forEach(function(s, i){ if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9); box.insertAdjacentHTML('beforeend','<div class="slot '+s.cat+'" data-uid="'+s._id+'" data-p="'+kind+'" data-i="'+i+'"><span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">📍</span><div class="n" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.n)+'</div><div class="d" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.d)+'</div><span class="x" onclick="rmPool(event,\''+kind+'\','+i+')">✕</span><span class="lk" onclick="toggleLock(event,\''+s._id+'\')" title="lock/unlock" style="cursor:pointer">'+(s.lock?'🔒':'🔓')+'</span></div>'); });
 }
-function rmSlot(e, di, si){ e.stopPropagation(); var s=state.days[di].slots[si]; if(!confirm('Remove "'+(s.n||'').slice(0,40)+'" to Spots Pool?'))return; state.days[di].slots.splice(si,1); state.spots.push(s); render(); }
+function toggleLock(e, id){ e.stopPropagation(); var s=findSlotById(id); if(!s) return; s.lock=!s.lock; render(); }
+function rmSlot(e, di, si){ e.stopPropagation(); var s=state.days[di].slots[si]; if(s.lock){ alert('Locked — unlock first.'); return; } if(!confirm('Remove "'+(s.n||'').slice(0,40)+'" to Spots Pool?'))return; state.days[di].slots.splice(si,1); state.spots.push(s); render(); }
 function toggleDay(id){ collapsed[id]=!collapsed[id]; var box=document.getElementById('slots-'+id); var t=document.getElementById('tog-'+id); if(!box)return; var hid=!!collapsed[id]; box.style.display=hid?'none':''; if(t)t.textContent=hid?'▸':'▾';
  // 요일 탭 누르면 지도도 해당일로
  var di=state.days.findIndex(function(x){return x.id===id;}); if(di>=0&&!hid){ mapDay=di; drawMap(); scrollSpyOff=Date.now()+5000; }
@@ -124,7 +125,7 @@ function tapSlot(e, id){
   setTimeout(function(){ var mk=(window._markers||{})[id]; if(mk) mk.openPopup(); }, 500);
  } else { lastTapId=id; lastTapT=now; }
 }
-function rmPool(e, kind, i){ e.stopPropagation(); if(!confirm('Delete this permanently?'))return; state[kind==='food'?'food':'spots'].splice(i,1); render(); }
+function rmPool(e, kind, i){ e.stopPropagation(); var s=state[kind==='food'?'food':'spots'][i]; if(s&&s.lock){ alert('Locked — unlock first.'); return; } if(!confirm('Delete this permanently?'))return; state[kind==='food'?'food':'spots'].splice(i,1); render(); }
 function addCustom(kind){
  var inp = document.getElementById(kind==='food'?'newFood':'newSpot');
  var tm = document.getElementById(kind==='food'?'newFoodT':'newSpotT');
