@@ -189,7 +189,11 @@ var DEFAULTS = {
 };
 
 var state = load() || JSON.parse(JSON.stringify(DEFAULTS));
-function load(){ try{ var h=location.hash.match(/s=([^&]+)/); var s=null; if(h){ s=JSON.parse(decodeURIComponent(escape(atob(h[1])))); } else { var l=localStorage.getItem('seoul25v2'); if(l) s=JSON.parse(l); } if(s){ if(s.geoC){ GEO_C=s.geoC; for(var k in s.geoC) GEO[k]=s.geoC[k]; } return s; } }catch(e){} return null; }
+function load(){ try{ var h=location.hash.match(/s=([^&]+)/); var s=null; if(h){ s=JSON.parse(decodeURIComponent(escape(atob(h[1])))); } else { var l=localStorage.getItem('seoul25v2'); if(l) s=JSON.parse(l); } if(s){ if(s.geoC){ GEO_C=s.geoC; for(var k in s.geoC) GEO[k]=s.geoC[k]; }
+  // 고정 슬롯 강제 lock (DB 구버전·드래그 덮어쓰기 방지)
+  var FIXED=["Arrive ICN T1","Airport Bus 6703","Check in \u2014 Andaz","Return to Andaz"];
+  (s.days||[]).forEach(function(d){ (d.slots||[]).forEach(function(x){ for(var i=0;i<FIXED.length;i++) if((x.n||'').indexOf(FIXED[i])===0) x.lock=1; }); });
+  return s; } }catch(e){} return null; }
 function persist(){ try{ state.geoC=GEO_C; localStorage.setItem('seoul25v2', JSON.stringify(state)); pushHistory(); }catch(e){} }
 // 히스토리: 최근 20개 자동 저장 (리셋·실수 대비)
 function pushHistory(){
