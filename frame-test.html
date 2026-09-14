@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>구성 프레임 테스트 (A+/B-/C+)</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Apple SD Gothic Neo',sans-serif;background:#f6f3ec;color:#1a3450;max-width:640px;margin:0 auto;padding-bottom:60px}
+header{padding:18px 20px 12px;position:sticky;top:0;background:#f6f3ec;z-index:5;border-bottom:1px solid #e5ddc9}
+header h1{font-size:17px}
+header p{font-size:12px;color:#8a8574;margin-top:2px}
+#tabs{display:flex;gap:8px;padding:12px 16px 0}
+#tabs button{flex:1;border:1px solid #d4cfae;background:#fff;color:#5c6a7a;border-radius:12px;padding:11px 4px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit}
+#tabs button.act{background:#d4af37;color:#1a3450;border-color:#d4af37}
+.page{display:none;padding:14px 16px}
+.page.act{display:block}
+.card{background:#fff;border:1px solid #e5ddc9;border-radius:14px;padding:16px;margin-bottom:12px}
+.card h3{font-size:15px;margin-bottom:8px}
+.card p{font-size:13px;color:#5c6a7a;line-height:1.6}
+.opt{display:flex;gap:8px;align-items:center;border:1px solid #e5ddc9;border-radius:10px;padding:10px 12px;margin-top:8px;cursor:pointer;font-size:13px;background:#fff;font-family:inherit;width:100%;text-align:left;color:#1a3450}
+.opt.sel{border-color:#d4af37;background:#fdf8ed;font-weight:700}
+.opt small{display:block;color:#8a8574;font-weight:400}
+.label{display:inline-block;font-size:11px;font-weight:800;background:#1a3450;color:#d4af37;border-radius:12px;padding:3px 10px;margin-bottom:8px}
+.day{border-left:3px solid #d4af37;padding:4px 0 4px 12px;margin:12px 0}
+.day h4{font-size:14px}
+.pm-opt{margin:6px 0 0 0}
+.note{font-size:11px;color:#8a8574;margin-top:10px;line-height:1.6}
+.themecard{border:2px solid #d4af37;border-radius:14px;padding:16px;margin-bottom:12px;background:#fff}
+.themecard h3{font-size:16px}
+.tweak{font-size:12px;color:#1a5c3f;background:#eef7f0;border-radius:8px;padding:8px 10px;margin-top:8px}
+:focus-visible{outline:2px solid #d4af37;outline-offset:2px}
+</style>
+</head>
+<body>
+<header><h1>🧪 구성 프레임 테스트</h1><p>A+ 취향진단 · B- 시그니처 Day · C+ 테마+조정 — 탭으로 비교</p></header>
+<div id="tabs">
+<button data-t="ap" class="act" onclick="tab('ap')">A+ 취향진단</button>
+<button data-t="bm" onclick="tab('bm')">B- 시그니처 Day</button>
+<button data-t="cp" onclick="tab('cp')">C+ 테마</button>
+</div>
+
+<!-- A+ -->
+<div class="page act" id="pg-ap">
+<div class="card"><span class="label">STEP 1 · 코스 취향</span><h3>어떤 그림에서 치고 싶나요?</h3>
+<button class="opt" onclick="pick(this,'ap1')">🌊 바다 옆 링크스<small>절벽 코스 + PCH 드라이브</small></button>
+<button class="opt" onclick="pick(this,'ap1')">🏜️ 사막 리조트<small>팜스프링스 + 여유로운 리조트</small></button>
+<button class="opt" onclick="pick(this,'ap1')">⛰️ 산악 + 호수<small>조용한 자연 속 라운드</small></button></div>
+<div class="card"><span class="label">STEP 2 · 골프 외 시간</span><h3>라운드 끝나고 뭐 하고 싶나요? (복수 선택)</h3>
+<button class="opt" onclick="mpick(this)">🍷 와이너리 투어<small>템큘라 밸리 · 40+ 와이너리</small></button>
+<button class="opt" onclick="mpick(this)">💆 스파 + 리조트 휴식<small>오후 반나절</small></button>
+<button class="opt" onclick="mpick(this)">🏟️ 스포츠 경기 관람<small>시즌별 NBA/MLB</small></button>
+<button class="opt" onclick="mpick(this)">🌵 사막 선셋 투어<small>조슈아트리 · 약 3시간</small></button></div>
+<div class="card" id="apResult" style="display:none"><span class="label">진단 결과</span><h3 id="apTitle"></h3><p id="apDesc"></p><p class="note">출발점일 뿐, 1:1 상담에서 조정합니다 → 문의로 연결</p></div>
+</div>
+
+<!-- B- -->
+<div class="page" id="pg-bm">
+<div class="card"><span class="label">샘플 일정 · 5일</span><h3>Day 1–2, 4–5는 고정 / Day 3만 고르세요</h3>
+<p>Day 1: 도착 + 오리엔테이션<br>Day 2: ⛳ 라운드 1 (오션 링크스)</p>
+<div class="day"><h4>Day 3 — 팜스프링스 (시그니처 Day)</h4><p style="font-size:13px">⛳ 오전: PGA West Stadium 라운드</p>
+<p style="font-size:13px;margin-top:6px">🍷 오후 옵션 (택1):</p>
+<button class="opt pm-opt" onclick="pick(this,'bm')">🍷 템큘라 와이너리 투어<small>약 4시간 · 시음 포함</small></button>
+<button class="opt pm-opt" onclick="pick(this,'bm')">💆 스파 + 리조트 휴식<small>오후 반나절 · 자유시간</small></button>
+<button class="opt pm-opt" onclick="pick(this,'bm')">🌵 조슈아트리 선셋 투어<small>약 3시간 · 사진 명소</small></button></div>
+<p>Day 4: ⛳ 라운드 3<br>Day 5: 출발</p></div>
+<div class="card" id="bmResult" style="display:none"><span class="label">확정 미리보기</span><h3>Day 3 오후: <span id="bmPick"></span></h3><p class="note">나머지 일정은 1:1 상담에서 확정 → 문의로 연결</p></div>
+</div>
+
+<!-- C+ -->
+<div class="page" id="pg-cp">
+<div class="themecard"><h3>🍷 골프 + 와인 5일</h3><p>링크스 2R + 템큘라 와이너리 + 스파 1회. 통합 견적 (개별가 노출 없음).</p><div class="tweak">✏️ 조정 예시: 와인 → 스파 추가, 라운드 1회 추가 가능. 출발점일 뿐 1:1로 조정합니다.</div></div>
+<div class="themecard"><h3>🏟️ 골프 + 스포츠 4일</h3><p>사막 2R + NBA/MLB 직관 + BBQ. 통합 견적.</p><div class="tweak">✏️ 조정 예시: 경기 일정에 맞춰 날짜 이동 가능. 출발점일 뿐 1:1로 조정합니다.</div></div>
+<div class="themecard"><h3>🌊 골프 + 휴식 6일</h3><p>오션+사막 3R + 리조트 휴식 2일. 통합 견적.</p><div class="tweak">✏️ 조정 예시: 휴식일 ↔ 관광일 교환 가능. 출발점일 뿐 1:1로 조정합니다.</div></div>
+</div>
+
+<script>
+function tab(t){document.querySelectorAll('#tabs button').forEach(function(b){b.classList.toggle('act',b.dataset.t===t)});document.querySelectorAll('.page').forEach(function(p){p.classList.toggle('act',p.id==='pg-'+t)});}
+function pick(el,grp){document.querySelectorAll('#'+(grp==='bm'?'pg-bm':'pg-ap')+' .opt').forEach(function(o){if(o.parentElement===el.parentElement&&o!==el&&grp!=='bm')o.classList.remove('sel')});if(grp==='bm'){document.querySelectorAll('#pg-bm .pm-opt').forEach(function(o){o.classList.remove('sel')});}el.classList.add('sel');update();}
+function mpick(el){el.classList.toggle('sel');update();}
+function selTxt(c){return [].slice.call(document.querySelectorAll(c+' .opt.sel')).map(function(o){return o.textContent.split('\n')[0]}).join(' / ');}
+function update(){
+ var a=selTxt('#pg-ap .card:first-child')||selTxt('#pg-ap');
+ var acts=[].slice.call(document.querySelectorAll('#pg-ap .opt.sel')).map(function(o){return o.childNodes[0].textContent.trim()});
+ if(acts.length){document.getElementById('apResult').style.display='block';
+  document.getElementById('apTitle').textContent='당신은 "'+acts.slice(0,2).join(' + ')+'"형';
+  document.getElementById('apDesc').textContent='선택 취향 기준으로 1:1 일정표를 만듭니다. '+acts.join(', ')+' 반영.';}
+ var b=document.querySelector('#pg-bm .pm-opt.sel');
+ if(b){document.getElementById('bmResult').style.display='block';document.getElementById('bmPick').textContent=b.childNodes[0].textContent.trim();}
+}
+</script>
+</body>
+</html>
