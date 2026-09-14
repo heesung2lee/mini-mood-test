@@ -80,8 +80,8 @@ function slotHTML(s, di, si, mapNum){
  +(s.addr?'<div class="ad">📍 '+esc(s.addr)+'</div>':'')
  +(s.t?'<div class="t">'+esc(s.t)+'</div>':'')
  +'<div class="n" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.n)+'</div>'
- +(s.d?'<div class="d" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.d)+'</div>':'')
- +'<span class="x" onclick="rmSlot(event,'+di+','+si+')">✕</span><span class="lk" onclick="toggleLock(event,\''+s._id+'\')" title="lock/unlock" style="cursor:pointer">'+(s.lock?'🔒':'🔓')+'</span></div>';
+ +'<div class="d" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.d||'(tap to add description)')+'</div>'
+ +'<span class="lk" data-lk="'+s._id+'" title="tap: lock/unlock, hold 1s: remove" style="cursor:pointer">'+(s.lock?'🔒':'🔓')+'</span></div>';
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function setStatus(s){ var el=document.getElementById('fbStatus'); if(el) el.textContent=s; setTimeout(fbStatus, 3000); }
@@ -98,15 +98,16 @@ function render(){
  });
  renderPool('pool-food', state.food, 'food');
  renderPool('pool-spots', state.spots, 'spot');
- initSortable(); drawMap(); setupScrollSpy(); persist(); fbStart(); fbStatus();
+ initSortable(); drawMap(); setupScrollSpy(); bindLocks(); persist(); fbStart(); fbStatus();
  // 변경 시 Firebase 푸시 (디바운스 1초)
  clearTimeout(fbTimer); fbTimer=setTimeout(fbPush, 1000);
 }
 function renderPool(id, arr, kind){
  var box = document.getElementById(id); if(!box) return; box.innerHTML='';
- (arr||[]).forEach(function(s, i){ if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9); box.insertAdjacentHTML('beforeend','<div class="slot '+s.cat+'" data-uid="'+s._id+'" data-p="'+kind+'" data-i="'+i+'"><span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">📍</span><div class="n" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.n)+'</div><div class="d" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.d)+'</div><span class="x" onclick="rmPool(event,\''+kind+'\','+i+')">✕</span><span class="lk" onclick="toggleLock(event,\''+s._id+'\')" title="lock/unlock" style="cursor:pointer">'+(s.lock?'🔒':'🔓')+'</span></div>'); });
+ (arr||[]).forEach(function(s, i){ if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9); box.insertAdjacentHTML('beforeend','<div class="slot '+s.cat+'" data-uid="'+s._id+'" data-p="'+kind+'" data-i="'+i+'"><span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">📍</span><div class="n" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.n)+'</div><div class="d" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.d)+'</div><span class="lk" data-lk="'+s._id+'" title="tap: lock/unlock, hold 1s: remove" style="cursor:pointer">'+(s.lock?'🔒':'🔓')+'</span></div>'); });
 }
-function toggleLock(e, id){ e.stopPropagation(); var s=findSlotById(id); if(!s) return; s.lock=!s.lock; render(); }
+function toggleLock(e, id){ if(e&&e.stopPropagation)e.stopPropagation(); var s=findSlotById(id); if(!s) return; if(s.lock) delete s.lock; else s.lock=1; persist(); render(); }
+function rmSlotById(id){ for(var di=0;di<state.days.length;di++){ var i=state.days[di].slots.findIndex(function(x){return x._id===id;}); if(i>=0){ var s=state.days[di].slots[i]; if(s.lock){alert('Locked \u2014 unlock first.');return;} if(!confirm('Remove to Spots Pool?'))return; state.days[di].slots.splice(i,1); state.spots.push(s); render(); return; } } for(var k of ['food','spots']){ var j=state[k].findIndex(function(x){return x._id===id;}); if(j>=0){ var t=state[k][j]; if(t.lock){alert('Locked \u2014 unlock first.');return;} if(!confirm('Delete permanently?'))return; state[k].splice(j,1); render(); return; } } }
 function rmSlot(e, di, si){ e.stopPropagation(); var s=state.days[di].slots[si]; if(s.lock){ alert('Locked — unlock first.'); return; } if(!confirm('Remove "'+(s.n||'').slice(0,40)+'" to Spots Pool?'))return; state.days[di].slots.splice(si,1); state.spots.push(s); render(); }
 function toggleDay(id){ collapsed[id]=!collapsed[id]; var box=document.getElementById('slots-'+id); var t=document.getElementById('tog-'+id); if(!box)return; var hid=!!collapsed[id]; box.style.display=hid?'none':''; if(t)t.textContent=hid?'▸':'▾';
  // 요일 탭 누르면 지도도 해당일로
@@ -325,3 +326,14 @@ function shareLink(){
 function resetAll(){ if(!confirm('Reset to default schedule? Current is saved in History.'))return; state=JSON.parse(JSON.stringify(DEFAULTS)); location.hash=''; render(); }
 function toggleExport(){ var p=document.getElementById('export'); if(p.style.display==='block'){p.style.display='none';return;} p.textContent=JSON.stringify(state,null,1).slice(0,6000); p.style.display='block'; }
 render();
+
+function bindLocks(){
+ document.querySelectorAll('.lk').forEach(function(el){
+  if(el._bound) return; el._bound=1;
+  var id=el.dataset.lk, timer=null;
+  el.addEventListener('pointerdown', function(e){ e.stopPropagation(); var self=this; timer=setTimeout(function(){ timer=null; rmSlotById(id); }, 900); });
+  el.addEventListener('pointerup', function(e){ e.stopPropagation(); if(timer){ clearTimeout(timer); timer=null; toggleLock(e, id); } });
+  el.addEventListener('pointerleave', function(){ if(timer){ clearTimeout(timer); timer=null; } });
+  el.addEventListener('contextmenu', function(e){ e.preventDefault(); e.stopPropagation(); });
+ });
+}
