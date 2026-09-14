@@ -15,7 +15,7 @@ var DEFAULTS = {
  days: [
   {id:"d21",label:"Sun Sep 21",slots:[
    {t:"",n:"Arrive ICN T1 (인천공항 1터미널)",d:"Philippine Airlines lands 19:15 at T1. ~40 min immigration+bags.",g:"icn",cat:"move",lock:1},
-   {t:"",n:"Airport Bus 6703 → Andaz (안다즈 서울 강남)",d:"Airport bus 6703 to Gangnam ≈ 70–90 min. Get off at Eulji Hospital / Four Points Gangnam & Hotel Sunshine stop.",g:"icn",cat:"move",lock:1},
+   {t:"",n:"Airport Bus 6703 → Andaz (안다즈 서울 강남)",d:"Airport bus 6703 to Gangnam ≈ 70–90 min. Get off at Eulji Hospital / Four Points Gangnam & Hotel Sunshine stop.",g:"icn",cat:"move"},
    {t:"",n:"Check in — Andaz Seoul Gangnam, by Hyatt (안다즈 서울 강남)",d:"Base for all 5 nights. Apgujeong Rodeo area, late-night convenience nearby.",g:"andaz",cat:"hotel",lock:1}]},
   {id:"d22",label:"Mon Sep 22",slots:[
    {t:"",n:"Ocellas at Andaz B2 (오셀라스 안다즈 서울 강남점)",d:"In-hotel facial + sauna. No transit — go downstairs. Afternoon wind-down.",g:"andaz",cat:"spot"},
@@ -47,7 +47,7 @@ var DEFAULTS = {
 var state = load() || JSON.parse(JSON.stringify(DEFAULTS));
 function load(){ try{ var h=location.hash.match(/s=([^&]+)/); var s=null; if(h){ s=JSON.parse(decodeURIComponent(escape(atob(h[1])))); } else { var l=localStorage.getItem('seoul25v2'); if(l) s=JSON.parse(l); } if(s){ if(s.geoC){ GEO_C=s.geoC; for(var k in s.geoC) GEO[k]=s.geoC[k]; }
   // 고정 슬롯 강제 lock (DB 구버전·드래그 덮어쓰기 방지)
-  var FIXED=["Arrive ICN T1","Airport Bus 6703","Check in \u2014 Andaz","Depart ICN T1"];
+  var FIXED=["Arrive ICN T1","Check in \u2014 Andaz","Depart ICN T1"];
   (s.days||[]).forEach(function(d){ (d.slots||[]).forEach(function(x){ for(var i=0;i<FIXED.length;i++) if((x.n||'').indexOf(FIXED[i])===0) x.lock=1; }); });
   return s; } }catch(e){} return null; }
 function persist(){ try{ state.geoC=GEO_C; localStorage.setItem('seoul25v2', JSON.stringify(state)); pushHistory(); }catch(e){} }
