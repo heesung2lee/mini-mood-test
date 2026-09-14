@@ -1,13 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Wendi & John Zapanta Seoul Schedule Sep 21–25</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-<style>
+
 :root{--bg:#f4f6fa;--card:#ffffff;--line:#d8e0ec;--txt:#1a2333;--dim:#64748b;--gold:#b8860b;--green:#3fb950;--red:#ef4444;--blue:#4a9eff}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--txt);font-family:-apple-system,'Segoe UI',Roboto,'Noto Sans KR',sans-serif;line-height:1.55;padding:14px 12px 80px;max-width:1100px;margin:0 auto}
@@ -66,45 +57,3 @@ h1{font-size:22px;font-weight:800}
 .toolbar button.primary{background:var(--gold);color:#fff;border-color:var(--gold)}
 pre#export{background:#000;color:#8f8;padding:10px;border-radius:8px;font-size:10px;overflow:auto;max-height:200px;display:none}
 footer{text-align:center;color:var(--dim);font-size:11px;margin-top:20px}
-</style>
-</head>
-<body>
-<header>
-<div class="logo">Wendi &amp; John Zapanta</div>
-<h1>Seoul Schedule · Sep 21–25</h1>
-<div class="sub"><span id="fbStatus">○ connecting…</span> · Drag cards between days · Tap ✕ to remove · Add your own spots below</div>
-</header>
-
-<div class="map-wrap">
-<div class="map-label" style="display:flex;justify-content:space-between;align-items:center">Live Map — <span id="mapDayBtns"></span></div>
-<div id="map"></div>
-<div class="legend"><span>● gold = stop</span><span style="color:var(--green)">● green = restaurant</span><span>🏠 = hotel</span><span>✈️ = airport</span></div>
-</div>
-
-<div class="hint">Times include transit + buffer. Airport limo ICN↔Gangnam ≈ 70–90 min. Subway/bus between Gangnam spots ≈ 15–30 min. Adjust freely — map follows.</div>
-
-<div id="days"></div>
-
-<div class="toolbar">
-<button class="primary" onclick="shareLink()">🔗 Copy Share Link</button>
-<button onclick="showHistory()">🕘 History</button>
-<button onclick="resetAll()">↩ Reset to Default</button>
-<button onclick="toggleExport()">{} Export / Import JSON</button>
-</div>
-<pre id="export"></pre>
-
-<div class="pools">
-<div class="pool"><h3>🍽 Restaurant Pool (drag onto a day)</h3><div class="slots" id="pool-food"></div>
-<div class="addbox"><input type="time" id="newFoodT" style="max-width:80px"><input id="newFood" placeholder="Add restaurant…"><input id="newFoodA" placeholder="address/area" style="max-width:110px"><button onclick="addCustom('food')">+</button></div></div>
-<div class="pool"><h3>📍 Spots Pool (drag onto a day)</h3><div class="slots" id="pool-spots"></div>
-<div class="addbox"><input type="time" id="newSpotT" style="max-width:80px"><input id="newSpot" placeholder="Add spot…"><input id="newSpotA" placeholder="address/area" style="max-width:110px"><button onclick="addCustom('spot')">+</button></div></div>
-</div>
-
-<footer>Times are estimates with transit buffer. Philippine Airlines T1 confirmed.</footer>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="seoul-schedule-config.js"></script>
-<script src="seoul-schedule-app.js"></script>
-</body>
-</html>
