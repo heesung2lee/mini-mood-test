@@ -74,7 +74,7 @@ function countSlots(s){ var n=0; (s.days||[]).forEach(function(d){n+=d.slots.len
 // ── Render ──
 function slotHTML(s, di, si, mapNum){
  if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9);
- var badge = (s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':String(mapNum));
+ var badge = (s.cat==='hotel')?'🏠':(s.cat==='move'?(((s.n||'').indexOf('Bus')>=0||(s.n||'').indexOf('버스')>=0)?'🚌':'✈️'):String(mapNum));
  return '<div class="slot '+s.cat+(s.lock?' locked':'')+'" data-uid="'+s._id+'" data-d="'+di+'" data-s="'+si+'" onclick="tapSlot(event,\''+s._id+'\')"'
  +'<span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">'+badge+'</span>'
  +(s.addr?'<div class="ad">📍 '+esc(s.addr)+'</div>':'')
@@ -238,7 +238,7 @@ function drawMap(){
   if(isNum){ n++; if(s._id) numMap[s._id]=n; }
   else if(s._id) numMap[s._id]=0;
   var cls=s.cat==='food'?'food':(s.cat==='hotel'?'hotel':(s.cat==='move'?'move':''));
-  var label=(s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':String(numMap[s._id]||''));
+  var label=(s.cat==='hotel')?'🏠':(s.cat==='move'?(((s.n||'').indexOf('Bus')>=0||(s.n||'').indexOf('버스')>=0)?'🚌':'✈️'):String(numMap[s._id]||''));
   var icon=L.divIcon({className:'',html:'<div class="mk '+cls+'">'+label+'</div>',iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-14]});
   var mk=L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>'+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
   if(s._id) markerById[s._id]=mk;
@@ -287,7 +287,7 @@ function refreshNums(){
   var b=el.querySelector('.num'); if(!b) return;
   var id=el.dataset.uid; var s=findSlotById(id); if(!s) return;
   var n=m[id];
-  b.textContent=(s.cat==='hotel')?'🏠':(s.cat==='move'?'✈️':(n!=null?String(n):'•'));
+  b.textContent=(s.cat==='hotel')?'🏠':(s.cat==='move'?(((s.n||'').indexOf('Bus')>=0||(s.n||'').indexOf('버스')>=0)?'🚌':'✈️'):(n!=null?String(n):'•'));
  });
 }
 function findSlotById(id){
