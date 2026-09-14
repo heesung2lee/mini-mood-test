@@ -152,31 +152,26 @@ var GEO_C = {};
 
 var DEFAULTS = {
  days: [
-  {id:"d21",label:"Sun Sep 21 — Arrival",slots:[
+  {id:"d21",label:"Sun Sep 21",slots:[
    {t:"",n:"Arrive ICN T1 (인천공항 1터미널)",d:"Philippine Airlines lands 19:15 at T1. ~40 min immigration+bags.",g:"icn",cat:"move",lock:1},
    {t:"",n:"Airport Bus 6703 → Andaz (안다즈 서울 강남)",d:"Airport bus 6703 to Gangnam ≈ 70–90 min. Get off at Eulji Hospital / Four Points Gangnam & Hotel Sunshine stop.",g:"icn",cat:"move",lock:1},
    {t:"",n:"Check in — Andaz Seoul Gangnam, by Hyatt (안다즈 서울 강남)",d:"Base for all 5 nights. Apgujeong Rodeo area, late-night convenience nearby.",g:"andaz",cat:"hotel",lock:1}]},
-  {id:"d22",label:"Mon Sep 22 — Rest + Hotel Spa",slots:[
-   {t:"",n:"Slow morning (arrival recovery)",d:"Jet lag day. Late checkout-style rest at Andaz.",g:"andaz",cat:"hotel"},
+  {id:"d22",label:"Mon Sep 22",slots:[
    {t:"",n:"Ocellas at Andaz B2 (오셀라스 안다즈 서울 강남점)",d:"In-hotel facial + sauna. No transit — go downstairs. Afternoon wind-down.",g:"andaz",cat:"spot"},
    {t:"",n:"Prima Spa (프리마스파)",d:"One of the most high-end quality spas open to the general public. Evening slot near Cheongdam.",g:"cheongdam",cat:"spot"},
-   {t:"",n:"Shinsegae Gangnam (신세계백화점 강남점)",d:"House of Shinsegae — premium night-dining social space, wine cellar, Suite Park desserts. Open till 10pm.",g:"shinsegae",cat:"spot"},
-   {t:"",n:"Return to Andaz (안다즈 복귀)",d:"End of day — back to base.",g:"andaz",cat:"hotel",lock:1}]},
-  {id:"d23",label:"Tue Sep 23 — Beauty + Seongsu + COEX + Tower",slots:[
+   {t:"",n:"Shinsegae Gangnam (신세계백화점 강남점)",d:"House of Shinsegae — premium night-dining social space, wine cellar, Suite Park desserts. Open till 10pm.",g:"shinsegae",cat:"spot"}]},
+  {id:"d23",label:"Tue Sep 23",slots:[
    {t:"",n:"Korean Celebrity Skin Clinic (메종프리베 클리닉)",d:"Beauty-aging spot for routine skincare and wellness, visited regularly by global celebs and K-pop idols. Morning session ≈ 2 hrs. Book ahead.",g:"cheongdam",cat:"spot"},
    {t:"",n:"Hwanggeumhee Aesthetics Cheongdam (황금희에스테틱 청담본점)",d:"30-year esthetic house popular with celebrities. Afternoon course ≈ 90 min–2 hrs.",g:"hwang",cat:"spot"},
    {t:"",n:"Seongsu-dong (성수동)",d:"aka Brooklyn of Seoul / Gangnam of young Koreans. New+retro vibe, popup stores. ~20 min from Cheongdam.",g:"seongsu",cat:"spot"},
    {t:"",n:"Olive Young N Seongsu (올리브영N 성수)",d:"Biggest Olive Young in Korea. Flagship exclusives + photo zones.",g:"seongsu",cat:"spot"},
    {t:"",n:"Starfield COEX Mall",d:"Massive book wall (Starfield Library). ~10 min from Seongsu.",g:"coex",cat:"spot"},
-   {t:"",n:"Lotte World Tower (롯데타워)",d:"Seoul Sky Observatory floors 117–123 (night view). Base: Avenuel, aquarium, cinema, concert hall. ~15 min from COEX.",g:"lotte",cat:"spot"},
-   {t:"",n:"Return to Andaz (안다즈 복귀)",d:"End of day — back to base.",g:"andaz",cat:"hotel",lock:1}]},
-  {id:"d24",label:"Wed Sep 24 — Festival + Palace",slots:[
+   {t:"",n:"Lotte World Tower (롯데타워)",d:"Seoul Sky Observatory floors 117–123 (night view). Base: Avenuel, aquarium, cinema, concert hall. ~15 min from COEX.",g:"lotte",cat:"spot"}]},
+  {id:"d24",label:"Wed Sep 24",slots:[
    {t:"",n:"Gwanghwamun Square Bitmorak Autumn Festival (광화문광장 빛모락 가을축제)",d:"10am-2pm, lunch at food stands. ~30 min from Andaz.",g:"gwanghwamun",cat:"spot"},
-   {t:"",n:"Gyeongbokgung Palace (경복궁)",d:"3-6pm palace visit. Next to Gwanghwamun Square, walkable.",g:"gyeongbok",cat:"spot"},
-   {t:"",n:"Return to Andaz (안다즈 복귀)",d:"End of day — back to base.",g:"andaz",cat:"hotel",lock:1}]},
-  {id:"d25",label:"Thu Sep 25 — Departure",slots:[
-   {t:"",n:"Lobby checkout + limo prep",d:"Pack, settle incidentals. Airport bus 6703 to ICN ≈ 70–90 min (same stop, reverse).",g:"andaz",cat:"hotel"},
-   {t:"",n:"Depart ICN T1 (인천공항 1터미널) 20:30",d:"Philippine Airlines 20:30 from T1. Arrive 2.5 hrs prior = 18:00 at airport.",g:"icn",cat:"move"}]}
+   {t:"",n:"Gyeongbokgung Palace (경복궁)",d:"3-6pm palace visit. Next to Gwanghwamun Square, walkable.",g:"gyeongbok",cat:"spot"}]},
+  {id:"d25",label:"Thu Sep 25",slots:[
+   {t:"",n:"Depart ICN T1 (인천공항 1터미널) 20:30",d:"Philippine Airlines 20:30 from T1. Arrive 2.5 hrs prior = 18:00 at airport.",g:"icn",cat:"move",lock:1}]}
  ],
  food: [
   {t:"",n:"Traditional Korean Dining (한정식)",d:"Full-course Korean set meal.",g:"andaz",cat:"food"},
@@ -191,7 +186,7 @@ var DEFAULTS = {
 var state = load() || JSON.parse(JSON.stringify(DEFAULTS));
 function load(){ try{ var h=location.hash.match(/s=([^&]+)/); var s=null; if(h){ s=JSON.parse(decodeURIComponent(escape(atob(h[1])))); } else { var l=localStorage.getItem('seoul25v2'); if(l) s=JSON.parse(l); } if(s){ if(s.geoC){ GEO_C=s.geoC; for(var k in s.geoC) GEO[k]=s.geoC[k]; }
   // 고정 슬롯 강제 lock (DB 구버전·드래그 덮어쓰기 방지)
-  var FIXED=["Arrive ICN T1","Airport Bus 6703","Check in \u2014 Andaz","Return to Andaz"];
+  var FIXED=["Arrive ICN T1","Airport Bus 6703","Check in \u2014 Andaz","Depart ICN T1"];
   (s.days||[]).forEach(function(d){ (d.slots||[]).forEach(function(x){ for(var i=0;i<FIXED.length;i++) if((x.n||'').indexOf(FIXED[i])===0) x.lock=1; }); });
   return s; } }catch(e){} return null; }
 function persist(){ try{ state.geoC=GEO_C; localStorage.setItem('seoul25v2', JSON.stringify(state)); pushHistory(); }catch(e){} }
