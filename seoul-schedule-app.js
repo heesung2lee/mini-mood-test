@@ -104,7 +104,7 @@ function render(){
 }
 function renderPool(id, arr, kind){
  var box = document.getElementById(id); if(!box) return; box.innerHTML='';
- (arr||[]).forEach(function(s, i){ if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9); box.insertAdjacentHTML('beforeend','<div class="slot '+s.cat+'" data-uid="'+s._id+'" data-p="'+kind+'" data-i="'+i+'"><span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">📍</span><div class="n">'+esc(s.n)+'</div><div class="d">'+esc(s.d)+'</div><span class="x" onclick="rmPool(event,\''+kind+'\','+i+')">✕</span></div>'); });
+ (arr||[]).forEach(function(s, i){ if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9); box.insertAdjacentHTML('beforeend','<div class="slot '+s.cat+'" data-uid="'+s._id+'" data-p="'+kind+'" data-i="'+i+'"><span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">📍</span><div class="n" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.n)+'</div><div class="d" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.d)+'</div><span class="x" onclick="rmPool(event,\''+kind+'\','+i+')">✕</span></div>'); });
 }
 function rmSlot(e, di, si){ e.stopPropagation(); var s=state.days[di].slots[si]; if(!confirm('Remove "'+(s.n||'').slice(0,40)+'" to Spots Pool?'))return; state.days[di].slots.splice(si,1); state.spots.push(s); render(); }
 function toggleDay(id){ collapsed[id]=!collapsed[id]; var box=document.getElementById('slots-'+id); var t=document.getElementById('tog-'+id); if(!box)return; var hid=!!collapsed[id]; box.style.display=hid?'none':''; if(t)t.textContent=hid?'▸':'▾';
