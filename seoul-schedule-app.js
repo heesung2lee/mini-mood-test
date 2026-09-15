@@ -110,8 +110,8 @@ function toggleLock(e, id){ if(e&&e.stopPropagation)e.stopPropagation(); var s=f
 function rmSlotById(id){ for(var di=0;di<state.days.length;di++){ var i=state.days[di].slots.findIndex(function(x){return x._id===id;}); if(i>=0){ var s=state.days[di].slots[i]; if(s.lock){alert('Locked \u2014 unlock first.');return;} if(!confirm('Remove to Spots Pool?'))return; state.days[di].slots.splice(i,1); state.spots.push(s); render(); return; } } for(var k of ['food','spots']){ var j=state[k].findIndex(function(x){return x._id===id;}); if(j>=0){ var t=state[k][j]; if(t.lock){alert('Locked \u2014 unlock first.');return;} if(!confirm('Delete permanently?'))return; state[k].splice(j,1); render(); return; } } }
 function rmSlot(e, di, si){ e.stopPropagation(); var s=state.days[di].slots[si]; if(s.lock){ alert('Locked — unlock first.'); return; } if(!confirm('Remove "'+(s.n||'').slice(0,40)+'" to Spots Pool?'))return; state.days[di].slots.splice(si,1); state.spots.push(s); render(); }
 function toggleDay(id){ collapsed[id]=!collapsed[id]; var box=document.getElementById('slots-'+id); var t=document.getElementById('tog-'+id); if(!box)return; var hid=!!collapsed[id]; box.style.display=hid?'none':''; if(t)t.textContent=hid?'▸':'▾';
- // 요일 탭 누르면 지도도 해당일로
- var di=state.days.findIndex(function(x){return x.id===id;}); if(di>=0&&!hid){ mapDay=di; drawMap(); scrollSpyOff=Date.now()+5000; }
+ // 요일 탭 누르면 지도도 해당일로 (펼치기·접기 모두)
+ var di=state.days.findIndex(function(x){return x.id===id;}); if(di>=0){ mapDay=di; drawMap(); scrollSpyOff=Date.now()+5000; }
 }
 // 일정 1번 탭: 지도 해당일로 (화면 이동 없음). 2번 탭: 지도 스크롤 + 팝업
 var lastTapId=null, lastTapT=0;
@@ -155,8 +155,8 @@ async function geocodeAddr(addr, slot){
 }
 // ── Drag & drop (mouse + touch) ──
 function initSortable(){
- var groups = {group:{name:'sched',pull:true,put:true},animation:150,ghostClass:'sortable-ghost',delay:250,delayOnTouchOnly:false,
-  forceFallback:true,fallbackTolerance:5,
+ var groups = {group:{name:'sched',pull:true,put:true},animation:150,ghostClass:'sortable-ghost',delay:400,delayOnTouchOnly:true,
+  forceFallback:false,fallbackTolerance:5,
   onEnd:function(){ syncFromDOM(); }};
  state.days.forEach(function(d){ var el=document.getElementById('slots-'+d.id); if(el&&!el._s) el._s=new Sortable(el,Object.assign({},groups,{filter:'.locked',onMove:function(e){return !e.dragged.classList.contains('locked');}})); });
  ['pool-food','pool-spots'].forEach(function(id){ var el=document.getElementById(id); if(el&&!el._s) el._s=new Sortable(el,Object.assign({},groups)); });

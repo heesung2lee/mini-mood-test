@@ -30,7 +30,7 @@ h1{font-size:22px;font-weight:800}
 .day-h{padding:10px 14px;background:#eaf0f8;border-bottom:1px solid var(--line);font-weight:800;font-size:14px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
 .day-h .cnt{font-size:11px;color:var(--dim);font-weight:400}
 .slots{min-height:60px;padding:8px}
-.slot{background:#f0f4fa;border:1px solid var(--line);border-radius:10px;padding:9px 11px 28px;margin-bottom:7px;cursor:grab;font-size:13px;position:relative}
+.slot{background:#f0f4fa;border:1px solid var(--line);border-radius:10px;padding:9px 11px 28px;margin-bottom:7px;font-size:13px;position:relative;touch-action:pan-y}
 .slot:active{cursor:grabbing}
 .slot.sortable-ghost{opacity:.4;background:var(--gold)}
 .slot .t{color:var(--gold);font-weight:700;font-size:12px}
