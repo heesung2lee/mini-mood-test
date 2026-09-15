@@ -37,7 +37,8 @@ header p{font-size:12px;color:#8a8574;margin-top:2px}
 <div id="tabs">
 <button data-t="ap" class="act" onclick="tab('ap')">A+ 취향진단</button>
 <button data-t="bm" onclick="tab('bm')">B- 시그니처 Day</button>
-<button data-t="cp" onclick="tab('cp')">C+ 테마</button>
+<button data-t="dp" onclick="tab('dp')">D 동행자별</button>
+<button data-t="ep" onclick="tab('ep')">E 시간대별</button>
 </div>
 
 <!-- A+ -->
@@ -67,17 +68,31 @@ header p{font-size:12px;color:#8a8574;margin-top:2px}
 <div class="card" id="bmResult" style="display:none"><span class="label">확정 미리보기</span><h3>Day 3 오후: <span id="bmPick"></span></h3><p class="note">나머지 일정은 1:1 상담에서 확정 → 문의로 연결</p></div>
 </div>
 
-<!-- C+ -->
-<div class="page" id="pg-cp">
-<div class="themecard"><h3>🍷 골프 + 와인 5일</h3><p>링크스 2R + 템큘라 와이너리 + 스파 1회. 통합 견적 (개별가 노출 없음).</p><div class="tweak">✏️ 조정 예시: 와인 → 스파 추가, 라운드 1회 추가 가능. 출발점일 뿐 1:1로 조정합니다.</div></div>
-<div class="themecard"><h3>🏟️ 골프 + 스포츠 4일</h3><p>사막 2R + NBA/MLB 직관 + BBQ. 통합 견적.</p><div class="tweak">✏️ 조정 예시: 경기 일정에 맞춰 날짜 이동 가능. 출발점일 뿐 1:1로 조정합니다.</div></div>
-<div class="themecard"><h3>🌊 골프 + 휴식 6일</h3><p>오션+사막 3R + 리조트 휴식 2일. 통합 견적.</p><div class="tweak">✏️ 조정 예시: 휴식일 ↔ 관광일 교환 가능. 출발점일 뿐 1:1로 조정합니다.</div></div>
+<!-- D -->
+<div class="page" id="pg-dp">
+<div class="card"><span class="label">누구와 가나요?</span><h3>동행자에 따라 일정이 달라집니다</h3>
+<button class="opt" onclick="dpick(this,'부부 · 커플','조용한 리조트 + 스파 + 선셋 디너. 라운드는 여유롭게 2R.')">💑 부부 · 커플<small>조용한 리조트 + 스파</small></button>
+<button class="opt" onclick="dpick(this,'친구 4인','라운드는 진검승부 3R + 밤엔 BBQ + 스포츠 직관.')">⛳ 친구 4인<small>3R + 직관 + BBQ</small></button>
+<button class="opt" onclick="dpick(this,'가족 (자녀 동반)','라운드는 부모만 2R + 아이는 키즈캠프 + 전원 테마파크 반일.')">👨‍👩‍👧 가족<small>부모 라운드 + 키즈 프로그램</small></button>
+<button class="opt" onclick="dpick(this,'비즈니스','프라이빗 섭외 지원 + 프로 레슨 + 셰프 테이블. 접대 동선 최적화.')">💼 비즈니스<small>섭외 지원 + 접대 동선</small></button></div>
+<div class="card" id="dpResult" style="display:none"><span class="label">추천 방향</span><h3 id="dpTitle"></h3><p id="dpDesc"></p><p class="note">출발점일 뿐, 1:1 상담에서 조정합니다 → 문의로 연결</p></div>
+</div>
+
+<!-- E -->
+<div class="page" id="pg-ep">
+<div class="card"><span class="label">하루를 어떻게 쓰고 싶나요?</span><h3>시간대별 취향을 고르세요 (복수 선택)</h3>
+<button class="opt" onclick="mpick(this)">🌅 아침 — 일출 라운드<small>새벽 티타임 선점</small></button>
+<button class="opt" onclick="mpick(this)">☀️ 낮 — 골프 집중<small>36홀 도전 가능</small></button>
+<button class="opt" onclick="mpick(this)">🌇 오후 — 관광 + 휴식<small>와이너리 · 스파 · 쇼핑</small></button>
+<button class="opt" onclick="mpick(this)">🌃 저녁 — 쇼 + 다이닝<small>베가스 쇼 · BBQ</small></button></div>
+<div class="card" id="epResult" style="display:none"><span class="label">하루 리듬</span><h3 id="epTitle"></h3><p id="epDesc"></p><p class="note">이 리듬으로 Day별 일정표를 짭니다 → 문의로 연결</p></div>
 </div>
 
 <script>
 function tab(t){document.querySelectorAll('#tabs button').forEach(function(b){b.classList.toggle('act',b.dataset.t===t)});document.querySelectorAll('.page').forEach(function(p){p.classList.toggle('act',p.id==='pg-'+t)});}
 function pick(el,grp){document.querySelectorAll('#'+(grp==='bm'?'pg-bm':'pg-ap')+' .opt').forEach(function(o){if(o.parentElement===el.parentElement&&o!==el&&grp!=='bm')o.classList.remove('sel')});if(grp==='bm'){document.querySelectorAll('#pg-bm .pm-opt').forEach(function(o){o.classList.remove('sel')});}el.classList.add('sel');update();}
 function mpick(el){el.classList.toggle('sel');update();}
+function dpick(el,t,d){document.querySelectorAll('#pg-dp .opt').forEach(function(o){o.classList.remove('sel')});el.classList.add('sel');document.getElementById('dpResult').style.display='block';document.getElementById('dpTitle').textContent='“'+t+'” 맞춤 방향';document.getElementById('dpDesc').textContent=d;}
 function selTxt(c){return [].slice.call(document.querySelectorAll(c+' .opt.sel')).map(function(o){return o.textContent.split('\n')[0]}).join(' / ');}
 function update(){
  var a=selTxt('#pg-ap .card:first-child')||selTxt('#pg-ap');
@@ -85,6 +100,8 @@ function update(){
  if(acts.length){document.getElementById('apResult').style.display='block';
   document.getElementById('apTitle').textContent='당신은 "'+acts.slice(0,2).join(' + ')+'"형';
   document.getElementById('apDesc').textContent='선택 취향 기준으로 1:1 일정표를 만듭니다. '+acts.join(', ')+' 반영.';}
+ var es=[].slice.call(document.querySelectorAll('#pg-ep .opt.sel')).map(function(o){return o.childNodes[0].textContent.trim()});
+ if(es.length){document.getElementById('epResult').style.display='block';document.getElementById('epTitle').textContent=es.join(' → ');document.getElementById('epDesc').textContent='이 순서대로 하루를 짭니다. '+es.length+'개 시간대 선택됨.';}
  var b=document.querySelector('#pg-bm .pm-opt.sel');
  if(b){document.getElementById('bmResult').style.display='block';document.getElementById('bmPick').textContent=b.childNodes[0].textContent.trim();}
 }
