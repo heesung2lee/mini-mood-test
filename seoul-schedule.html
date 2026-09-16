@@ -102,9 +102,11 @@ footer{text-align:center;color:var(--dim);font-size:11px;margin-top:20px}
 
 <footer>Times are estimates with transit buffer. Philippine Airlines T1 confirmed.</footer>
 
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;align-items:center;justify-content:center;padding:20px"><div style="background:#fff;border-radius:14px;padding:16px;width:100%;max-width:340px"><div id="modalTitle" style="font-weight:800;margin-bottom:8px;font-size:14px"></div><div id="modalFields"></div><div style="display:flex;gap:8px;margin-top:12px"><button id="modalOk" style="flex:1;padding:10px;border:0;border-radius:10px;background:#b8860b;color:#fff;font-weight:800">OK</button><button id="modalCancel" style="flex:1;padding:10px;border:1px solid #d8e0ec;border-radius:10px;background:#fff;font-weight:700">Cancel</button></div></div></div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="seoul-schedule-config.js"></script>
-<script src="seoul-schedule-app.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

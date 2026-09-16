@@ -108,7 +108,7 @@ function renderPool(id, arr, kind){
 }
 function toggleLock(e, id){ if(e&&e.stopPropagation)e.stopPropagation(); var s=findSlotById(id); if(!s) return; if(s.lock) delete s.lock; else s.lock=1; persist(); render(); }
 function rmSlotById(id){ for(var di=0;di<state.days.length;di++){ var i=state.days[di].slots.findIndex(function(x){return x._id===id;}); if(i>=0){ var s=state.days[di].slots[i]; if(s.lock){alert('Locked \u2014 unlock first.');return;} if(!confirm('Remove to Spots Pool?'))return; state.days[di].slots.splice(i,1); state.spots.push(s); render(); return; } } for(var k of ['food','spots']){ var j=state[k].findIndex(function(x){return x._id===id;}); if(j>=0){ var t=state[k][j]; if(t.lock){alert('Locked \u2014 unlock first.');return;} if(!confirm('Delete permanently?'))return; state[k].splice(j,1); render(); return; } } }
-function rmSlot(e, di, si){ e.stopPropagation(); var s=state.days[di].slots[si]; if(s.lock){ alert('Locked — unlock first.'); return; } if(!confirm('Remove "'+(s.n||'').slice(0,40)+'" to Spots Pool?'))return; state.days[di].slots.splice(si,1); state.spots.push(s); render(); }
+function rmSlot(e, di, si){ e.stopPropagation(); var s=state.days[di].slots[si]; if(s.lock){ alert('Locked — unlock first.'); return; } modalConfirm('Remove to Spots Pool?', function(ok){ if(!ok)return; state.days[di].slots.splice(si,1); state.spots.push(s); render(); }); }
 function toggleDay(id){ collapsed[id]=!collapsed[id]; var box=document.getElementById('slots-'+id); var t=document.getElementById('tog-'+id); if(!box)return; var hid=!!collapsed[id]; box.style.display=hid?'none':''; if(t)t.textContent=hid?'▸':'▾';
  // 요일 탭 누르면 지도도 해당일로 (펼치기·접기 모두)
  var di=state.days.findIndex(function(x){return x.id===id;}); if(di>=0){ mapDay=di; drawMap(); scrollSpyOff=Date.now()+5000; }
@@ -126,7 +126,7 @@ function tapSlot(e, id){
   setTimeout(function(){ var mk=(window._markers||{})[id]; if(mk) mk.openPopup(); }, 500);
  } else { lastTapId=id; lastTapT=now; }
 }
-function rmPool(e, kind, i){ e.stopPropagation(); var s=state[kind==='food'?'food':'spots'][i]; if(s&&s.lock){ alert('Locked — unlock first.'); return; } if(!confirm('Delete this permanently?'))return; state[kind==='food'?'food':'spots'].splice(i,1); render(); }
+function rmPool(e, kind, i){ e.stopPropagation(); var s=state[kind==='food'?'food':'spots'][i]; if(s&&s.lock){ alert('Locked — unlock first.'); return; } modalConfirm('Delete permanently?', function(ok){ if(!ok)return; state[kind==='food'?'food':'spots'].splice(i,1); render(); }); }
 function addCustom(kind){
  var inp = document.getElementById(kind==='food'?'newFood':'newSpot');
  var tm = document.getElementById(kind==='food'?'newFoodT':'newSpotT');
@@ -250,23 +250,48 @@ function drawMap(){
  // 일정 카드에 지도 번호 반영
  window._numMap=numMap; refreshNums();
 }
+// 인앱 대응: prompt/confirm 대신 커스텀 모달 (카톡·라인 인앱은 prompt 막힘)
+function modal(title, fields, cb){
+ var m=document.getElementById('modal'); if(!m){ cb(fields.map(function(){return null;})); return; }
+ document.getElementById('modalTitle').textContent=title;
+ var box=document.getElementById('modalFields'); box.innerHTML='';
+ var inputs=fields.map(function(f){
+  var inp=document.createElement(f.multiline?'textarea':'input');
+  inp.value=f.value||''; inp.placeholder=f.ph||'';
+  inp.style.cssText='width:100%;box-sizing:border-box;padding:9px;margin-top:6px;border:1px solid #d8e0ec;border-radius:8px;font-size:14px;font-family:inherit';
+  if(f.multiline) inp.rows=3;
+  box.appendChild(inp); return inp;
+ });
+ m.style.display='flex';
+ var done=function(ok){ m.style.display='none';
+  document.getElementById('modalOk').onclick=null; document.getElementById('modalCancel').onclick=null;
+  cb(ok?inputs.map(function(i){return i.value;}):null); };
+ document.getElementById('modalOk').onclick=function(){done(true);};
+ document.getElementById('modalCancel').onclick=function(){done(false);};
+}
+function modalConfirm(msg, cb){
+ var m=document.getElementById('modal'); if(!m){ cb(window.confirm?window.confirm(msg):true); return; }
+ document.getElementById('modalTitle').textContent=msg;
+ document.getElementById('modalFields').innerHTML='';
+ m.style.display='flex';
+ var done=function(ok){ m.style.display='none'; document.getElementById('modalOk').onclick=null; document.getElementById('modalCancel').onclick=null; cb(ok); };
+ document.getElementById('modalOk').onclick=function(){done(true);};
+ document.getElementById('modalCancel').onclick=function(){done(false);};
+}
 function editText(e, id){
  e.stopPropagation();
  var s=findSlotById(id); if(!s||s.lock) return;
- var nn=prompt('Title:', s.n||'');
- if(nn===null) return;
- var dd=prompt('Description:', s.d||'');
- if(dd===null) return;
- s.n=nn.trim(); s.d=dd.trim();
- render();
+ modal('Edit card', [{value:s.n||'',ph:'Title'},{value:s.d||'',ph:'Description',multiline:1}], function(v){
+  if(!v) return; s.n=(v[0]||'').trim(); s.d=(v[1]||'').trim(); render();
+ });
 }
 function editAddr(e, id){
  e.stopPropagation();
  var s=findSlotById(id); if(!s) return;
  var cur=s.addr||'';
- var v=prompt('Address (Korean OK) for map pin:\n'+s.n, cur);
- if(v===null) return;
- s.addr=v.trim();
+ modal('Address for map pin (Korean OK)\n'+s.n, [{value:cur,ph:'e.g. 중구 세종대로 82'}], function(v){
+ if(!v) return;
+ s.addr=(v[0]||'').trim();
  if(!s.addr){ setStatus('Address cleared.'); render(); return; }
  setStatus('Searching location…');
  fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(s.addr)) 
@@ -281,6 +306,7 @@ function editAddr(e, id){
   render();
  })
  .catch(function(){ setStatus('Search failed — kept anyway.'); render(); });
+ });
 }
 function refreshNums(){
  var m=window._numMap||{};
