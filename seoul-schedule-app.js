@@ -41,7 +41,9 @@ var DEFAULTS = {
   {t:"",n:"Korea House (한국의집)",d:"Traditional performance + dining. Chungmuro.",g:"chungmuro",cat:"food"},
   {t:"",n:"Jinju Hoegwan (진주회관)",d:"Jung-gu kongguksu + kimchi. Near Seoul Plaza.",g:"jinju",cat:"food"}
  ],
- spots: []
+ spots: [
+  {t:"",n:"Olive Young Myeongdong Station (올리브영 명동역점)",d:"Flagship beauty store near Myeongdong Station.",g:"myeongdong",cat:"spot"}
+ ]
 };
 
 var state = load() || JSON.parse(JSON.stringify(DEFAULTS));
