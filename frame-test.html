@@ -35,24 +35,22 @@ header p{font-size:12px;color:#8a8574;margin-top:2px}
 <body>
 <header><h1>🧪 구성 프레임 테스트</h1><p>A+ 취향진단 · B- 시그니처 Day · C+ 테마+조정 — 탭으로 비교</p></header>
 <div id="tabs">
-<button data-t="ap" class="act" onclick="tab('ap')">A+ 취향진단</button>
-<button data-t="bm" onclick="tab('bm')">B- 시그니처 Day</button>
-<button data-t="dp" onclick="tab('dp')">D 동행자별</button>
-<button data-t="ep" onclick="tab('ep')">E 시간대별</button>
+<button data-t="ap" class="act" onclick="tab('ap')">🧭 나침반</button>
+<button data-t="bm" onclick="tab('bm')">📅 시그니처 Day</button>
+<button data-t="dp" onclick="tab('dp')">👥 동행자</button>
+<button data-t="ep" onclick="tab('ep')">⏰ 시간대</button>
+<button data-t="pp" onclick="tab('pp')">🚪 목적문</button>
+<button data-t="fp" onclick="tab('fp')">🎯 2스텝 진단</button>
 </div>
 
-<!-- A+ -->
+<!-- A+ 나침반 -->
 <div class="page act" id="pg-ap">
-<div class="card"><span class="label">STEP 1 · 코스 취향</span><h3>어떤 그림에서 치고 싶나요?</h3>
-<button class="opt" onclick="pick(this,'ap1')">🌊 바다 옆 링크스<small>절벽 코스 + PCH 드라이브</small></button>
-<button class="opt" onclick="pick(this,'ap1')">🏜️ 사막 리조트<small>팜스프링스 + 여유로운 리조트</small></button>
-<button class="opt" onclick="pick(this,'ap1')">⛰️ 산악 + 호수<small>조용한 자연 속 라운드</small></button></div>
-<div class="card"><span class="label">STEP 2 · 골프 외 시간</span><h3>라운드 끝나고 뭐 하고 싶나요? (복수 선택)</h3>
-<button class="opt" onclick="mpick(this)">🍷 와이너리 투어<small>템큘라 밸리 · 40+ 와이너리</small></button>
-<button class="opt" onclick="mpick(this)">💆 스파 + 리조트 휴식<small>오후 반나절</small></button>
-<button class="opt" onclick="mpick(this)">🏟️ 스포츠 경기 관람<small>시즌별 NBA/MLB</small></button>
-<button class="opt" onclick="mpick(this)">🌵 사막 선셋 투어<small>조슈아트리 · 약 3시간</small></button></div>
-<div class="card" id="apResult" style="display:none"><span class="label">진단 결과</span><h3 id="apTitle"></h3><p id="apDesc"></p><p class="note">출발점일 뿐, 1:1 상담에서 조정합니다 → 문의로 연결</p></div>
+<div class="card"><span class="label">4방향 중 1~2개 선택</span><h3>어디에 마음이 가나요?</h3>
+<button class="opt" onclick="mpick(this)">🌊 바다<small>페블비치 링크스 G01 · 17마일 C01 · 토리파인 G03</small></button>
+<button class="opt" onclick="mpick(this)">🏜️ 사막 · 휴양<small>섀도우크릭 G09 · 스파 J03 · 팜스프링스 S03</small></button>
+<button class="opt" onclick="mpick(this)">🍷 와인 · 미식<small>나파 버티컬 W01 · 셰프테이블 M01 · 수확기 S02</small></button>
+<button class="opt" onclick="mpick(this)">⛰️ 모험 · 자연<small>밴프 헬리 H01 · 요세미티 H02 · 빅서 H03</small></button></div>
+<div class="card" id="apResult" style="display:none"><span class="label">선택 방향</span><h3 id="apTitle"></h3><p id="apDesc"></p><p class="note">세부 393개 항목은 1:1 상담에서 매칭 → 문의로 연결</p></div>
 </div>
 
 <!-- B- -->
@@ -61,9 +59,9 @@ header p{font-size:12px;color:#8a8574;margin-top:2px}
 <p>Day 1: 도착 + 오리엔테이션<br>Day 2: ⛳ 라운드 1 (오션 링크스)</p>
 <div class="day"><h4>Day 3 — 팜스프링스 (시그니처 Day)</h4><p style="font-size:13px">⛳ 오전: PGA West Stadium 라운드</p>
 <p style="font-size:13px;margin-top:6px">🍷 오후 옵션 (택1):</p>
-<button class="opt pm-opt" onclick="pick(this,'bm')">🍷 템큘라 와이너리 투어<small>약 4시간 · 시음 포함</small></button>
-<button class="opt pm-opt" onclick="pick(this,'bm')">💆 스파 + 리조트 휴식<small>오후 반나절 · 자유시간</small></button>
-<button class="opt pm-opt" onclick="pick(this,'bm')">🌵 조슈아트리 선셋 투어<small>약 3시간 · 사진 명소</small></button></div>
+<button class="opt pm-opt" onclick="pick(this,'bm')">🍷 템큘라 와이너리 투어<small>W-템큘라 · 약 4시간 · 시음 포함</small></button>
+<button class="opt pm-opt" onclick="pick(this,'bm')">💆 스파 + 리조트 휴식<small>J03 · 오후 반나절</small></button>
+<button class="opt pm-opt" onclick="pick(this,'bm')">🌵 조슈아트리 선셋 투어<small>H-데저트 · 약 3시간</small></button></div>
 <p>Day 4: ⛳ 라운드 3<br>Day 5: 출발</p></div>
 <div class="card" id="bmResult" style="display:none"><span class="label">확정 미리보기</span><h3>Day 3 오후: <span id="bmPick"></span></h3><p class="note">나머지 일정은 1:1 상담에서 확정 → 문의로 연결</p></div>
 </div>
@@ -73,25 +71,54 @@ header p{font-size:12px;color:#8a8574;margin-top:2px}
 <div class="card"><span class="label">누구와 가나요?</span><h3>동행자에 따라 일정이 달라집니다</h3>
 <button class="opt" onclick="dpick(this,'부부 · 커플','조용한 리조트 + 스파 + 선셋 디너. 라운드는 여유롭게 2R.')">💑 부부 · 커플<small>조용한 리조트 + 스파</small></button>
 <button class="opt" onclick="dpick(this,'친구 4인','라운드는 진검승부 3R + 밤엔 BBQ + 스포츠 직관.')">⛳ 친구 4인<small>3R + 직관 + BBQ</small></button>
-<button class="opt" onclick="dpick(this,'가족 (자녀 동반)','라운드는 부모만 2R + 아이는 키즈캠프 + 전원 테마파크 반일.')">👨‍👩‍👧 가족<small>부모 라운드 + 키즈 프로그램</small></button>
-<button class="opt" onclick="dpick(this,'비즈니스','프라이빗 섭외 지원 + 프로 레슨 + 셰프 테이블. 접대 동선 최적화.')">💼 비즈니스<small>섭외 지원 + 접대 동선</small></button></div>
+<button class="opt" onclick="dpick(this,'가족 (자녀 동반)','라운드는 부모만 2R + 아이는 키즈캠프 + 전원 테마파크 반일.')">👨‍👩‍👧 가족<small>F01~F04 · 부모 라운드 + 키즈 프로그램</small></button>
+<button class="opt" onclick="dpick(this,'비즈니스','프라이빗 섭외 지원 + 프로 레슨 + 셰프 테이블. 접대 동선 최적화.')">💼 비즈니스<small>B01~B04 · 섭외 지원 + 접대 동선</small></button></div>
 <div class="card" id="dpResult" style="display:none"><span class="label">추천 방향</span><h3 id="dpTitle"></h3><p id="dpDesc"></p><p class="note">출발점일 뿐, 1:1 상담에서 조정합니다 → 문의로 연결</p></div>
 </div>
 
 <!-- E -->
 <div class="page" id="pg-ep">
 <div class="card"><span class="label">하루를 어떻게 쓰고 싶나요?</span><h3>시간대별 취향을 고르세요 (복수 선택)</h3>
-<button class="opt" onclick="mpick(this)">🌅 아침 — 일출 라운드<small>새벽 티타임 선점</small></button>
+<button class="opt" onclick="mpick(this)">🌅 아침 — 일출 라운드<small>여름 코스트 S01 · 새벽 티타임</small></button>
 <button class="opt" onclick="mpick(this)">☀️ 낮 — 골프 집중<small>36홀 도전 가능</small></button>
 <button class="opt" onclick="mpick(this)">🌇 오후 — 관광 + 휴식<small>와이너리 · 스파 · 쇼핑</small></button>
-<button class="opt" onclick="mpick(this)">🌃 저녁 — 쇼 + 다이닝<small>베가스 쇼 · BBQ</small></button></div>
+<button class="opt" onclick="mpick(this)">🌃 저녁 — 쇼 + 다이닝<small>M03 베가스 다이닝쇼 · BBQ</small></button></div>
 <div class="card" id="epResult" style="display:none"><span class="label">하루 리듬</span><h3 id="epTitle"></h3><p id="epDesc"></p><p class="note">이 리듬으로 Day별 일정표를 짭니다 → 문의로 연결</p></div>
 </div>
 
+<!-- P 목적문 -->
+<div class="page" id="pg-pp">
+<div class="card"><span class="label">어느 문으로 들어오나요?</span><h3>목적 1개 선택</h3>
+<button class="opt" onclick="dpick2(this,'버킷리스트','페블비치 G01 · 섀도우크릭 G09 · 토리파인 G03')">🚩 버킷리스트<small>페블비치 G01 · 섀도우크릭 G09</small></button>
+<button class="opt" onclick="dpick2(this,'즐기기','나파 버티컬 W01 · 셰프테이블 M01 · 스파 J03')">🍷 즐기기<small>와인 · 다이닝 · 스파</small></button>
+<button class="opt" onclick="dpick2(this,'함께','가족 F01~ · 비즈니스 B01~')">🤝 함께<small>가족 · 비즈니스</small></button></div>
+<div class="card" id="ppResult" style="display:none"><span class="label">선택 목적</span><h3 id="ppTitle"></h3><p id="ppDesc"></p></div>
+</div>
+<!-- F 2스텝 -->
+<div class="page" id="pg-fp">
+<div class="card"><span class="label">Step 1 · 방향</span><h3>4방향 중 선택 (복수 가능)</h3>
+<button class="opt" onclick="mpick(this)">🌊 바다</button>
+<button class="opt" onclick="mpick(this)">🏜️ 사막 · 휴양</button>
+<button class="opt" onclick="mpick(this)">🍷 와인 · 미식</button>
+<button class="opt" onclick="mpick(this)">⛰️ 모험 · 자연</button></div>
+<div class="card"><span class="label">Step 2 · 누구와 + 언제</span><h3>동행자 + 시즌</h3>
+<button class="opt" onclick="fpick(this,'who')">💑 부부</button>
+<button class="opt" onclick="fpick(this,'who')">⛳ 친구</button>
+<button class="opt" onclick="fpick(this,'who')">👨‍👩‍👧 가족</button>
+<button class="opt" onclick="fpick(this,'who')">💼 비즈니스</button>
+<button class="opt" onclick="fpick(this,'sea')">☀️ 여름 S01</button>
+<button class="opt" onclick="fpick(this,'sea')">🍇 가을 수확 S02</button>
+<button class="opt" onclick="fpick(this,'sea')">🌵 겨울 데저트 S03</button>
+<button class="opt" onclick="fpick(this,'sea')">🌸 봄 로키 S04</button></div>
+<div class="card" id="fpResult" style="display:none"><span class="label">조합 라벨</span><h3 id="fpTitle"></h3><p class="note">이 조합으로 팔레트 393개 중 해당 항목만 상담 때 매칭 → 문의로 연결</p></div>
+</div>
 <script>
 function tab(t){document.querySelectorAll('#tabs button').forEach(function(b){b.classList.toggle('act',b.dataset.t===t)});document.querySelectorAll('.page').forEach(function(p){p.classList.toggle('act',p.id==='pg-'+t)});}
 function pick(el,grp){document.querySelectorAll('#'+(grp==='bm'?'pg-bm':'pg-ap')+' .opt').forEach(function(o){if(o.parentElement===el.parentElement&&o!==el&&grp!=='bm')o.classList.remove('sel')});if(grp==='bm'){document.querySelectorAll('#pg-bm .pm-opt').forEach(function(o){o.classList.remove('sel')});}el.classList.add('sel');update();}
 function mpick(el){el.classList.toggle('sel');update();}
+function dpick2(el,t,d){var pg=el.closest('.page');pg.querySelectorAll('.opt').forEach(function(o){o.classList.remove('sel')});el.classList.add('sel');document.getElementById('ppResult').style.display='block';document.getElementById('ppTitle').textContent='“'+t+'”';document.getElementById('ppDesc').textContent=d;}
+function fpick(el,grp){document.querySelectorAll('#pg-fp .opt').forEach(function(o){if(o.textContent.match(/부부|친구|가족|비즈니스/)&&grp==='who')o.classList.remove('sel');if(o.textContent.match(/여름|가을|겨울|봄/)&&grp==='sea')o.classList.remove('sel')});el.classList.add('sel');fupdate();}
+function fupdate(){var dirs=[].slice.call(document.querySelectorAll('#pg-fp .card:first-child .opt.sel')).map(function(o){return o.textContent.trim()}).join('×');var who=document.querySelector('#pg-fp .opt.sel');var all=[].slice.call(document.querySelectorAll('#pg-fp .opt.sel')).map(function(o){return o.textContent.trim()});if(all.length>=2){document.getElementById('fpResult').style.display='block';document.getElementById('fpTitle').textContent=all.join(' × ');}}
 function dpick(el,t,d){document.querySelectorAll('#pg-dp .opt').forEach(function(o){o.classList.remove('sel')});el.classList.add('sel');document.getElementById('dpResult').style.display='block';document.getElementById('dpTitle').textContent='“'+t+'” 맞춤 방향';document.getElementById('dpDesc').textContent=d;}
 function selTxt(c){return [].slice.call(document.querySelectorAll(c+' .opt.sel')).map(function(o){return o.textContent.split('\n')[0]}).join(' / ');}
 function update(){
