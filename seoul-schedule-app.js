@@ -157,9 +157,9 @@ async function geocodeAddr(addr, slot){
 function initSortable(){
  var groups = {group:{name:'sched',pull:true,put:true},animation:150,ghostClass:'sortable-ghost',delay:600,delayOnTouchOnly:true,
   forceFallback:false,fallbackTolerance:8,preventOnFilter:false,
-  filter:function(e, target){ return !!target.closest('.num,.lk,.n,.d,.ad'); },
+  filter:'.num,.lk,.n,.d,.ad',
   onEnd:function(){ syncFromDOM(); }};
- state.days.forEach(function(d){ var el=document.getElementById('slots-'+d.id); if(el&&!el._s) el._s=new Sortable(el,Object.assign({},groups,{filter:'.locked',onMove:function(e){return !e.dragged.classList.contains('locked');}})); });
+ state.days.forEach(function(d){ var el=document.getElementById('slots-'+d.id); if(el&&!el._s) el._s=new Sortable(el,Object.assign({},groups,{filter:'.locked,.num,.lk,.n,.d,.ad',preventOnFilter:false,onMove:function(e){return !e.dragged.classList.contains('locked');}})); });
  ['pool-food','pool-spots'].forEach(function(id){ var el=document.getElementById(id); if(el&&!el._s) el._s=new Sortable(el,Object.assign({},groups)); });
 }
 function syncFromDOM(){
