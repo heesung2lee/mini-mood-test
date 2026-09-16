@@ -77,7 +77,7 @@ function slotHTML(s, di, si, mapNum){
  var badge = (s.cat==='hotel')?'🏠':(s.cat==='move'?(((s.n||'').indexOf('Bus')>=0||(s.n||'').indexOf('버스')>=0)?'🚌':'✈️'):String(mapNum));
  return '<div class="slot '+s.cat+(s.lock?' locked':'')+'" data-uid="'+s._id+'" data-d="'+di+'" data-s="'+si+'" onclick="tapSlot(event,\''+s._id+'\')"'
  +'<span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">'+badge+'</span>'
- +(s.addr?'<div class="ad">📍 '+esc(s.addr)+'</div>':'')
+ +(s.addr?'<div class="ad" onclick="editAddr(event,\''+s._id+'\')" title="tap to edit address" style="cursor:pointer">📍 '+esc(s.addr)+'</div>':'<div class="ad" onclick="editAddr(event,\''+s._id+'\')" title="tap to add address" style="cursor:pointer;opacity:.5">📍 (tap to add address)</div>')
  +(s.t?'<div class="t">'+esc(s.t)+'</div>':'')
  +'<div class="n" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.n)+'</div>'
  +'<div class="d" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.d||'(tap to add description)')+'</div>'
@@ -155,8 +155,9 @@ async function geocodeAddr(addr, slot){
 }
 // ── Drag & drop (mouse + touch) ──
 function initSortable(){
- var groups = {group:{name:'sched',pull:true,put:true},animation:150,ghostClass:'sortable-ghost',delay:400,delayOnTouchOnly:true,
-  forceFallback:false,fallbackTolerance:5,
+ var groups = {group:{name:'sched',pull:true,put:true},animation:150,ghostClass:'sortable-ghost',delay:600,delayOnTouchOnly:true,
+  forceFallback:false,fallbackTolerance:8,preventOnFilter:false,
+  filter:function(e, target){ return !!target.closest('.num,.lk,.n,.d,.ad'); },
   onEnd:function(){ syncFromDOM(); }};
  state.days.forEach(function(d){ var el=document.getElementById('slots-'+d.id); if(el&&!el._s) el._s=new Sortable(el,Object.assign({},groups,{filter:'.locked',onMove:function(e){return !e.dragged.classList.contains('locked');}})); });
  ['pool-food','pool-spots'].forEach(function(id){ var el=document.getElementById(id); if(el&&!el._s) el._s=new Sortable(el,Object.assign({},groups)); });
