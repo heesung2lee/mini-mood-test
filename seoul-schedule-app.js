@@ -243,7 +243,7 @@ function drawMap(){
   var cls=s.cat==='food'?'food':(s.cat==='hotel'?'hotel':(s.cat==='move'?'move':''));
   var label=(s.cat==='hotel')?'🏠':(s.cat==='move'?(((s.n||'').indexOf('Bus')>=0||(s.n||'').indexOf('버스')>=0)?'🚌':'✈️'):String(numMap[s._id]||''));
   var icon=L.divIcon({className:'',html:'<div class="mk '+cls+'">'+label+'</div>',iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-14]});
-  var mk=L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>'+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span><br><a href="https://www.google.com/maps/search/?api=1&query='+g[0]+','+g[1]+'" target="_blank" style="color:#4a9eff;font-size:12px">Google Maps ↗</a> · <a href="https://map.kakao.com/link/to/'+encodeURIComponent(s.n.replace(/\(.*?\)/g,''))+','+g[0]+','+g[1]+'" target="_blank" style="color:#fae100;font-size:12px">KakaoMap ↗</a>');
+  var mk=L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>'+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
   if(s._id) markerById[s._id]=mk;
   pts.push(g);
  });
@@ -317,7 +317,7 @@ function refreshNums(){
   var b=el.querySelector('.num'); if(!b) return;
   var id=el.dataset.uid; var s=findSlotById(id); if(!s) return;
   var n=m[id];
-  b.textContent=(s.cat==='hotel')?'🏠':(s.cat==='move'?(((s.n||'').indexOf('Bus')>=0||(s.n||'').indexOf('버스')>=0)?'🚌':'✈️'):(n!=null?String(n):'•'));
+  b.textContent=(s.cat==='hotel')?'🏠':(s.cat==='move'?(((s.n||'').indexOf('Bus')>=0||(s.n||'').indexOf('버스')>=0)?'🚌':'✈️'):(n>0?String(n):'•'));
  });
 }
 function findSlotById(id){
