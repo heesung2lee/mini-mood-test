@@ -290,6 +290,7 @@ function editText(e, id){
 function editAddr(e, id){
  e.stopPropagation();
  var s=findSlotById(id); if(!s) return;
+ if(s.lock){ alert('Locked — unlock first.'); return; }
  var cur=s.addr||'';
  modal('Address for map pin (Korean OK)\n'+s.n, [{value:cur,ph:'e.g. 중구 세종대로 82'}], function(v){
  if(!v) return;
