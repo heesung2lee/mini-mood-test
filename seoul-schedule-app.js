@@ -253,8 +253,14 @@ function drawMap(){
  });
  if(pts.length>1){ L.polyline(pts,{color:'#b8860b',weight:2.5,dashArray:'6 4',opacity:.8}).addTo(layerGroup); }
  if(pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[40,40]});
- // 일정 카드에 지도 번호 반영
- window._numMap=numMap; refreshNums();
+ // 일정 카드에 지도 번호 반영 — 전 요일 전부 (현재 요일 아니면 순서번호)
+ (function(){
+  var allMap={};
+  state.days.forEach(function(dd){
+   var nn=0; (dd.slots||[]).forEach(function(ss){ if(!(ss.icon||ss.iconEmoji)&&ss.cat!=='hotel'&&ss.cat!=='move'){ nn++; if(ss._id) allMap[ss._id]=nn; } });
+  });
+  window._numMap=allMap; refreshNums();
+ })();
 }
 // 인앱 대응: prompt/confirm 대신 커스텀 모달 (카톡·라인 인앱은 prompt 막힘)
 function modal(title, fields, cb){
@@ -365,7 +371,7 @@ function bindLocks(){
  document.querySelectorAll('.lk').forEach(function(el){
   if(el._bound) return; el._bound=1;
   var id=el.dataset.lk, timer=null;
-  el.addEventListener('pointerdown', function(e){ e.stopPropagation(); var self=this; timer=setTimeout(function(){ timer=null; rmSlotById(id); }, 900); });
+  el.addEventListener('pointerdown', function(e){ e.stopPropagation(); timer=setTimeout(function(){ timer=null; rmSlotById(id); }, 900); });
   el.addEventListener('pointerup', function(e){ e.stopPropagation(); if(timer){ clearTimeout(timer); timer=null; toggleLock(e, id); } });
   el.addEventListener('pointerleave', function(){ if(timer){ clearTimeout(timer); timer=null; } });
   el.addEventListener('contextmenu', function(e){ e.preventDefault(); e.stopPropagation(); });
