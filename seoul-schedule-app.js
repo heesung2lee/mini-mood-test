@@ -76,9 +76,9 @@ function countSlots(s){ var n=0; (s.days||[]).forEach(function(d){n+=d.slots.len
 // ── Render ──
 function slotHTML(s, di, si, mapNum){
  if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9);
- var badge = (s.cat==='hotel')?'🏠':(s.cat==='move'?(((s.n||'').indexOf('Bus')>=0||(s.n||'').indexOf('버스')>=0)?'🚌':'✈️'):String(mapNum));
+ var badge = badgeFor(s, String(mapNum));
  return '<div class="slot '+s.cat+(s.lock?' locked':'')+'" data-uid="'+s._id+'" data-d="'+di+'" data-s="'+si+'" onclick="tapSlot(event,\''+s._id+'\')"'
- +'<span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">'+badge+'</span>'
+ +'<span class="num" onclick="editIcon(event,\''+s._id+'\')" title="tap to change icon" style="cursor:pointer">'+badge+'</span>'
  +(s.addr?'<div class="ad" onclick="editAddr(event,\''+s._id+'\')" title="tap to edit address" style="cursor:pointer">📍 '+esc(s.addr)+'</div>':'<div class="ad" onclick="editAddr(event,\''+s._id+'\')" title="tap to add address" style="cursor:pointer;opacity:.5">📍 (tap to add address)</div>')
  +(s.t?'<div class="t">'+esc(s.t)+'</div>':'')
  +'<div class="n" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.n)+'</div>'
@@ -86,6 +86,10 @@ function slotHTML(s, di, si, mapNum){
  +'<span class="lk" data-lk="'+s._id+'" title="tap: lock/unlock, hold 1s: remove" style="cursor:pointer">'+(s.lock?'🔒':'🔓')+'</span></div>';
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+var ICONS={hotel:'🏠',move:'✈️',bus:'🚌',food:'🍽️',shop:'🛍️',makeup:'💄',spot:'•'};
+function badgeFor(s, fb){ if(s.iconEmoji) return s.iconEmoji; if(s.icon&&ICONS[s.icon]) return ICONS[s.icon]; if(s.cat==='hotel')return ICONS.hotel; if(s.cat==='move'){var n=s.n||'';return (n.indexOf('Bus')>=0||n.indexOf('버스')>=0)?ICONS.bus:ICONS.move;} if(s.cat==='food')return ICONS.food; if(s.cat==='shop')return ICONS.shop; if(s.cat==='makeup')return ICONS.makeup; return fb; }
+function iconChoices(cur){ return Object.keys(ICONS).map(function(k){return (k===cur?'● ':'○ ')+k+' '+ICONS[k];}).join('\n'); }
+function editIcon(e, id){ e.stopPropagation(); var s=findSlotById(id); if(!s||s.lock) return; modal('Card icon (current: '+((s.iconEmoji||(s.icon&&ICONS[s.icon])||s.icon)||s.cat||'auto')+')', [{value:s.icon||s.iconEmoji||'',ph:'hotel/move/bus/food/shop/makeup/spot or emoji like ☕'}], function(v){ if(!v) return; var c=(v[0]||'').trim(); if(!c){delete s.icon;delete s.iconEmoji;} else if(ICONS[c]){s.icon=c;delete s.iconEmoji;} else {s.icon=null;s.iconEmoji=c;} render(); }); }
 function setStatus(s){ var el=document.getElementById('fbStatus'); if(el) el.textContent=s; setTimeout(fbStatus, 3000); }
 var collapsed = {};
 function render(){
@@ -237,11 +241,11 @@ function drawMap(){
  viewSlots.forEach(function(s){
   var g=GEO[s.g]||GEO.andaz;
   if(!GEO[s.g]||s.g==='andaz'){ jit++; g=[g[0]+jit*0.004, g[1]+jit*0.006]; }
-  var isNum=(s.cat!=='hotel'&&s.cat!=='move');
+  var isNum=!(s.icon||s.iconEmoji)&&s.cat!=='hotel'&&s.cat!=='move';
   if(isNum){ n++; if(s._id) numMap[s._id]=n; }
   else if(s._id) numMap[s._id]=0;
-  var cls=s.cat==='food'?'food':(s.cat==='hotel'?'hotel':(s.cat==='move'?'move':''));
-  var label=(s.cat==='hotel')?'🏠':(s.cat==='move'?(((s.n||'').indexOf('Bus')>=0||(s.n||'').indexOf('버스')>=0)?'🚌':'✈️'):String(numMap[s._id]||''));
+  var cls=s.cat==='food'?'food':(s.cat==='hotel'?'hotel':(s.cat==='move'?'move':(s.cat==='shop'?'shop':(s.cat==='makeup'?'makeup':''))));
+  var label=badgeFor(s, String(numMap[s._id]||n+1));
   var icon=L.divIcon({className:'',html:'<div class="mk '+cls+'">'+label+'</div>',iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-14]});
   var mk=L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>'+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
   if(s._id) markerById[s._id]=mk;
@@ -317,7 +321,7 @@ function refreshNums(){
   var b=el.querySelector('.num'); if(!b) return;
   var id=el.dataset.uid; var s=findSlotById(id); if(!s) return;
   var n=m[id];
-  b.textContent=(s.cat==='hotel')?'🏠':(s.cat==='move'?(((s.n||'').indexOf('Bus')>=0||(s.n||'').indexOf('버스')>=0)?'🚌':'✈️'):(n>0?String(n):'•'));
+  b.textContent=badgeFor(s, (n>0?String(n):'•'));
  });
 }
 function findSlotById(id){
