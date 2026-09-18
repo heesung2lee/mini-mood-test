@@ -77,7 +77,7 @@ function countSlots(s){ var n=0; (s.days||[]).forEach(function(d){n+=d.slots.len
 function slotHTML(s, di, si, mapNum){
  if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9);
  var badge = badgeFor(s, String(mapNum));
- return '<div class="slot '+s.cat+(s.lock?' locked':'')+'" data-uid="'+s._id+'" data-d="'+di+'" data-s="'+si+'" onclick="tapSlot(event,\''+s._id+'\')"'
+ return '<div class="slot '+s.cat+(s.lock?' locked':'')+'" data-uid="'+s._id+'" data-d="'+di+'" data-s="'+si+'" onclick="tapSlot(event,\''+s._id+'\')">'
  +'<span class="num" onclick="editIcon(event,\''+s._id+'\')" title="tap to change icon" style="cursor:pointer">'+badge+'</span>'
  +(s.addr?'<div class="ad" onclick="editAddr(event,\''+s._id+'\')" title="tap to edit address" style="cursor:pointer">📍 '+esc(s.addr)+'</div>':'<div class="ad" onclick="editAddr(event,\''+s._id+'\')" title="tap to add address" style="cursor:pointer;opacity:.5">📍 (tap to add address)</div>')
  +(s.t?'<div class="t">'+esc(s.t)+'</div>':'')
