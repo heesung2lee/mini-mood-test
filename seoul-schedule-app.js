@@ -230,14 +230,14 @@ function syncFromDOM(){
   return null;
  }
  state.days.forEach(function(d){
-  var box=document.getElementById('slots-'+d.id); if(!box) return; var out=[];
+  var box=document.getElementById('slots-'+d.id); if(!box) return; var out=[]; var seen={};
   box.querySelectorAll('.slot').forEach(function(el){
    var src=el.dataset.uid?findSlot(el.dataset.uid):null;
    if(!src){
     if(el.dataset.d!==undefined) src=state.days[+el.dataset.d].slots[+el.dataset.s];
     else src=state[el.dataset.p==='food'?'food':'spots'][+el.dataset.i];
    }
-   if(src) out.push(src);
+   if(src){ var k=src._id||src.n; if(!seen[k]){ seen[k]=1; out.push(src); } }
   });
   d.slots=out;
  });
