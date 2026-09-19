@@ -86,8 +86,8 @@ function slotHTML(s, di, si, mapNum){
  +'<span class="lk" data-lk="'+s._id+'" title="tap: lock/unlock, hold 1s: remove" style="cursor:pointer">'+(s.lock?'🔒':'🔓')+'</span></div>';
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-var ICONS={hotel:'🏠',move:'✈️',bus:'🚌',food:'🍽️',shop:'🛍️',makeup:'💄',spot:'•'};
-function badgeFor(s, fb){ if(s.iconEmoji) return s.iconEmoji; if(s.icon&&ICONS[s.icon]) return ICONS[s.icon]; if(s.cat==='hotel')return ICONS.hotel; if(s.cat==='move'){var n=s.n||'';return (n.indexOf('Bus')>=0||n.indexOf('버스')>=0)?ICONS.bus:ICONS.move;} if(s.cat==='food')return ICONS.food; if(s.cat==='shop')return ICONS.shop; if(s.cat==='makeup')return ICONS.makeup; return fb; }
+var ICONS={hotel:'🏠',move:'✈️',bus:'🚌',food:'🍽️',shop:'🛍️',makeup:'💄',spa:'🧖‍♀️',spot:'•'};
+function badgeFor(s, fb){ if(s.iconEmoji) return s.iconEmoji; if(s.icon&&ICONS[s.icon]) return ICONS[s.icon]; if(s.cat==='hotel')return ICONS.hotel; if(s.cat==='move'){var n=s.n||'';return (n.indexOf('Bus')>=0||n.indexOf('버스')>=0)?ICONS.bus:ICONS.move;} if(s.cat==='food')return ICONS.food; if(s.cat==='shop')return ICONS.shop; if(s.cat==='makeup')return ICONS.makeup; if(s.cat==='spa')return ICONS.spa; return fb; }
 function iconChoices(cur){ return Object.keys(ICONS).map(function(k){return (k===cur?'● ':'○ ')+k+' '+ICONS[k];}).join('\n'); }
 function editIcon(e, id){ e.stopPropagation(); var s=findSlotById(id); if(!s||s.lock) return; modal('Card icon (current: '+((s.iconEmoji||(s.icon&&ICONS[s.icon])||s.icon)||s.cat||'auto')+')', [{value:s.icon||s.iconEmoji||'',ph:'hotel/move/bus/food/shop/makeup/spot or emoji like ☕'}], function(v){ if(!v) return; var c=(v[0]||'').trim(); if(!c){delete s.icon;delete s.iconEmoji;} else if(ICONS[c]){s.icon=c;delete s.iconEmoji;} else {s.icon=null;s.iconEmoji=c;} render(); }); }
 function setStatus(s){ var el=document.getElementById('fbStatus'); if(el) el.textContent=s; setTimeout(fbStatus, 3000); }
@@ -244,7 +244,7 @@ function drawMap(){
   var isNum=!(s.icon||s.iconEmoji)&&s.cat!=='hotel'&&s.cat!=='move';
   if(isNum){ n++; if(s._id) numMap[s._id]=n; }
   else if(s._id) numMap[s._id]=0;
-  var cls=s.cat==='food'?'food':(s.cat==='hotel'?'hotel':(s.cat==='move'?'move':(s.cat==='shop'?'shop':(s.cat==='makeup'?'makeup':''))));
+  var cls=s.cat==='food'?'food':(s.cat==='hotel'?'hotel':(s.cat==='move'?'move':(s.cat==='shop'?'shop':(s.cat==='makeup'?'makeup':(s.cat==='spa'?'spa':'')))));
   var label=badgeFor(s, String(numMap[s._id]||n+1));
   var icon=L.divIcon({className:'',html:'<div class="mk '+cls+'">'+label+'</div>',iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-14]});
   var mk=L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>'+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
