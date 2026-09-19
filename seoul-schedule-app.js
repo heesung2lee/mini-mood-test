@@ -84,6 +84,7 @@ function slotHTML(s, di, si, mapNum){
  +(s.t?'<div class="t">'+esc(s.t)+'</div>':'')
  +'<div class="n" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.n)+'</div>'
  +'<div class="d" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.d||'(tap to add description)')+'</div>'
+ +'<span class="lk" data-lk="'+s._id+'" title="lock/unlock" style="cursor:pointer">'+(s.lock?'🔒':'🔓')+'</span>'
  +'<span class="pm" onclick="dayMenu(event,\''+s._id+'\',\'day\')" title="move to day" style="cursor:pointer">−</span></div>';
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
