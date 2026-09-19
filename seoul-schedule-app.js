@@ -277,6 +277,7 @@ function drawMapPinsOnly(){
  var d=state.days[mapDay]; if(!d||!map||!layerGroup) return;
  layerGroup.clearLayers();
  // 핀 라벨은 computeNums()가 만든 전 요일 번호 기준 — 카드-핀 번호 일치 보장
+ if(!window._numMap) computeNums();
  var numMap=window._numMap||{};
  var viewSlots=d.slots.filter(function(x){return !x._hidden;}).slice();
  var HOTEL={t:"",n:"Andaz Seoul Gangnam (안다즈 서울 강남) — base",d:"Hotel base (map anchor).",g:"andaz",cat:"hotel",_anchor:1};
@@ -284,8 +285,8 @@ function drawMapPinsOnly(){
  var markerById={}; window._markers=markerById;
  var jit=0;
  viewSlots.forEach(function(s){
-  var g=(s.g&&GEO[s.g])||GEO.andaz;
-  if(!s.g||!GEO[s.g]){ jit++; var b=GEO.andaz; g=[b[0]+jit*0.004, b[1]+jit*0.006]; }
+  var g=(s.g&&GEO[s.g])||null;
+  if(!g){ jit++; var b=GEO.andaz; g=[b[0]+jit*0.004, b[1]+jit*0.006]; }
   var n2=numMap[s._id];
   var cls='';
   var label=s._anchor?'🏠':String(n2>0?n2:'•');
@@ -335,8 +336,8 @@ function drawMap(){
  var numMap=window._numMap||{}; var markerById={}; window._markers=markerById;
  var jit=0;
  viewSlots.forEach(function(s){
-  var g=(s.g&&GEO[s.g])||GEO.andaz;
-  if(!s.g||!GEO[s.g]){ jit++; var b=GEO.andaz; g=[b[0]+jit*0.004, b[1]+jit*0.006]; }
+  var g=(s.g&&GEO[s.g])||null;
+  if(!g){ jit++; var b=GEO.andaz; g=[b[0]+jit*0.004, b[1]+jit*0.006]; }
   var n2=numMap[s._id];
   var cls='';
   var label=s._anchor?'🏠':String(n2>0?n2:'•');
