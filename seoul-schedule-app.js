@@ -16,21 +16,22 @@ var DEFAULTS = {
  days: [
   {id:"d21",label:"Mon Sep 21",slots:[
    {t:"",n:"Arrive ICN T1 (인천공항 1터미널)",d:"Philippine Airlines lands 19:15 at T1. ~40 min immigration+bags.",g:"icn",cat:"move",lock:1},
-   {t:"",n:"Airport Bus 6703 → Andaz (안다즈 서울 강남)",d:"Airport bus 6703 to Gangnam ≈ 70–90 min. Get off at Eulji Hospital / Four Points Gangnam & Hotel Sunshine stop.",g:"icn",cat:"move"},
+   {t:"",n:"Airport Bus 6006 → Andaz Hotel (안다즈 서울 강남)",d:"Bus: get off @ Hyundai Apartment stop\nSubway: couple transits on foot\nboth take about 1.5 hr",g:"c_1789825336409",cat:"move",addr:"서울 강남구 압구정로 218"},
    {t:"",n:"Check in — Andaz Seoul Gangnam, by Hyatt (안다즈 서울 강남)",d:"Base for all 5 nights. Apgujeong Rodeo area, late-night convenience nearby.",g:"andaz",cat:"hotel",lock:1}]},
   {id:"d22",label:"Tue Sep 22",slots:[
-   {t:"",n:"Ocellas at Andaz B2 (오셀라스 안다즈 서울 강남점)",d:"In-hotel facial + sauna. No transit — go downstairs. Afternoon wind-down.",g:"andaz",cat:"spot"},
-   {t:"",n:"Prima Spa (프리마스파)",d:"One of the most high-end quality spas open to the general public. Evening slot near Cheongdam.",g:"cheongdam",cat:"spot"},
-   {t:"",n:"Shinsegae Gangnam (신세계백화점 강남점)",d:"House of Shinsegae — premium night-dining social space, wine cellar, Suite Park desserts. Open till 10pm.",g:"shinsegae",cat:"spot"}]},
+   {t:"",n:"😶‍🌫️ Facial - Hwanggeumhee Aesthetics Cheongdam (황금희에스테틱 청담본점)",d:"booked at 1:30pm with deposit of 100,000won",g:"hwang_new",cat:"spot",addr:"강남구 압구정로80길 34 6층"},
+   {t:"",n:"🗼🛒Lotte World Tower (롯데타워)",d:"",g:"lotte_new",cat:"spot",addr:"올림픽로 300"},
+   {t:"",n:"📖 Massive book wall @COEX Mall (별마당도서관)",d:"",g:"coex_new",cat:"spot",addr:"강남구 영동대로 513 스타필드 코엑스몰 B1"},
+   {t:"",n:"Shinsegae Gangnam (신세계백화점 강남점)",d:"Biggest shopping mall brand in Korea",g:"shinsegae_new",cat:"spot",addr:"서울특별시 서초구 신반포로 176"}]},
   {id:"d23",label:"Wed Sep 23",slots:[
-   {t:"",n:"Hwanggeumhee Aesthetics Cheongdam (황금희에스테틱 청담본점)",d:"30-year esthetic house popular with celebrities. Afternoon course ≈ 90 min–2 hrs.",g:"hwang_new",cat:"spot",addr:"강남구 압구정로80길 34 6층"},
-   {t:"",n:"Seongsu-dong (성수동)",d:"aka Brooklyn of Seoul / Gangnam of young Koreans. New+retro vibe, popup stores. ~20 min from Cheongdam.",g:"seongsu_new",cat:"spot"},
-   {t:"",n:"Olive Young N Seongsu (올리브영N 성수)",d:"Biggest Olive Young in Korea. Flagship exclusives + photo zones.",g:"seongsu_new",cat:"spot",addr:"성동구 연무장7길 13 팩토리얼 성수"},
-   {t:"",n:"Starfield COEX Mall (별마당도서관 코엑스몰)",d:"Massive book wall (Starfield Library). ~10 min from Seongsu.",g:"coex_new",cat:"spot",addr:"강남구 영동대로 513 스타필드 코엑스몰 B1"},
-   {t:"",n:"Lotte World Tower (롯데월드타워)",d:"Seoul Sky Observatory floors 117–123 (night view). Base: Avenuel, aquarium, cinema, concert hall. ~15 min from COEX.",g:"lotte_new",cat:"spot",addr:"올림픽로 300"}]},
+   {t:"",n:"🛒Olive Young N Seongsu (올리브영N 성수)",d:"",g:"seongsu_new",cat:"spot",addr:"성동구 연무장7길 13 팩토리얼 성수"},
+   {t:"",n:"Daiso Myeongdong Station (다이소 명동역점)",d:"Large variety store.",g:"daiso",cat:"spot",addr:"서울 중구 퇴계로 134-1"},
+   {t:"",n:"Souvenir Shopping @ National Museum of Korea (국립중앙박물관)",d:"closes at at 930pm Wed, best to get there around 3pm and shop for few hrs before dinner",g:"c_1789825856796",cat:"spot",addr:"서울특별시 용산구 서빙고로 137 국립중앙박물관"}]},
   {id:"d24",label:"Thu Sep 24",slots:[
-   {t:"",n:"Gwanghwamun Square Bitmorak Autumn Festival (광화문광장 빛모락 가을축제)",d:"10am-2pm, lunch at food stands. ~30 min from Andaz.",g:"gwanghwamun",cat:"spot"},
-   {t:"",n:"Gyeongbokgung Palace (경복궁)",d:"3-6pm palace visit. Next to Gwanghwamun Square, walkable.",g:"gyeongbok",cat:"spot"}]},
+   {t:"",n:"salt bread bakery (소하염전)",d:"Salt farm themed bakery",g:"andaz",cat:"spot",addr:"서울 종로구 수표로28길 21-5 (익선동)"},
+   {t:"",n:"Gyeongbokgung Palace (경복궁)",d:"King's palace, sight seeing",g:"c_1789826554500",cat:"spot",addr:"서울 종로구 세종로"},
+   {t:"",n:"Autumn Festival (광화문광장 빛모락 가을축제)",d:"held at Gwanghwamun Square, featuring free live concerts, outdoor movie screenings, and fun experience booths",g:"c_1789826104676",cat:"spot",addr:"서울특별시 종로구 세종대로 175"},
+   {t:"",n:"🍣Live Octopus/Raw Beef Tasting (육회자매집 본점)",d:"Live octopus + raw beef tasting with traditional korean drinks",g:"gwanghwamun",cat:"food",addr:"서울 종로구 종로 200-4 제우빌딩"}]},
   {id:"d25",label:"Fri Sep 25",slots:[
    {t:"",n:"Depart ICN T1 (인천공항 1터미널) 20:30",d:"Philippine Airlines 20:30 from T1. Arrive 2.5 hrs prior = 18:00 at airport.",g:"icn",cat:"move",lock:1}]}
  ],
