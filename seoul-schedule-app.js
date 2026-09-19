@@ -6,7 +6,7 @@ var GEO = {
  seongsu:[37.5446,127.0561], coex:[37.5119,127.0591], lotte:[37.5126,127.1027],
  museum:[37.524,126.9803], ntower:[37.535,126.9871], myeongdong:[37.5609,126.9864],
  gwanghwamun:[37.5716,126.9769], hannam:[37.5382,127.0074], jinju:[37.5638,126.9752],
- hwang_new:[37.5247,127.0440], seongsu_new:[37.5442,127.0544], coex_new:[37.5125,127.0588], daiso:[37.5628,127.0005], lotte_new:[37.5137,127.1042]
+ hwang_new:[37.5247,127.0440], seongsu_new:[37.5442,127.0544], coex_new:[37.5125,127.0588], daiso:[37.5608,126.9868], lotte_new:[37.5131,127.1010], chungmuro:[37.5602,126.9949], myeongdong_oy:[37.5615,127.9840], gwanghwamun_sq:[37.5728,127.9769], gyeongbok:[37.5798,127.9767], andaz_new:[37.5256,127.0290], prima:[37.5239,127.0528], shinsegae_new:[37.5041,127.0040]
 };
 // Shinsegae Gangnam approx (Express Bus Terminal)
 GEO.shinsegae = [37.5045,127.0049];
