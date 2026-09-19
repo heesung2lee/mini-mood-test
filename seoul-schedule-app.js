@@ -284,8 +284,8 @@ function drawMapPinsOnly(){
  var markerById={}; window._markers=markerById;
  var jit=0;
  viewSlots.forEach(function(s){
-  var g=GEO[s.g]||GEO.andaz;
-  if(!GEO[s.g]||s.g==='andaz'){ jit++; g=[g[0]+jit*0.004, g[1]+jit*0.006]; }
+  var g=(s.g&&GEO[s.g])||GEO.andaz;
+  if(!s.g||!GEO[s.g]){ jit++; var b=GEO.andaz; g=[b[0]+jit*0.004, b[1]+jit*0.006]; }
   var n2=numMap[s._id];
   var cls='';
   var label=s._anchor?'🏠':String(n2>0?n2:'•');
@@ -298,6 +298,7 @@ function drawMapPinsOnly(){
  })();
 }
 function drawMap(){
+ if(mapDay==null) mapDay=0;
  computeNums();
  if(!map){
   map=L.map('map',{center:[37.53,127.02],zoom:11,scrollWheelZoom:false});
@@ -334,8 +335,8 @@ function drawMap(){
  var numMap=window._numMap||{}; var markerById={}; window._markers=markerById;
  var jit=0;
  viewSlots.forEach(function(s){
-  var g=GEO[s.g]||GEO.andaz;
-  if(!GEO[s.g]||s.g==='andaz'){ jit++; g=[g[0]+jit*0.004, g[1]+jit*0.006]; }
+  var g=(s.g&&GEO[s.g])||GEO.andaz;
+  if(!s.g||!GEO[s.g]){ jit++; var b=GEO.andaz; g=[b[0]+jit*0.004, b[1]+jit*0.006]; }
   var n2=numMap[s._id];
   var cls='';
   var label=s._anchor?'🏠':String(n2>0?n2:'•');
