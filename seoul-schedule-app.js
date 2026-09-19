@@ -122,6 +122,17 @@ function dayMenu(e, id, from){
   b.onclick=function(){ moveSlotToDay(id, from, di); closeDayMenu(); };
   m.appendChild(b);
  });
+ if(from==='day'){
+  var sep=document.createElement('div'); sep.style.cssText='border-top:1px solid #e8e0ec;margin:4px 2px'; m.appendChild(sep);
+  var bp=document.createElement('button'); bp.textContent='↩ Move back to Pool';
+  bp.style.cssText='display:block;width:100%;text-align:left;padding:9px 12px;border:0;background:none;font-size:14px;cursor:pointer;border-radius:8px;font-family:inherit;color:#64748b';
+  bp.onclick=function(){ backToPool(id); closeDayMenu(); };
+  m.appendChild(bp);
+  var del=document.createElement('button'); del.textContent='🗑 Remove';
+  del.style.cssText='display:block;width:100%;text-align:left;padding:9px 12px;border:0;background:none;font-size:14px;cursor:pointer;border-radius:8px;font-family:inherit;color:#ef4444';
+  del.onclick=function(){ deleteSlot(id); closeDayMenu(); };
+  m.appendChild(del);
+ }
  document.body.appendChild(m);
  setTimeout(function(){ document.addEventListener('click', closeDayMenu, {once:true}); }, 0);
 }
@@ -136,6 +147,21 @@ function moveSlotToDay(id, from, di){
   for(var d2=0;d2<state.days.length;d2++){ var i=state.days[d2].slots.findIndex(function(x){return x._id===id;}); if(i>=0){ var mv=state.days[d2].slots.splice(i,1)[0]; state.days[di].slots.push(mv); break; } }
  }
  render();
+}
+function backToPool(id){
+ var s=findSlotById(id); if(!s) return;
+ if(s.lock){ alert('Locked — unlock first.'); return; }
+ for(var d2=0;d2<state.days.length;d2++){ var i=state.days[d2].slots.findIndex(function(x){return x._id===id;}); if(i>=0){ var mv=state.days[d2].slots.splice(i,1)[0]; state.spots.push(mv); break; } }
+ render();
+}
+function deleteSlot(id){
+ var s=findSlotById(id); if(!s) return;
+ if(s.lock){ alert('Locked — unlock first.'); return; }
+ modalConfirm('Delete this card permanently?', function(ok){
+  if(!ok) return;
+  for(var d2=0;d2<state.days.length;d2++){ var i=state.days[d2].slots.findIndex(function(x){return x._id===id;}); if(i>=0){ state.days[d2].slots.splice(i,1); render(); return; } }
+  for(var k of ['food','spots']){ var j=state[k].findIndex(function(x){return x._id===id;}); if(j>=0){ state[k].splice(j,1); render(); return; } }
+ });
 }
 function toggleLock(e, id){ if(e&&e.stopPropagation)e.stopPropagation(); var s=findSlotById(id); if(!s) return; if(s.lock) delete s.lock; else s.lock=1; persist(); render(); }
 function rmSlotById(id){ for(var di=0;di<state.days.length;di++){ var i=state.days[di].slots.findIndex(function(x){return x._id===id;}); if(i>=0){ var s=state.days[di].slots[i]; if(s.lock){alert('Locked \u2014 unlock first.');return;} if(!confirm('Remove to Spots Pool?'))return; state.days[di].slots.splice(i,1); state.spots.push(s); render(); return; } } for(var k of ['food','spots']){ var j=state[k].findIndex(function(x){return x._id===id;}); if(j>=0){ var t=state[k][j]; if(t.lock){alert('Locked \u2014 unlock first.');return;} if(!confirm('Delete permanently?'))return; state[k].splice(j,1); render(); return; } } }
@@ -427,7 +453,7 @@ function shareLink(){
  var url=location.href.split('#')[0]+'#s='+s;
  (navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(function(){alert('Share link copied — anyone opening it sees + edits this schedule.');},function(){prompt('Copy this link:',url);});
 }
-function resetAll(){ if(!confirm('Reset to default schedule? Current is saved in History.'))return; state=JSON.parse(JSON.stringify(DEFAULTS)); location.hash=''; render(); }
+function resetAll(){ if(!confirm('Reset to default schedule? Current is saved in History.'))return; try{ state=JSON.parse(JSON.stringify(DEFAULTS)); }catch(_e){ state=DEFAULTS; } location.hash=''; render(); }
 function toggleExport(){ var p=document.getElementById('export'); if(p.style.display==='block'){p.style.display='none';return;} p.textContent=JSON.stringify(state,null,1).slice(0,6000); p.style.display='block'; }
 render();
 
