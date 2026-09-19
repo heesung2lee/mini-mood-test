@@ -24,7 +24,7 @@ h1{font-size:22px;font-weight:800}
 .leaflet-popup-content{margin:10px 14px!important;font-size:13px!important}
 .leaflet-popup-content b{color:var(--gold)}
 .mk{width:26px;height:26px;border-radius:50%;background:var(--gold);border:3px solid #0b1420;color:#0b1420;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(212,175,55,.4)}
-.mk.food{background:var(--green);color:#fff}.mk.hotel{background:var(--blue);color:#fff}.mk.move{background:#666;color:#fff}.mk.shop{background:#9333ea;color:#fff}.mk.makeup{background:#ec4899;color:#fff}.mk.spa{background:#0ea5e9;color:#fff}
+
 /* Route line legend */
 .legend{display:flex;gap:12px;font-size:11px;color:var(--dim);margin-top:6px;flex-wrap:wrap}
 /* Days */

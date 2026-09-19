@@ -76,9 +76,9 @@ function countSlots(s){ var n=0; (s.days||[]).forEach(function(d){n+=d.slots.len
 // ── Render ──
 function slotHTML(s, di, si, mapNum){
  if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9);
- var badge = badgeFor(s, String(mapNum));
+ var badge = String(mapNum);
  return '<div class="slot '+s.cat+(s.lock?' locked':'')+'" data-uid="'+s._id+'" data-d="'+di+'" data-s="'+si+'" onclick="tapSlot(event,\''+s._id+'\')">'
- +'<span class="num" onclick="editIcon(event,\''+s._id+'\')" title="tap to change icon" style="cursor:pointer">'+badge+'</span>'
+ +'<span class="num" style="cursor:default">'+badge+'</span>'
  +(s.addr?'<div class="ad" onclick="editAddr(event,\''+s._id+'\')" title="tap to edit address" style="cursor:pointer">📍 '+esc(s.addr)+'</div>':'<div class="ad" onclick="editAddr(event,\''+s._id+'\')" title="tap to add address" style="cursor:pointer;opacity:.5">📍 (tap to add address)</div>')
  +(s.t?'<div class="t">'+esc(s.t)+'</div>':'')
  +'<div class="n" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.n)+'</div>'
@@ -86,10 +86,6 @@ function slotHTML(s, di, si, mapNum){
  +'<span class="lk" data-lk="'+s._id+'" title="tap: lock/unlock, hold 1s: remove" style="cursor:pointer">'+(s.lock?'🔒':'🔓')+'</span></div>';
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-var ICONS={hotel:'🏠',move:'✈️',bus:'🚌',food:'🍽️',shop:'🛍️',makeup:'💄',spa:'🧖‍♀️',spot:'•'};
-function badgeFor(s, fb){ if(s.iconEmoji) return s.iconEmoji; if(s.icon&&ICONS[s.icon]) return ICONS[s.icon]; if(s.cat==='hotel')return ICONS.hotel; if(s.cat==='move'){var n=s.n||'';return (n.indexOf('Bus')>=0||n.indexOf('버스')>=0)?ICONS.bus:ICONS.move;} if(s.cat==='food')return ICONS.food; if(s.cat==='shop')return ICONS.shop; if(s.cat==='makeup')return ICONS.makeup; if(s.cat==='spa')return ICONS.spa; return fb; }
-function iconChoices(cur){ return Object.keys(ICONS).map(function(k){return (k===cur?'● ':'○ ')+k+' '+ICONS[k];}).join('\n'); }
-function editIcon(e, id){ e.stopPropagation(); var s=findSlotById(id); if(!s||s.lock) return; modal('Card icon (current: '+((s.iconEmoji||(s.icon&&ICONS[s.icon])||s.icon)||s.cat||'auto')+')', [{value:s.icon||s.iconEmoji||'',ph:'hotel/move/bus/food/shop/makeup/spot or emoji like ☕'}], function(v){ if(!v) return; var c=(v[0]||'').trim(); if(!c){delete s.icon;delete s.iconEmoji;} else if(ICONS[c]){s.icon=c;delete s.iconEmoji;} else {s.icon=null;s.iconEmoji=c;} render(); }); }
 function setStatus(s){ var el=document.getElementById('fbStatus'); if(el) el.textContent=s; setTimeout(fbStatus, 3000); }
 var collapsed = {};
 function render(){
@@ -241,11 +237,11 @@ function drawMap(){
  viewSlots.forEach(function(s){
   var g=GEO[s.g]||GEO.andaz;
   if(!GEO[s.g]||s.g==='andaz'){ jit++; g=[g[0]+jit*0.004, g[1]+jit*0.006]; }
-  var isNum=!(s.icon||s.iconEmoji)&&s.cat!=='hotel'&&s.cat!=='move';
+  var isNum=s.cat!=='hotel'&&s.cat!=='move';
   if(isNum){ n++; if(s._id) numMap[s._id]=n; }
   else if(s._id) numMap[s._id]=0;
-  var cls=s.cat==='food'?'food':(s.cat==='hotel'?'hotel':(s.cat==='move'?'move':(s.cat==='shop'?'shop':(s.cat==='makeup'?'makeup':(s.cat==='spa'?'spa':'')))));
-  var label=badgeFor(s, String(numMap[s._id]||n+1));
+  var cls='';
+  var label=String(numMap[s._id]||n+1);
   var icon=L.divIcon({className:'',html:'<div class="mk '+cls+'">'+label+'</div>',iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-14]});
   var mk=L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>'+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
   if(s._id) markerById[s._id]=mk;
@@ -257,7 +253,7 @@ function drawMap(){
  (function(){
   var allMap={};
   state.days.forEach(function(dd){
-   var nn=0; (dd.slots||[]).forEach(function(ss){ if(!(ss.icon||ss.iconEmoji)&&ss.cat!=='hotel'&&ss.cat!=='move'){ nn++; if(ss._id) allMap[ss._id]=nn; } });
+   var nn=0; (dd.slots||[]).forEach(function(ss){ if(ss.cat!=='hotel'&&ss.cat!=='move'){ nn++; if(ss._id) allMap[ss._id]=nn; } });
   });
   window._numMap=allMap; refreshNums();
  })();
@@ -268,19 +264,6 @@ function modal(title, fields, cb){
  document.getElementById('modalTitle').textContent=title;
  var box=document.getElementById('modalFields'); box.innerHTML='';
  var inputs=fields.map(function(f){
-  if(f.chips){
-   var wrap=document.createElement('div'); wrap.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-top:8px';
-   var hidden=document.createElement('input'); hidden.type='hidden'; hidden.value=f.value||'';
-   f.chips.forEach(function(ch){
-    var b=document.createElement('button'); b.type='button'; b.textContent=ch.label; b.dataset.val=ch.val;
-    b.style.cssText='padding:7px 10px;border-radius:16px;border:1px solid #d8e0ec;background:#fff;font-size:14px;cursor:pointer'+(hidden.value===ch.val?';background:#1a2333;color:#fff;border-color:#1a2333':'');
-    b.onclick=function(){ hidden.value=b.dataset.val; Array.prototype.forEach.call(wrap.querySelectorAll('button'),function(x){x.style.background='#fff';x.style.color='';x.style.borderColor='#d8e0ec';}); b.style.background='#1a2333';b.style.color='#fff';b.style.borderColor='#1a2333'; };
-    wrap.appendChild(b);
-   });
-   box.appendChild(wrap);
-   wrap.appendChild(hidden);
-   return {get value(){return hidden.value;}, set value(v){hidden.value=v;}};
-  }
   var inp=document.createElement(f.multiline?'textarea':'input');
   inp.value=f.value||''; inp.placeholder=f.ph||'';
   inp.style.cssText='width:100%;box-sizing:border-box;padding:9px;margin-top:6px;border:1px solid #d8e0ec;border-radius:8px;font-size:14px;font-family:inherit';
@@ -303,14 +286,11 @@ function modalConfirm(msg, cb){
  document.getElementById('modalOk').onclick=function(){done(true);};
  document.getElementById('modalCancel').onclick=function(){done(false);};
 }
-function iconChips(){ var keys=Object.keys(ICONS); return [{label:'Auto',val:''}].concat(keys.map(function(k){return {label:ICONS[k]+' '+k, val:k};})); }
-function iconChipVal(s){ if(s.iconEmoji) return s_iconKey(s.iconEmoji)||''; if(s.icon&&ICONS[s.icon]) return s.icon; return ''; }
-function s_iconKey(cur){ for(var k in ICONS){ if(ICONS[k]===cur) return k; } return cur&&ICONS[cur]?cur:''; }
 function editText(e, id){
  e.stopPropagation();
  var s=findSlotById(id); if(!s||s.lock) return;
- modal('Edit card', [{value:s.n||'',ph:'Title'},{value:s.d||'',ph:'Description',multiline:1},{chips:iconChips(),value:iconChipVal(s)}], function(v){
-  if(!v) return; s.n=(v[0]||'').trim(); s.d=(v[1]||'').trim(); var c=(v[2]||'').trim(); if(!c){delete s.icon;delete s.iconEmoji;} else if(ICONS[c]){s.icon=c;delete s.iconEmoji;} else {s.icon=null;s.iconEmoji=c;} render();
+ modal('Edit card', [{value:s.n||'',ph:'Title'},{value:s.d||'',ph:'Description',multiline:1}], function(v){
+  if(!v) return; s.n=(v[0]||'').trim(); s.d=(v[1]||'').trim(); render();
  });
 }
 function editAddr(e, id){
@@ -343,7 +323,7 @@ function refreshNums(){
   var b=el.querySelector('.num'); if(!b) return;
   var id=el.dataset.uid; var s=findSlotById(id); if(!s) return;
   var n=m[id];
-  b.textContent=badgeFor(s, (n>0?String(n):'•'));
+  b.textContent=(n>0?String(n):'•');
  });
 }
 function findSlotById(id){
