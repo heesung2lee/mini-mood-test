@@ -91,6 +91,8 @@ function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
 function setStatus(s){ var el=document.getElementById('fbStatus'); if(el) el.textContent=s; setTimeout(fbStatus, 3000); }
 var collapsed = {};
 function render(){
+ window._rendering=true;
+ try{
  var w = document.getElementById('days'); w.innerHTML='';
  state.days.forEach(function(d, di){
   var el = document.createElement('div'); el.className='day'; el.id='day-'+d.id;
@@ -105,6 +107,7 @@ function render(){
  initSortable(); if(!window._mapInitDone){ window._mapInitDone=true; drawMap(); } else { refreshMapPins(); } setupScrollSpy(); bindLocks(); persist(); fbStart(); fbStatus();
  // 변경 시 Firebase 푸시 (디바운스 1초)
  clearTimeout(fbTimer); fbTimer=setTimeout(fbPush, 1000);
+ }finally{ window._rendering=false; }
 }
 function renderPool(id, arr, kind){
  var box = document.getElementById(id); if(!box) return; box.innerHTML='';
@@ -209,7 +212,7 @@ async function geocodeAddr(addr, slot){
    if(!slot.d||slot.d.indexOf('(')===0) slot.d=j[0].display_name.split(',').slice(0,3).join(',');
    setStatus('Pinned ✓');
   } else { slot.d='('+addr+') — not found, edit manually.'; setStatus('Address not found — added anyway.'); }
- }catch(e){ slot.d='('+addr+')'; setStatus('Search failed — added anyway.'); }
+ }catch{ slot.d='('+addr+')'; setStatus('Search failed — added anyway.'); }
  render();
 }
 // ── Drag & drop (mouse + touch) ──
@@ -432,6 +435,7 @@ function setupScrollSpy(){
   window._dayObs=new IntersectionObserver(function(es){
    es.forEach(function(e){
     if(e.isIntersecting){
+     if(window._rendering) return;
      var id=(e.target.id||'').replace('day-','');
      var di=state.days.findIndex(function(x){return x.id===id;});
      if(di>=0&&di!==mapDay&&Date.now()>scrollSpyOff){ mapDay=di; drawMap(); }
@@ -449,7 +453,7 @@ function shareLink(){
  (navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(function(){alert('Share link copied — anyone opening it sees + edits this schedule.');},function(){prompt('Copy this link:',url);});
 }
 function resetAll(){ if(!confirm('Reset to default schedule? Current is saved in History.'))return; try{ state=JSON.parse(JSON.stringify(DEFAULTS)); }catch{ state=DEFAULTS; } location.hash=''; render(); }
-void [editText, editAddr, resetAll, toggleExport, shareLink];
+void [editText, editAddr, resetAll, toggleExport, shareLink, dayMenu, rmSlot, toggleDay, tapSlot, rmPool, addCustom];
 function toggleExport(){ var p=document.getElementById('export'); if(p.style.display==='block'){p.style.display='none';return;} p.textContent=JSON.stringify(state,null,1).slice(0,6000); p.style.display='block'; }
 render();
 
