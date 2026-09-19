@@ -206,7 +206,7 @@ async function geocodeAddr(addr, slot){
    var key='c_'+Date.now();
    GEO[key]=[parseFloat(j[0].lat),parseFloat(j[0].lon)]; GEO_C[key]=GEO[key];
    slot.g=key;
-   slot.d=j[0].display_name.split(',').slice(0,3).join(',');
+   if(!slot.d||slot.d.indexOf('(')===0) slot.d=j[0].display_name.split(',').slice(0,3).join(',');
    setStatus('Pinned ✓');
   } else { slot.d='('+addr+') — not found, edit manually.'; setStatus('Address not found — added anyway.'); }
  }catch(e){ slot.d='('+addr+')'; setStatus('Search failed — added anyway.'); }
