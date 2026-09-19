@@ -235,6 +235,7 @@ function drawMap(){
   map=L.map('map',{center:[37.53,127.02],zoom:11,scrollWheelZoom:false});
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',subdomains:'abc',maxZoom:19}).addTo(map);
   map.on('click',function(){map.scrollWheelZoom.enable();});
+  map.on('moveend',function(){ try{ var c=map.getCenter(); window._mapView[mapDay]={c:[c.lat,c.lng],z:map.getZoom()}; }catch(_e){} });
  }
  if(layerGroup) layerGroup.clearLayers(); else layerGroup=L.layerGroup().addTo(map);
  // day buttons
@@ -256,28 +257,32 @@ function drawMap(){
  if(mapDay>=state.days.length) mapDay=0;
  var d=state.days[mapDay];
  if(!d) return;
- // 호텔+공항 앵커: 지도에만 추가 (일정 건드리지 않음)
- var viewSlots=d.slots.slice();
- var HOTEL={t:"",n:"Andaz Seoul Gangnam (안다즈 서울 강남) — base",d:"Hotel base (map anchor).",g:"andaz",cat:"hotel"};
+ // 호텔 앵커·줌 기억: 지도에만 추가 (일정 건드리지 않음, 번호 없음)
+ var viewSlots=d.slots.filter(function(x){return !x._hidden;}).slice();
+ var HOTEL={t:"",n:"Andaz Seoul Gangnam (안다즈 서울 강남) — base",d:"Hotel base (map anchor).",g:"andaz",cat:"hotel",_anchor:1};
  if(!viewSlots.some(function(x){return x.cat==='hotel';})) viewSlots.push(HOTEL);
+ if(!window._mapView) window._mapView={};
  var n=0, pts=[];
  var numMap={}; var markerById={}; window._markers=markerById;
  var jit=0;
  viewSlots.forEach(function(s){
   var g=GEO[s.g]||GEO.andaz;
   if(!GEO[s.g]||s.g==='andaz'){ jit++; g=[g[0]+jit*0.004, g[1]+jit*0.006]; }
-  var isNum=s.cat!=='hotel'&&s.cat!=='move';
+  var isNum=!s._anchor&&s.cat!=='hotel'&&s.cat!=='move';
   if(isNum){ n++; if(s._id) numMap[s._id]=n; }
   else if(s._id) numMap[s._id]=0;
   var cls='';
-  var label=String(numMap[s._id]||n+1);
+  var label=s._anchor?'🏠':String(numMap[s._id]||n+1);
   var icon=L.divIcon({className:'',html:'<div class="mk '+cls+'">'+label+'</div>',iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-14]});
   var mk=L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>'+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
   if(s._id) markerById[s._id]=mk;
   pts.push(g);
  });
  if(pts.length>1){ L.polyline(pts,{color:'#b8860b',weight:2.5,dashArray:'6 4',opacity:.8}).addTo(layerGroup); }
- if(pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[40,40]});
+ var saved=window._mapView[mapDay];
+ if(window._skipFit){ window._skipFit=false; if(saved) map.setView(saved.c, saved.z); }
+ else if(saved){ map.setView(saved.c, saved.z); }
+ else if(pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[40,40]});
  // 일정 카드에 지도 번호 반영 — 전 요일 전부 (현재 요일 아니면 순서번호)
  (function(){
   var allMap={};
