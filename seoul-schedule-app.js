@@ -27,7 +27,7 @@ var DEFAULTS = {
    {t:"",n:"Seongsu-dong (성수동)",d:"aka Brooklyn of Seoul / Gangnam of young Koreans. New+retro vibe, popup stores. ~20 min from Cheongdam.",g:"seongsu_new",cat:"spot"},
    {t:"",n:"Olive Young N Seongsu (올리브영N 성수)",d:"Biggest Olive Young in Korea. Flagship exclusives + photo zones.",g:"seongsu_new",cat:"spot",addr:"성동구 연무장7길 13 팩토리얼 성수"},
    {t:"",n:"Starfield COEX Mall (별마당도서관 코엑스몰)",d:"Massive book wall (Starfield Library). ~10 min from Seongsu.",g:"coex_new",cat:"spot",addr:"강남구 영동대로 513 스타필드 코엑스몰 B1"},
-   {t:"",n:"Lotte World Tower (롯데월드타워)",d:"Seoul Sky Observatory floors 117–123 (night view). Base: Avenuel, aquarium, cinema, concert hall. ~15 min from COEX.",g:"lotte_new",cat:"spot",addr:"올림픽로 300"}]},,
+   {t:"",n:"Lotte World Tower (롯데월드타워)",d:"Seoul Sky Observatory floors 117–123 (night view). Base: Avenuel, aquarium, cinema, concert hall. ~15 min from COEX.",g:"lotte_new",cat:"spot",addr:"올림픽로 300"}]},
   {id:"d24",label:"Wed Sep 24",slots:[
    {t:"",n:"Gwanghwamun Square Bitmorak Autumn Festival (광화문광장 빛모락 가을축제)",d:"10am-2pm, lunch at food stands. ~30 min from Andaz.",g:"gwanghwamun",cat:"spot"},
    {t:"",n:"Gyeongbokgung Palace (경복궁)",d:"3-6pm palace visit. Next to Gwanghwamun Square, walkable.",g:"gyeongbok",cat:"spot"}]},
