@@ -230,7 +230,7 @@ function syncFromDOM(){
   return null;
  }
  state.days.forEach(function(d){
-  var box=document.getElementById('slots-'+d.id); var out=[];
+  var box=document.getElementById('slots-'+d.id); if(!box) return; var out=[];
   box.querySelectorAll('.slot').forEach(function(el){
    var src=el.dataset.uid?findSlot(el.dataset.uid):null;
    if(!src){
@@ -244,7 +244,7 @@ function syncFromDOM(){
  var onDays=new Set(); state.days.forEach(function(d){d.slots.forEach(function(s){if(s._id)onDays.add(s._id);else onDays.add(s);});});
  ['food','spots'].forEach(function(k){ state[k]=state[k].filter(function(s){return !(s._id?onDays.has(s._id):onDays.has(s));}); });
  ['pool-all|spots'].forEach(function(pair){
-  var parts=pair.split('|'), box=document.getElementById(parts[0]), out=[];
+  var parts=pair.split('|'), box=document.getElementById(parts[0]); if(!box) return; var out=[];
   box.querySelectorAll('.slot').forEach(function(el){
    var src=el.dataset.uid?findSlot(el.dataset.uid):null;
    if(!src&&el.dataset.p!==undefined) src=(state[parts[1]].concat(collectDaySlots())).find(function(x){return x&&x.n===el.querySelector('.n').textContent;});
