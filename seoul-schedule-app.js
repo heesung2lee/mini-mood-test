@@ -278,6 +278,7 @@ function modal(title, fields, cb){
     wrap.appendChild(b);
    });
    box.appendChild(wrap);
+   wrap.appendChild(hidden);
    return {get value(){return hidden.value;}, set value(v){hidden.value=v;}};
   }
   var inp=document.createElement(f.multiline?'textarea':'input');
