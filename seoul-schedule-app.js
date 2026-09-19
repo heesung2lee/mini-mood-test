@@ -99,8 +99,7 @@ function render(){
   d.slots.forEach(function(s, si){ box.insertAdjacentHTML('beforeend', slotHTML(s, di, si, 0)); });
   w.appendChild(el);
  });
- renderPool('pool-food', state.food, 'food');
- renderPool('pool-spots', state.spots, 'spot');
+ renderPool('pool-all', state.spots.concat(state.food||[]), 'spots');
  initSortable(); drawMap(); setupScrollSpy(); bindLocks(); persist(); fbStart(); fbStatus();
  // 변경 시 Firebase 푸시 (디바운스 1초)
  clearTimeout(fbTimer); fbTimer=setTimeout(fbPush, 1000);
@@ -159,14 +158,14 @@ function tapSlot(e, id){
  } else { lastTapId=id; lastTapT=now; }
 }
 function rmPool(e, kind, i){ e.stopPropagation(); var s=state[kind==='food'?'food':'spots'][i]; if(s&&s.lock){ alert('Locked — unlock first.'); return; } modalConfirm('Delete permanently?', function(ok){ if(!ok)return; state[kind==='food'?'food':'spots'].splice(i,1); render(); }); }
-function addCustom(kind){
- var inp = document.getElementById(kind==='food'?'newFood':'newSpot');
- var tm = document.getElementById(kind==='food'?'newFoodT':'newSpotT');
- var ad = document.getElementById(kind==='food'?'newFoodA':'newSpotA');
+function addCustom(){
+ var inp = document.getElementById('newSpot');
+ var tm = document.getElementById('newSpotT');
+ var ad = document.getElementById('newSpotA');
  var v = inp.value.trim(); if(!v) return;
  var addr = (ad&&ad.value.trim())||'';
- var slot = {t:(tm&&tm.value)||'',n:v,d:'Custom stop — add note by editing JSON.',g:'andaz',cat:kind==='food'?'food':'spot'};
- state[kind==='food'?'food':'spots'].push(slot);
+ var slot = {t:(tm&&tm.value)||'',n:v,d:'',g:'andaz',cat:'spot'};
+ state.spots.push(slot);
  inp.value=''; if(tm)tm.value=''; if(ad)ad.value='';
  if(addr){ geocodeAddr(addr, slot); setStatus('Searching location…'); } else render();
 }
@@ -192,7 +191,7 @@ function initSortable(){
   filter:'.num,.lk,.n,.d,.ad',
   onEnd:function(){ syncFromDOM(); }};
  state.days.forEach(function(d){ var el=document.getElementById('slots-'+d.id); if(el&&!el._s) el._s=new Sortable(el,Object.assign({},groups,{filter:'.locked,.num,.lk,.n,.d,.ad',preventOnFilter:false,onMove:function(e){return !e.dragged.classList.contains('locked');}})); });
- ['pool-food','pool-spots'].forEach(function(id){ var el=document.getElementById(id); if(el&&!el._s) el._s=new Sortable(el,Object.assign({},groups)); });
+ ['pool-all'].forEach(function(id){ var el=document.getElementById(id); if(el&&!el._s) el._s=new Sortable(el,Object.assign({},groups)); });
 }
 function syncFromDOM(){
  // ID 기반으로 추적 (인덱스 꼬임 방지)
@@ -217,7 +216,7 @@ function syncFromDOM(){
  });
  var onDays=new Set(); state.days.forEach(function(d){d.slots.forEach(function(s){if(s._id)onDays.add(s._id);else onDays.add(s);});});
  ['food','spots'].forEach(function(k){ state[k]=state[k].filter(function(s){return !(s._id?onDays.has(s._id):onDays.has(s));}); });
- ['pool-food|food','pool-spots|spots'].forEach(function(pair){
+ ['pool-all|spots'].forEach(function(pair){
   var parts=pair.split('|'), box=document.getElementById(parts[0]), out=[];
   box.querySelectorAll('.slot').forEach(function(el){
    var src=el.dataset.uid?findSlot(el.dataset.uid):null;
