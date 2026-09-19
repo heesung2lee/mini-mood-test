@@ -14,24 +14,24 @@ var GEO_C = {};
 
 var DEFAULTS = {
  days: [
-  {id:"d21",label:"Sun Sep 21",slots:[
+  {id:"d21",label:"Mon Sep 21",slots:[
    {t:"",n:"Arrive ICN T1 (인천공항 1터미널)",d:"Philippine Airlines lands 19:15 at T1. ~40 min immigration+bags.",g:"icn",cat:"move",lock:1},
    {t:"",n:"Airport Bus 6703 → Andaz (안다즈 서울 강남)",d:"Airport bus 6703 to Gangnam ≈ 70–90 min. Get off at Eulji Hospital / Four Points Gangnam & Hotel Sunshine stop.",g:"icn",cat:"move"},
    {t:"",n:"Check in — Andaz Seoul Gangnam, by Hyatt (안다즈 서울 강남)",d:"Base for all 5 nights. Apgujeong Rodeo area, late-night convenience nearby.",g:"andaz",cat:"hotel",lock:1}]},
-  {id:"d22",label:"Mon Sep 22",slots:[
+  {id:"d22",label:"Tue Sep 22",slots:[
    {t:"",n:"Ocellas at Andaz B2 (오셀라스 안다즈 서울 강남점)",d:"In-hotel facial + sauna. No transit — go downstairs. Afternoon wind-down.",g:"andaz",cat:"spot"},
    {t:"",n:"Prima Spa (프리마스파)",d:"One of the most high-end quality spas open to the general public. Evening slot near Cheongdam.",g:"cheongdam",cat:"spot"},
    {t:"",n:"Shinsegae Gangnam (신세계백화점 강남점)",d:"House of Shinsegae — premium night-dining social space, wine cellar, Suite Park desserts. Open till 10pm.",g:"shinsegae",cat:"spot"}]},
-  {id:"d23",label:"Tue Sep 23",slots:[
+  {id:"d23",label:"Wed Sep 23",slots:[
    {t:"",n:"Hwanggeumhee Aesthetics Cheongdam (황금희에스테틱 청담본점)",d:"30-year esthetic house popular with celebrities. Afternoon course ≈ 90 min–2 hrs.",g:"hwang_new",cat:"spot",addr:"강남구 압구정로80길 34 6층"},
    {t:"",n:"Seongsu-dong (성수동)",d:"aka Brooklyn of Seoul / Gangnam of young Koreans. New+retro vibe, popup stores. ~20 min from Cheongdam.",g:"seongsu_new",cat:"spot"},
    {t:"",n:"Olive Young N Seongsu (올리브영N 성수)",d:"Biggest Olive Young in Korea. Flagship exclusives + photo zones.",g:"seongsu_new",cat:"spot",addr:"성동구 연무장7길 13 팩토리얼 성수"},
    {t:"",n:"Starfield COEX Mall (별마당도서관 코엑스몰)",d:"Massive book wall (Starfield Library). ~10 min from Seongsu.",g:"coex_new",cat:"spot",addr:"강남구 영동대로 513 스타필드 코엑스몰 B1"},
    {t:"",n:"Lotte World Tower (롯데월드타워)",d:"Seoul Sky Observatory floors 117–123 (night view). Base: Avenuel, aquarium, cinema, concert hall. ~15 min from COEX.",g:"lotte_new",cat:"spot",addr:"올림픽로 300"}]},
-  {id:"d24",label:"Wed Sep 24",slots:[
+  {id:"d24",label:"Thu Sep 24",slots:[
    {t:"",n:"Gwanghwamun Square Bitmorak Autumn Festival (광화문광장 빛모락 가을축제)",d:"10am-2pm, lunch at food stands. ~30 min from Andaz.",g:"gwanghwamun",cat:"spot"},
    {t:"",n:"Gyeongbokgung Palace (경복궁)",d:"3-6pm palace visit. Next to Gwanghwamun Square, walkable.",g:"gyeongbok",cat:"spot"}]},
-  {id:"d25",label:"Thu Sep 25",slots:[
+  {id:"d25",label:"Fri Sep 25",slots:[
    {t:"",n:"Depart ICN T1 (인천공항 1터미널) 20:30",d:"Philippine Airlines 20:30 from T1. Arrive 2.5 hrs prior = 18:00 at airport.",g:"icn",cat:"move",lock:1}]}
  ],
  food: [
@@ -100,7 +100,7 @@ function render(){
   w.appendChild(el);
  });
  renderPool('pool-all', state.spots||[], 'spots');
- initSortable(); drawMap(); setupScrollSpy(); bindLocks(); persist(); fbStart(); fbStatus();
+ initSortable(); if(!window._mapInitDone){ window._mapInitDone=true; drawMap(); } else { refreshMapPins(); } setupScrollSpy(); bindLocks(); persist(); fbStart(); fbStatus();
  // 변경 시 Firebase 푸시 (디바운스 1초)
  clearTimeout(fbTimer); fbTimer=setTimeout(fbPush, 1000);
 }
@@ -230,12 +230,46 @@ function syncFromDOM(){
 function collectDaySlots(){ var a=[]; state.days.forEach(function(d){d.slots.forEach(function(s){a.push(s);});}); return a; }
 // ── Map: one day at a time ──
 var map, layerGroup, mapDay = 0;
+function refreshMapPins(){
+ if(!map||!layerGroup) { drawMap(); return; }
+ var d=state.days[mapDay]; if(!d) return;
+ drawMapPinsOnly();
+}
+function drawMapPinsOnly(){
+ var d=state.days[mapDay]; if(!d||!map||!layerGroup) return;
+ layerGroup.clearLayers();
+ var viewSlots=d.slots.filter(function(x){return !x._hidden;}).slice();
+ var HOTEL={t:"",n:"Andaz Seoul Gangnam (안다즈 서울 강남) — base",d:"Hotel base (map anchor).",g:"andaz",cat:"hotel",_anchor:1};
+ if(!viewSlots.some(function(x){return x.cat==='hotel';})) viewSlots.push(HOTEL);
+ var n=0;
+ var numMap={}; var markerById={}; window._markers=markerById;
+ var jit=0;
+ viewSlots.forEach(function(s){
+  var g=GEO[s.g]||GEO.andaz;
+  if(!GEO[s.g]||s.g==='andaz'){ jit++; g=[g[0]+jit*0.004, g[1]+jit*0.006]; }
+  var isNum=!s._anchor&&s.cat!=='hotel'&&s.cat!=='move';
+  if(isNum){ n++; if(s._id) numMap[s._id]=n; }
+  else if(s._id) numMap[s._id]=0;
+  var cls='';
+  var label=s._anchor?'🏠':String(numMap[s._id]||n+1);
+  var icon=L.divIcon({className:'',html:'<div class="mk '+cls+'">'+label+'</div>',iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-14]});
+  var mk=L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>'+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
+  if(s._id) markerById[s._id]=mk;
+ });
+ (function(){
+  var allMap={};
+  state.days.forEach(function(dd){
+   var nn=0; (dd.slots||[]).forEach(function(ss){ if(ss.cat!=='hotel'&&ss.cat!=='move'){ nn++; if(ss._id) allMap[ss._id]=nn; } });
+  });
+  window._numMap=allMap; refreshNums();
+ })();
+}
 function drawMap(){
  if(!map){
   map=L.map('map',{center:[37.53,127.02],zoom:11,scrollWheelZoom:false});
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',subdomains:'abc',maxZoom:19}).addTo(map);
   map.on('click',function(){map.scrollWheelZoom.enable();});
-  map.on('moveend',function(){ try{ var c=map.getCenter(); window._mapView[mapDay]={c:[c.lat,c.lng],z:map.getZoom()}; }catch(_e){} });
+  map.on('moveend',function(){ var c=map.getCenter(); window._mapView[mapDay]={c:[c.lat,c.lng],z:map.getZoom()}; });
  }
  if(layerGroup) layerGroup.clearLayers(); else layerGroup=L.layerGroup().addTo(map);
  // day buttons
@@ -244,7 +278,7 @@ function drawMap(){
   bb.innerHTML='';
   state.days.forEach(function(d,di){
    var b=document.createElement('button');
-   var lbl=['Sun 21','Mon 22','Tue 23','Wed 24','Thu 25'][di]||('Day '+(di+1));
+   var lbl=['Mon 21','Tue 22','Wed 23','Thu 24','Fri 25'][di]||('Day '+(di+1));
    b.textContent=lbl;
    b.title=d.label;
    b.style.cssText='margin:0 3px;padding:2px 10px;border-radius:12px;border:1px solid '+(di===mapDay?'#b8860b':'#d8e0ec')+';background:'+(di===mapDay?'#b8860b':'#fff')+';color:'+(di===mapDay?'#fff':'#64748b')+';cursor:pointer;font-size:12px;font-weight:700';
