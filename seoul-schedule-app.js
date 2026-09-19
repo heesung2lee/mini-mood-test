@@ -268,6 +268,18 @@ function modal(title, fields, cb){
  document.getElementById('modalTitle').textContent=title;
  var box=document.getElementById('modalFields'); box.innerHTML='';
  var inputs=fields.map(function(f){
+  if(f.chips){
+   var wrap=document.createElement('div'); wrap.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-top:8px';
+   var hidden=document.createElement('input'); hidden.type='hidden'; hidden.value=f.value||'';
+   f.chips.forEach(function(ch){
+    var b=document.createElement('button'); b.type='button'; b.textContent=ch.label; b.dataset.val=ch.val;
+    b.style.cssText='padding:7px 10px;border-radius:16px;border:1px solid #d8e0ec;background:#fff;font-size:14px;cursor:pointer'+(hidden.value===ch.val?';background:#1a2333;color:#fff;border-color:#1a2333':'');
+    b.onclick=function(){ hidden.value=b.dataset.val; Array.prototype.forEach.call(wrap.querySelectorAll('button'),function(x){x.style.background='#fff';x.style.color='';x.style.borderColor='#d8e0ec';}); b.style.background='#1a2333';b.style.color='#fff';b.style.borderColor='#1a2333'; };
+    wrap.appendChild(b);
+   });
+   box.appendChild(wrap);
+   return {get value(){return hidden.value;}, set value(v){hidden.value=v;}};
+  }
   var inp=document.createElement(f.multiline?'textarea':'input');
   inp.value=f.value||''; inp.placeholder=f.ph||'';
   inp.style.cssText='width:100%;box-sizing:border-box;padding:9px;margin-top:6px;border:1px solid #d8e0ec;border-radius:8px;font-size:14px;font-family:inherit';
@@ -290,11 +302,14 @@ function modalConfirm(msg, cb){
  document.getElementById('modalOk').onclick=function(){done(true);};
  document.getElementById('modalCancel').onclick=function(){done(false);};
 }
+function iconChips(){ var keys=Object.keys(ICONS); return [{label:'Auto',val:''}].concat(keys.map(function(k){return {label:ICONS[k]+' '+k, val:k};})); }
+function iconChipVal(s){ if(s.iconEmoji) return s_iconKey(s.iconEmoji)||''; if(s.icon&&ICONS[s.icon]) return s.icon; return ''; }
+function s_iconKey(cur){ for(var k in ICONS){ if(ICONS[k]===cur) return k; } return cur&&ICONS[cur]?cur:''; }
 function editText(e, id){
  e.stopPropagation();
  var s=findSlotById(id); if(!s||s.lock) return;
- modal('Edit card', [{value:s.n||'',ph:'Title'},{value:s.d||'',ph:'Description',multiline:1}], function(v){
-  if(!v) return; s.n=(v[0]||'').trim(); s.d=(v[1]||'').trim(); render();
+ modal('Edit card', [{value:s.n||'',ph:'Title'},{value:s.d||'',ph:'Description',multiline:1},{chips:iconChips(),value:iconChipVal(s)}], function(v){
+  if(!v) return; s.n=(v[0]||'').trim(); s.d=(v[1]||'').trim(); var c=(v[2]||'').trim(); if(!c){delete s.icon;delete s.iconEmoji;} else if(ICONS[c]){s.icon=c;delete s.iconEmoji;} else {s.icon=null;s.iconEmoji=c;} render();
  });
 }
 function editAddr(e, id){
