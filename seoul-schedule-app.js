@@ -265,6 +265,9 @@ function refreshMapPins(){
 function drawMapPinsOnly(){
  var d=state.days[mapDay]; if(!d||!map||!layerGroup) return;
  layerGroup.clearLayers();
+ // 핀 라벨은 전 요일 번호(allMap) 기준 — 카드-핀 번호 일치 보장
+ if(!window._numMap){ var am={}; state.days.forEach(function(dd){ var nn=0; (dd.slots||[]).forEach(function(ss){ if(ss.cat!=='hotel'&&ss.cat!=='move'){ nn++; if(ss._id) am[ss._id]=nn; } }); }); window._numMap=am; refreshNums(); }
+ var numMap=window._numMap;
  var viewSlots=d.slots.filter(function(x){return !x._hidden;}).slice();
  var HOTEL={t:"",n:"Andaz Seoul Gangnam (안다즈 서울 강남) — base",d:"Hotel base (map anchor).",g:"andaz",cat:"hotel",_anchor:1};
  if(!viewSlots.some(function(x){return x.cat==='hotel';})) viewSlots.push(HOTEL);
@@ -280,15 +283,11 @@ function drawMapPinsOnly(){
   var cls='';
   var label=s._anchor?'🏠':String(numMap[s._id]||n+1);
   var icon=L.divIcon({className:'',html:'<div class="mk '+cls+'">'+label+'</div>',iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-14]});
-  var mk=L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>'+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
+  var mk=L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>Day '+(["Mon","Tue","Wed","Thu","Fri"][mapDay]||'')+' #'+label+' — '+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
   if(s._id) markerById[s._id]=mk;
  });
  (function(){
-  var allMap={};
-  state.days.forEach(function(dd){
-   var nn=0; (dd.slots||[]).forEach(function(ss){ if(ss.cat!=='hotel'&&ss.cat!=='move'){ nn++; if(ss._id) allMap[ss._id]=nn; } });
-  });
-  window._numMap=allMap; refreshNums();
+  window._numMap=numMap; refreshNums();
  })();
 }
 function drawMap(){
@@ -323,19 +322,17 @@ function drawMap(){
  var HOTEL={t:"",n:"Andaz Seoul Gangnam (안다즈 서울 강남) — base",d:"Hotel base (map anchor).",g:"andaz",cat:"hotel",_anchor:1};
  if(!viewSlots.some(function(x){return x.cat==='hotel';})) viewSlots.push(HOTEL);
  if(!window._mapView) window._mapView={};
- var n=0, pts=[];
- var numMap={}; var markerById={}; window._markers=markerById;
+ var pts=[];
+ var numMap=window._numMap||{}; var markerById={}; window._markers=markerById;
  var jit=0;
  viewSlots.forEach(function(s){
   var g=GEO[s.g]||GEO.andaz;
   if(!GEO[s.g]||s.g==='andaz'){ jit++; g=[g[0]+jit*0.004, g[1]+jit*0.006]; }
-  var isNum=!s._anchor&&s.cat!=='hotel'&&s.cat!=='move';
-  if(isNum){ n++; if(s._id) numMap[s._id]=n; }
-  else if(s._id) numMap[s._id]=0;
+  var n2=numMap[s._id];
   var cls='';
-  var label=s._anchor?'🏠':String(numMap[s._id]||n+1);
+  var label=s._anchor?'🏠':String(n2>0?n2:'•');
   var icon=L.divIcon({className:'',html:'<div class="mk '+cls+'">'+label+'</div>',iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-14]});
-  var mk=L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>'+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
+  var mk=L.marker(g,{icon:icon}).addTo(layerGroup).bindPopup('<b>Day '+(["Mon","Tue","Wed","Thu","Fri"][mapDay]||'')+' #'+label+' — '+esc(s.n)+'</b><br>'+esc(d.label)+'<br><span style="font-size:11px;color:#8899b4">'+esc(s.d||'')+'</span>');
   if(s._id) markerById[s._id]=mk;
   pts.push(g);
  });
@@ -454,7 +451,8 @@ function shareLink(){
  var url=location.href.split('#')[0]+'#s='+s;
  (navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(function(){alert('Share link copied — anyone opening it sees + edits this schedule.');},function(){prompt('Copy this link:',url);});
 }
-function resetAll(){ if(!confirm('Reset to default schedule? Current is saved in History.'))return; try{ state=JSON.parse(JSON.stringify(DEFAULTS)); }catch(_e){ state=DEFAULTS; } location.hash=''; render(); }
+function resetAll(){ if(!confirm('Reset to default schedule? Current is saved in History.'))return; try{ state=JSON.parse(JSON.stringify(DEFAULTS)); }catch{ state=DEFAULTS; } location.hash=''; render(); }
+void [editText, editAddr, resetAll, toggleExport, shareLink];
 function toggleExport(){ var p=document.getElementById('export'); if(p.style.display==='block'){p.style.display='none';return;} p.textContent=JSON.stringify(state,null,1).slice(0,6000); p.style.display='block'; }
 render();
 
