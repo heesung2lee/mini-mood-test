@@ -147,7 +147,7 @@ function moveSlotToDay(id, from, di){
  } else {
   for(var d2=0;d2<state.days.length;d2++){ var i=state.days[d2].slots.findIndex(function(x){return x._id===id;}); if(i>=0){ var mv=state.days[d2].slots.splice(i,1)[0]; state.days[di].slots.push(mv); break; } }
  }
- render();
+ mapDay=di; render();
 }
 function backToPool(id){
  var s=findSlotById(id); if(!s) return;
