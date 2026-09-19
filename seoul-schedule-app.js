@@ -101,6 +101,7 @@ function render(){
   w.appendChild(el);
  });
  renderPool('pool-all', state.spots||[], 'spots');
+ computeNums();
  initSortable(); if(!window._mapInitDone){ window._mapInitDone=true; drawMap(); } else { refreshMapPins(); } setupScrollSpy(); bindLocks(); persist(); fbStart(); fbStatus();
  // 변경 시 Firebase 푸시 (디바운스 1초)
  clearTimeout(fbTimer); fbTimer=setTimeout(fbPush, 1000);
@@ -262,12 +263,18 @@ function refreshMapPins(){
  var d=state.days[mapDay]; if(!d) return;
  drawMapPinsOnly();
 }
+function computeNums(){
+ var am={};
+ state.days.forEach(function(dd){
+  var nn=0; (dd.slots||[]).forEach(function(ss){ if(ss.cat!=='hotel'&&ss.cat!=='move'){ nn++; if(ss._id) am[ss._id]=nn; } });
+ });
+ window._numMap=am; refreshNums();
+}
 function drawMapPinsOnly(){
  var d=state.days[mapDay]; if(!d||!map||!layerGroup) return;
  layerGroup.clearLayers();
- // 핀 라벨은 전 요일 번호(allMap) 기준 — 카드-핀 번호 일치 보장
- if(!window._numMap){ var am={}; state.days.forEach(function(dd){ var nn=0; (dd.slots||[]).forEach(function(ss){ if(ss.cat!=='hotel'&&ss.cat!=='move'){ nn++; if(ss._id) am[ss._id]=nn; } }); }); window._numMap=am; refreshNums(); }
- var numMap=window._numMap;
+ // 핀 라벨은 computeNums()가 만든 전 요일 번호 기준 — 카드-핀 번호 일치 보장
+ var numMap=window._numMap||{};
  var viewSlots=d.slots.filter(function(x){return !x._hidden;}).slice();
  var HOTEL={t:"",n:"Andaz Seoul Gangnam (안다즈 서울 강남) — base",d:"Hotel base (map anchor).",g:"andaz",cat:"hotel",_anchor:1};
  if(!viewSlots.some(function(x){return x.cat==='hotel';})) viewSlots.push(HOTEL);
