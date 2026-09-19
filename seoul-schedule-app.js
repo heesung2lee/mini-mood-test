@@ -5,7 +5,8 @@ var GEO = {
  hwang:[37.5191,127.0517], shinsegae:[37.5126,127.1067], hyundai:[37.5274,127.0275],
  seongsu:[37.5446,127.0561], coex:[37.5119,127.0591], lotte:[37.5126,127.1027],
  museum:[37.524,126.9803], ntower:[37.535,126.9871], myeongdong:[37.5609,126.9864],
- gwanghwamun:[37.5716,126.9769], hannam:[37.5382,127.0074], jinju:[37.5638,126.9752]
+ gwanghwamun:[37.5716,126.9769], hannam:[37.5382,127.0074], jinju:[37.5638,126.9752],
+ hwang_new:[37.5247,127.0440], seongsu_new:[37.5442,127.0544], coex_new:[37.5125,127.0588], daiso:[37.5628,127.0005], lotte_new:[37.5137,127.1042]
 };
 // Shinsegae Gangnam approx (Express Bus Terminal)
 GEO.shinsegae = [37.5045,127.0049];
@@ -22,12 +23,11 @@ var DEFAULTS = {
    {t:"",n:"Prima Spa (프리마스파)",d:"One of the most high-end quality spas open to the general public. Evening slot near Cheongdam.",g:"cheongdam",cat:"spot"},
    {t:"",n:"Shinsegae Gangnam (신세계백화점 강남점)",d:"House of Shinsegae — premium night-dining social space, wine cellar, Suite Park desserts. Open till 10pm.",g:"shinsegae",cat:"spot"}]},
   {id:"d23",label:"Tue Sep 23",slots:[
-   {t:"",n:"Korean Celebrity Skin Clinic (메종프리베 클리닉)",d:"Beauty-aging spot for routine skincare and wellness, visited regularly by global celebs and K-pop idols. Morning session ≈ 2 hrs. Book ahead.",g:"cheongdam",cat:"spot"},
-   {t:"",n:"Hwanggeumhee Aesthetics Cheongdam (황금희에스테틱 청담본점)",d:"30-year esthetic house popular with celebrities. Afternoon course ≈ 90 min–2 hrs.",g:"hwang",cat:"spot"},
-   {t:"",n:"Seongsu-dong (성수동)",d:"aka Brooklyn of Seoul / Gangnam of young Koreans. New+retro vibe, popup stores. ~20 min from Cheongdam.",g:"seongsu",cat:"spot"},
-   {t:"",n:"Olive Young N Seongsu (올리브영N 성수)",d:"Biggest Olive Young in Korea. Flagship exclusives + photo zones.",g:"seongsu",cat:"spot"},
-   {t:"",n:"Starfield COEX Mall",d:"Massive book wall (Starfield Library). ~10 min from Seongsu.",g:"coex",cat:"spot"},
-   {t:"",n:"Lotte World Tower (롯데타워)",d:"Seoul Sky Observatory floors 117–123 (night view). Base: Avenuel, aquarium, cinema, concert hall. ~15 min from COEX.",g:"lotte",cat:"spot"}]},
+   {t:"",n:"Hwanggeumhee Aesthetics Cheongdam (황금희에스테틱 청담본점)",d:"30-year esthetic house popular with celebrities. Afternoon course ≈ 90 min–2 hrs.",g:"hwang_new",cat:"spot",addr:"강남구 압구정로80길 34 6층"},
+   {t:"",n:"Seongsu-dong (성수동)",d:"aka Brooklyn of Seoul / Gangnam of young Koreans. New+retro vibe, popup stores. ~20 min from Cheongdam.",g:"seongsu_new",cat:"spot"},
+   {t:"",n:"Olive Young N Seongsu (올리브영N 성수)",d:"Biggest Olive Young in Korea. Flagship exclusives + photo zones.",g:"seongsu_new",cat:"spot",addr:"성동구 연무장7길 13 팩토리얼 성수"},
+   {t:"",n:"Starfield COEX Mall (별마당도서관 코엑스몰)",d:"Massive book wall (Starfield Library). ~10 min from Seongsu.",g:"coex_new",cat:"spot",addr:"강남구 영동대로 513 스타필드 코엑스몰 B1"},
+   {t:"",n:"Lotte World Tower (롯데월드타워)",d:"Seoul Sky Observatory floors 117–123 (night view). Base: Avenuel, aquarium, cinema, concert hall. ~15 min from COEX.",g:"lotte_new",cat:"spot",addr:"올림픽로 300"}]},,
   {id:"d24",label:"Wed Sep 24",slots:[
    {t:"",n:"Gwanghwamun Square Bitmorak Autumn Festival (광화문광장 빛모락 가을축제)",d:"10am-2pm, lunch at food stands. ~30 min from Andaz.",g:"gwanghwamun",cat:"spot"},
    {t:"",n:"Gyeongbokgung Palace (경복궁)",d:"3-6pm palace visit. Next to Gwanghwamun Square, walkable.",g:"gyeongbok",cat:"spot"}]},
@@ -42,7 +42,8 @@ var DEFAULTS = {
   {t:"",n:"Jinju Hoegwan (진주회관)",d:"Jung-gu kongguksu + kimchi. Near Seoul Plaza.",g:"jinju",cat:"food"}
  ],
  spots: [
-  {t:"",n:"Olive Young Myeongdong Station (올리브영 명동역점)",d:"Flagship beauty store near Myeongdong Station.",g:"myeongdong",cat:"spot"}
+  {t:"",n:"Olive Young Myeongdong Station (올리브영 명동역점)",d:"Flagship beauty store near Myeongdong Station.",g:"myeongdong",cat:"spot"},
+  {t:"",n:"Daiso Myeongdong Station (다이소 명동역점)",d:"Large variety store.",g:"daiso",cat:"spot",addr:"서울 중구 퇴계로 134-1"}
  ]
 };
 
