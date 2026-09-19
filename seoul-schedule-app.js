@@ -84,7 +84,7 @@ function slotHTML(s, di, si, mapNum){
  +(s.t?'<div class="t">'+esc(s.t)+'</div>':'')
  +'<div class="n" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.n)+'</div>'
  +'<div class="d" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.d||'(tap to add description)')+'</div>'
- +'<span class="lk" data-lk="'+s._id+'" title="tap: lock/unlock, hold 1s: remove" style="cursor:pointer">'+(s.lock?'🔒':'🔓')+'</span></div>';
+ +'<span class="pm" onclick="dayMenu(event,\''+s._id+'\',\'day\')" title="move to day" style="cursor:pointer">−</span></div>';
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function setStatus(s){ var el=document.getElementById('fbStatus'); if(el) el.textContent=s; setTimeout(fbStatus, 3000); }
@@ -107,7 +107,36 @@ function render(){
 }
 function renderPool(id, arr, kind){
  var box = document.getElementById(id); if(!box) return; box.innerHTML='';
- (arr||[]).forEach(function(s, i){ if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9); box.insertAdjacentHTML('beforeend','<div class="slot '+s.cat+'" data-uid="'+s._id+'" data-p="'+kind+'" data-i="'+i+'"><span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">📍</span><div class="n" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.n)+'</div><div class="d" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.d)+'</div><span class="lk" data-lk="'+s._id+'" title="tap: lock/unlock, hold 1s: remove" style="cursor:pointer">'+(s.lock?'🔒':'🔓')+'</span></div>'); });
+ (arr||[]).forEach(function(s, i){ if(!s._id)s._id='s'+Math.random().toString(36).slice(2,9); if(s.lock) delete s.lock; box.insertAdjacentHTML('beforeend','<div class="slot '+s.cat+'" data-uid="'+s._id+'" data-p="'+kind+'" data-i="'+i+'"><span class="num" onclick="editAddr(event,\''+s._id+'\')" title="tap to set address" style="cursor:pointer">📍</span><div class="n" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.n)+'</div><div class="d" onclick="editText(event,\''+s._id+'\')" title="tap to edit" style="cursor:text">'+esc(s.d)+'</div><span class="pm" onclick="dayMenu(event,\''+s._id+'\',\'pool\')" title="add to day" style="cursor:pointer">+</span></div>'); });
+}
+function dayMenu(e, id, from){
+ e.stopPropagation();
+ closeDayMenu();
+ var m=document.createElement('div'); m.id='daymenu';
+ m.style.cssText='position:fixed;z-index:200;background:#fff;border:1px solid #d8e0ec;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.15);padding:6px;min-width:150px';
+ var r=e.target.getBoundingClientRect();
+ m.style.top=Math.min(window.innerHeight-40-state.days.length*36, r.bottom+6)+'px';
+ m.style.right=Math.max(8, window.innerWidth-r.right)+'px';
+ state.days.forEach(function(d, di){
+  var b=document.createElement('button'); b.textContent=d.label; b.dataset.di=di;
+  b.style.cssText='display:block;width:100%;text-align:left;padding:9px 12px;border:0;background:none;font-size:14px;cursor:pointer;border-radius:8px;font-family:inherit';
+  b.onclick=function(){ moveSlotToDay(id, from, di); closeDayMenu(); };
+  m.appendChild(b);
+ });
+ document.body.appendChild(m);
+ setTimeout(function(){ document.addEventListener('click', closeDayMenu, {once:true}); }, 0);
+}
+function closeDayMenu(){ var m=document.getElementById('daymenu'); if(m) m.remove(); }
+function moveSlotToDay(id, from, di){
+ var s=findSlotById(id); if(!s) return;
+ if(from==='pool'){
+  for(var k of ['food','spots']){ var j=state[k].findIndex(function(x){return x._id===id;}); if(j>=0) state[k].splice(j,1); }
+  var c={}; try{ c=JSON.parse(JSON.stringify(s)); }catch{ c={t:s.t,n:s.n,d:s.d,g:s.g,cat:s.cat,addr:s.addr}; } c._id='s'+Math.random().toString(36).slice(2,9); delete c.lock;
+  state.days[di].slots.push(c);
+ } else {
+  for(var d2=0;d2<state.days.length;d2++){ var i=state.days[d2].slots.findIndex(function(x){return x._id===id;}); if(i>=0){ var mv=state.days[d2].slots.splice(i,1)[0]; state.days[di].slots.push(mv); break; } }
+ }
+ render();
 }
 function toggleLock(e, id){ if(e&&e.stopPropagation)e.stopPropagation(); var s=findSlotById(id); if(!s) return; if(s.lock) delete s.lock; else s.lock=1; persist(); render(); }
 function rmSlotById(id){ for(var di=0;di<state.days.length;di++){ var i=state.days[di].slots.findIndex(function(x){return x._id===id;}); if(i>=0){ var s=state.days[di].slots[i]; if(s.lock){alert('Locked \u2014 unlock first.');return;} if(!confirm('Remove to Spots Pool?'))return; state.days[di].slots.splice(i,1); state.spots.push(s); render(); return; } } for(var k of ['food','spots']){ var j=state[k].findIndex(function(x){return x._id===id;}); if(j>=0){ var t=state[k][j]; if(t.lock){alert('Locked \u2014 unlock first.');return;} if(!confirm('Delete permanently?'))return; state[k].splice(j,1); render(); return; } } }
