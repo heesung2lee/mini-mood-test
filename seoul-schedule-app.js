@@ -272,7 +272,7 @@ function drawMapPinsOnly(){
  var HOTEL={t:"",n:"Andaz Seoul Gangnam (안다즈 서울 강남) — base",d:"Hotel base (map anchor).",g:"andaz",cat:"hotel",_anchor:1};
  if(!viewSlots.some(function(x){return x.cat==='hotel';})) viewSlots.push(HOTEL);
  var n=0;
- var numMap={}; var markerById={}; window._markers=markerById;
+ var markerById={}; window._markers=markerById;
  var jit=0;
  viewSlots.forEach(function(s){
   var g=GEO[s.g]||GEO.andaz;
