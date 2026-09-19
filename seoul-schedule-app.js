@@ -99,7 +99,7 @@ function render(){
   d.slots.forEach(function(s, si){ box.insertAdjacentHTML('beforeend', slotHTML(s, di, si, 0)); });
   w.appendChild(el);
  });
- renderPool('pool-all', state.spots.concat(state.food||[]), 'spots');
+ renderPool('pool-all', state.spots||[], 'spots');
  initSortable(); drawMap(); setupScrollSpy(); bindLocks(); persist(); fbStart(); fbStatus();
  // 변경 시 Firebase 푸시 (디바운스 1초)
  clearTimeout(fbTimer); fbTimer=setTimeout(fbPush, 1000);
