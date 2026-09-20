@@ -49,8 +49,7 @@ function slotHTML(s, di, si, num, prevG){
  +'<span class="rm" style="top:90px" onclick="rmSlot(\''+s._id+'\')">−</span>'
  +'<input class="ttl" data-f="n" data-id="'+s._id+'" value="'+esc(s.n).replace(/"/g,'&quot;')+'" oninput="edit(this)">'
  +'<div class="ad">📍 <input data-f="addr" data-id="'+s._id+'" value="'+esc(s.addr||'').replace(/"/g,'&quot;')+'" placeholder="address" oninput="edit(this)"></div>'
- +'<textarea data-f="d" data-id="'+s._id+'" rows="2" oninput="edit(this)"'+(s._det?'':' style="display:none"')+'>'+esc(s.d||'')+'</textarea>'
- +'<span class="det" onclick="toggleDet(\''+s._id+'\')">'+(s._det?'▲ detail':'▼ detail')+'</span>'
+ +'<textarea data-f="d" data-id="'+s._id+'" rows="2" oninput="edit(this)">'+esc(s.d||'')+'</textarea>'
  +(tn?'<div class="dn">'+tn+'</div>':'')
  +'</div>';
 }
@@ -170,12 +169,6 @@ function render(){
  pe.innerHTML=ph; w.appendChild(pe);
  drawMap();
 }
-function toggleDet(id){
- for(var di=0;di<state.days.length;di++) for(var si=0;si<state.days[di].slots.length;si++){
-  var s=state.days[di].slots[si];
-  if(s._id===id){ s._det=!s._det; render(); return; }
- }
-}
 function toggleDay(id){ collapsed[id]=!collapsed[id]; markDirty(); render(); }
 var collapsed={};
 function drawMap(){
@@ -234,5 +227,5 @@ function load(){
  }).catch(function(){ render(); });
 }
 document.getElementById('saveBtn').onclick=save;
-void [edit, editPool, mvSlot, dayPick, closeDayPick, moveToDay, rmSlot, rmPool, poolToDay, addPool, toggleDay, toggleDet];
+void [edit, editPool, mvSlot, dayPick, closeDayPick, moveToDay, rmSlot, rmPool, poolToDay, addPool, toggleDay];
 load();
