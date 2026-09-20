@@ -49,7 +49,8 @@ function slotHTML(s, di, si, num, prevG){
  +'<span class="rm" style="top:90px" onclick="rmSlot(\''+s._id+'\')">−</span>'
  +'<input class="ttl" data-f="n" data-id="'+s._id+'" value="'+esc(s.n).replace(/"/g,'&quot;')+'" oninput="edit(this)">'
  +'<div class="ad">📍 <input data-f="addr" data-id="'+s._id+'" value="'+esc(s.addr||'').replace(/"/g,'&quot;')+'" placeholder="address" oninput="edit(this)"></div>'
- +'<textarea data-f="d" data-id="'+s._id+'" rows="2" oninput="edit(this)">'+esc(s.d||'')+'</textarea>'
+ +'<textarea data-f="d" data-id="'+s._id+'" rows="2" oninput="edit(this)"'+(s._det?'':' style="display:none"')+'>'+esc(s.d||'')+'</textarea>'
+ +'<span class="det" onclick="toggleDet(\''+s._id+'\')">'+(s._det?'▲ detail':'▼ detail')+'</span>'
  +(tn?'<div class="dn">'+tn+'</div>':'')
  +'</div>';
 }
@@ -145,12 +146,6 @@ function rmSlot(id){
   if(i>=0){ state.days[di].slots.splice(i,1); markDirty(); render(); return; }
  }
 }
-function addSlot(di){
- var box=document.getElementById('new-'+di);
- var v=(box&&box.value||'').trim(); if(!v) return;
- state.days[di].slots.push({t:'',n:v,d:'',g:'andaz',cat:'spot',addr:'',_id:'s'+Math.random().toString(36).slice(2,9)});
- box.value=''; markDirty(); render();
-}
 function render(){
  var w=document.getElementById('days'); w.innerHTML='';
  var numMap=computeNums();
@@ -163,7 +158,7 @@ function render(){
    h+=slotHTML(s, di, si, n, prevG);
    prevG=s.g;
   });
-  h+='</div><div class="addrow"><input id="new-'+di+'" placeholder="Add place…"><button onclick="addSlot('+di+')">+</button></div>';
+  h+='</div>';
   el.innerHTML=h; w.appendChild(el);
  });
  // Others — backup pool (요일 밖 보관, 삭제 없이)
@@ -174,6 +169,12 @@ function render(){
  ph+='</div><div class="addrow"><input id="new-pool" placeholder="Add backup option…"><button onclick="addPool()">+</button></div>';
  pe.innerHTML=ph; w.appendChild(pe);
  drawMap();
+}
+function toggleDet(id){
+ for(var di=0;di<state.days.length;di++) for(var si=0;si<state.days[di].slots.length;si++){
+  var s=state.days[di].slots[si];
+  if(s._id===id){ s._det=!s._det; render(); return; }
+ }
 }
 function toggleDay(id){ collapsed[id]=!collapsed[id]; markDirty(); render(); }
 var collapsed={};
@@ -230,5 +231,5 @@ function load(){
  }).catch(function(){ render(); });
 }
 document.getElementById('saveBtn').onclick=save;
-void [edit, editPool, mvSlot, dayPick, closeDayPick, moveToDay, rmSlot, rmPool, poolToDay, addSlot, addPool, toggleDay];
+void [edit, editPool, mvSlot, dayPick, closeDayPick, moveToDay, rmSlot, rmPool, poolToDay, addPool, toggleDay, toggleDet];
 load();
