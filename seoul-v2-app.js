@@ -43,8 +43,8 @@ function slotHTML(s, di, si, num, prevG){
  var tn = transitNote(prevG, s.g);
  return '<div class="slot" data-uid="'+s._id+'" data-d="'+di+'" data-s="'+si+'">'
  +'<span class="num">'+(num>0?num:'•')+'</span>'
- +'<span class="rm" onclick="mvSlot(\''+s._id+'\',-1)">↑</span>'
- +'<span class="rm" style="top:34px" onclick="mvSlot(\''+s._id+'\',1)">↓</span>'
+ +'<span class="mv mvup" onclick="mvSlot(\''+s._id+'\',-1)">↑</span>'
+ +'<span class="mv mvdn" onclick="mvSlot(\''+s._id+'\',1)">↓</span>'
  +'<span class="rm" style="top:62px" onclick="dayPick(event,\''+s._id+'\')">📅</span>'
  +'<span class="rm" style="top:90px" onclick="rmSlot(\''+s._id+'\')">−</span>'
  +'<input class="ttl" data-f="n" data-id="'+s._id+'" value="'+esc(s.n).replace(/"/g,'&quot;')+'" oninput="edit(this)">'
@@ -112,8 +112,8 @@ function render(){
  var w=document.getElementById('days'); w.innerHTML='';
  var numMap=computeNums();
  state.days.forEach(function(d, di){
-  var el=document.createElement('div'); el.className='day';
-  var h='<div class="day-h">'+esc(d.label)+' · '+d.slots.length+' stops</div><div class="slots">';
+  var el=document.createElement('div'); el.className='day'+(collapsed[d.id]?' closed':'');
+  var h='<div class="day-h" onclick="toggleDay(\''+d.id+'\')">'+esc(d.label)+' · '+d.slots.length+' stops<span class="tg">'+(collapsed[d.id]?'▸':'▾')+'</span></div><div class="slots">';
   var prevG=null;
   d.slots.forEach(function(s, si){
    var n=(s.cat==='hotel'||s.cat==='move')?0:(numMap[s._id]||0);
@@ -125,6 +125,8 @@ function render(){
  });
  drawMap();
 }
+function toggleDay(id){ collapsed[id]=!collapsed[id]; markDirty(); render(); }
+var collapsed={};
 function drawMap(){
  if(!map){
   map=L.map('map',{center:[37.53,127.02],zoom:11,scrollWheelZoom:false});
@@ -178,5 +180,5 @@ function load(){
  }).catch(function(){ render(); });
 }
 document.getElementById('saveBtn').onclick=save;
-void [edit, mvSlot, dayPick, closeDayPick, moveToDay, rmSlot, addSlot];
+void [edit, mvSlot, dayPick, closeDayPick, moveToDay, rmSlot, addSlot, toggleDay];
 load();

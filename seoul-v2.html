@@ -24,10 +24,16 @@ h1{font-size:22px;font-weight:800}
 .daybtns button{padding:2px 10px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--dim);cursor:pointer;font-size:12px;font-weight:700}
 .daybtns button.on{border-color:var(--gold);background:var(--gold);color:#fff}
 .day{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden}
-.day-h{padding:10px 14px;background:#eaf0f8;border-bottom:1px solid var(--line);font-weight:800;font-size:14px}
+.day-h{padding:10px 14px;background:#eaf0f8;border-bottom:1px solid var(--line);font-weight:800;font-size:14px;cursor:pointer;user-select:none}
+.day.closed .slots,.day.closed .addrow{display:none}
+.day-h .tg{float:right;color:var(--dim);font-weight:400;font-size:12px}
 .slots{padding:8px}
-.slot{background:#f0f4fa;border:1px solid var(--line);border-radius:10px;padding:9px 11px 9px 34px;margin-bottom:7px;font-size:13px;position:relative}
+.slot{background:#f0f4fa;border:1px solid var(--line);border-radius:10px;padding:9px 11px 9px 64px;margin-bottom:7px;font-size:13px;position:relative}
 .slot .num{position:absolute;top:8px;left:8px;font-size:11px;font-weight:800;color:var(--gold);background:#fff;border:1px solid var(--gold);border-radius:10px;padding:0 7px;line-height:18px}
+.slot .mv{position:absolute;left:8px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:1px 7px;cursor:pointer;font-size:14px;line-height:20px;min-width:28px;text-align:center}
+.slot .mvup{top:32px}
+.slot .mvdn{top:58px}
+@media(min-width:640px){.slot .mv{padding:4px 10px;font-size:15px}}
 .slot .n{font-weight:700}
 .slot .d{color:var(--dim);font-size:12px;white-space:pre-line}
 .slot .ad{font-size:11px;color:var(--dim)}
