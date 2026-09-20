@@ -43,7 +43,10 @@ function slotHTML(s, di, si, num, prevG){
  var tn = transitNote(prevG, s.g);
  return '<div class="slot" data-uid="'+s._id+'" data-d="'+di+'" data-s="'+si+'">'
  +'<span class="num">'+(num>0?num:'•')+'</span>'
- +'<span class="rm" onclick="rmSlot(\''+s._id+'\')">−</span>'
+ +'<span class="rm" onclick="mvSlot(\''+s._id+'\',-1)">↑</span>'
+ +'<span class="rm" style="top:34px" onclick="mvSlot(\''+s._id+'\',1)">↓</span>'
+ +'<span class="rm" style="top:62px" onclick="dayPick(event,\''+s._id+'\')">📅</span>'
+ +'<span class="rm" style="top:90px" onclick="rmSlot(\''+s._id+'\')">−</span>'
  +'<input class="ttl" data-f="n" data-id="'+s._id+'" value="'+esc(s.n).replace(/"/g,'&quot;')+'" oninput="edit(this)">'
  +'<div class="ad">📍 <input data-f="addr" data-id="'+s._id+'" value="'+esc(s.addr||'').replace(/"/g,'&quot;')+'" placeholder="address" oninput="edit(this)"></div>'
  +'<textarea data-f="d" data-id="'+s._id+'" rows="2" oninput="edit(this)">'+esc(s.d||'')+'</textarea>'
@@ -55,6 +58,42 @@ function edit(inp){
  for(var di=0;di<state.days.length;di++) for(var si=0;si<state.days[di].slots.length;si++){
   var s=state.days[di].slots[si];
   if(s._id===id){ s[f]=inp.value; markDirty(); return; }
+ }
+}
+function mvSlot(id, dir){
+ for(var di=0;di<state.days.length;di++){
+  var a=state.days[di].slots;
+  var i=a.findIndex(function(x){return x._id===id;});
+  if(i>=0){
+   var j=i+dir;
+   if(j<0||j>=a.length) return;
+   var t=a[i]; a[i]=a[j]; a[j]=t;
+   markDirty(); render(); return;
+  }
+ }
+}
+function dayPick(e, id){
+ e.stopPropagation();
+ closeDayPick();
+ var m=document.createElement('div'); m.id='daypick';
+ m.style.cssText='position:fixed;z-index:200;background:#fff;border:1px solid #d8e0ec;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.15);padding:6px;min-width:150px';
+ var r=e.target.getBoundingClientRect();
+ m.style.top=Math.min(window.innerHeight-40-state.days.length*40, r.bottom+6)+'px';
+ m.style.right=Math.max(8, window.innerWidth-r.right)+'px';
+ state.days.forEach(function(d, di){
+  var b=document.createElement('button'); b.textContent=d.label;
+  b.style.cssText='display:block;width:100%;text-align:left;padding:9px 12px;border:0;background:none;font-size:14px;cursor:pointer;border-radius:8px';
+  b.onclick=function(){ moveToDay(id, di); closeDayPick(); };
+  m.appendChild(b);
+ });
+ document.body.appendChild(m);
+ setTimeout(function(){ document.addEventListener('click', closeDayPick, {once:true}); }, 0);
+}
+function closeDayPick(){ var m=document.getElementById('daypick'); if(m) m.remove(); }
+function moveToDay(id, di){
+ for(var d2=0;d2<state.days.length;d2++){
+  var i=state.days[d2].slots.findIndex(function(x){return x._id===id;});
+  if(i>=0){ var mv=state.days[d2].slots.splice(i,1)[0]; state.days[di].slots.push(mv); mapDay=di; markDirty(); render(); return; }
  }
 }
 function rmSlot(id){
@@ -123,9 +162,9 @@ function save(){
  try{
   state.geoC=GEO_C; state.updatedAt=Date.now();
   fbRef.set(state);
-  try{ localStorage.setItem('seoul25v2x', JSON.stringify(state)); }catch(e){}
+  try{ localStorage.setItem('seoul25v2x', JSON.stringify(state)); }catch{ }
   markClean(); setStatus('Saved ✓ '+new Date().toLocaleTimeString());
- }catch(e){ setStatus('Save failed'); }
+ }catch{ setStatus('Save failed'); }
 }
 function load(){
  if(!fbRef) return;
@@ -139,4 +178,5 @@ function load(){
  }).catch(function(){ render(); });
 }
 document.getElementById('saveBtn').onclick=save;
+void [edit, mvSlot, dayPick, closeDayPick, moveToDay, rmSlot, addSlot];
 load();
