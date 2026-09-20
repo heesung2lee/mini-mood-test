@@ -90,6 +90,49 @@ function dayPick(e, id){
  setTimeout(function(){ document.addEventListener('click', closeDayPick, {once:true}); }, 0);
 }
 function closeDayPick(){ var m=document.getElementById('daypick'); if(m) m.remove(); }
+function poolHTML(s){
+ if(!s._id) s._id='s'+Math.random().toString(36).slice(2,9);
+ return '<div class="slot" data-uid="'+s._id+'">'
+ +'<span class="num">•</span>'
+ +'<span class="rm" onclick="poolToDay(event,\''+s._id+'\')">📅</span>'
+ +'<span class="rm" style="top:34px" onclick="rmPool(\''+s._id+'\')">−</span>'
+ +'<input class="ttl" data-pf="n" data-id="'+s._id+'" value="'+esc(s.n).replace(/"/g,'&quot;')+'" oninput="editPool(this)">'
+ +'<div class="ad">📍 <input data-pf="addr" data-id="'+s._id+'" value="'+esc(s.addr||'').replace(/"/g,'&quot;')+'" placeholder="address" oninput="editPool(this)"></div>'
+ +'<textarea data-pf="d" data-id="'+s._id+'" rows="2" oninput="editPool(this)">'+esc(s.d||'')+'</textarea>'
+ +'</div>';
+}
+function editPool(inp){
+ var id=inp.dataset.id, f=inp.dataset.pf;
+ for(var i=0;i<(state.spots||[]).length;i++){ if(state.spots[i]._id===id){ state.spots[i][f]=inp.value; markDirty(); return; } }
+}
+function addPool(){
+ var box=document.getElementById('new-pool');
+ var v=(box&&box.value||'').trim(); if(!v) return;
+ state.spots=state.spots||[];
+ state.spots.push({t:'',n:v,d:'',g:'andaz',cat:'spot',addr:'',_id:'s'+Math.random().toString(36).slice(2,9)});
+ box.value=''; markDirty(); render();
+}
+function rmPool(id){
+ var i=(state.spots||[]).findIndex(function(x){return x._id===id;});
+ if(i>=0){ state.spots.splice(i,1); markDirty(); render(); }
+}
+function poolToDay(e, id){
+ e.stopPropagation();
+ closeDayPick();
+ var m=document.createElement('div'); m.id='daypick';
+ m.style.cssText='position:fixed;z-index:200;background:#fff;border:1px solid #d8e0ec;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.15);padding:6px;min-width:150px';
+ var r=e.target.getBoundingClientRect();
+ m.style.top=Math.min(window.innerHeight-40-state.days.length*40, r.bottom+6)+'px';
+ m.style.right=Math.max(8, window.innerWidth-r.right)+'px';
+ state.days.forEach(function(d, di){
+  var b=document.createElement('button'); b.textContent=d.label;
+  b.style.cssText='display:block;width:100%;text-align:left;padding:9px 12px;border:0;background:none;font-size:14px;cursor:pointer;border-radius:8px';
+  b.onclick=function(){ var j=(state.spots||[]).findIndex(function(x){return x._id===id;}); if(j>=0){ var mv=state.spots.splice(j,1)[0]; state.days[di].slots.push(mv); mapDay=di; markDirty(); render(); } closeDayPick(); };
+  m.appendChild(b);
+ });
+ document.body.appendChild(m);
+ setTimeout(function(){ document.addEventListener('click', closeDayPick, {once:true}); }, 0);
+}
 function moveToDay(id, di){
  for(var d2=0;d2<state.days.length;d2++){
   var i=state.days[d2].slots.findIndex(function(x){return x._id===id;});
@@ -123,6 +166,13 @@ function render(){
   h+='</div><div class="addrow"><input id="new-'+di+'" placeholder="Add place…"><button onclick="addSlot('+di+')">+</button></div>';
   el.innerHTML=h; w.appendChild(el);
  });
+ // Others — backup pool (요일 밖 보관, 삭제 없이)
+ var pool=(state.spots||[]).filter(function(s){ for(var di=0;di<state.days.length;di++){ var arr=state.days[di].slots; for(var si=0;si<arr.length;si++){ if(arr[si]._id&&arr[si]._id===s._id) return false; } } return true; });
+ var pe=document.createElement('div'); pe.className='day'+(collapsed['others']?' closed':'');
+ var ph='<div class="day-h" onclick="toggleDay(\'others\')">Others · backup pool<span class="tg">'+(collapsed['others']?'▸':'▾')+'</span></div><div class="slots">';
+ pool.forEach(function(s){ ph+=poolHTML(s); });
+ ph+='</div><div class="addrow"><input id="new-pool" placeholder="Add backup option…"><button onclick="addPool()">+</button></div>';
+ pe.innerHTML=ph; w.appendChild(pe);
  drawMap();
 }
 function toggleDay(id){ collapsed[id]=!collapsed[id]; markDirty(); render(); }
@@ -180,5 +230,5 @@ function load(){
  }).catch(function(){ render(); });
 }
 document.getElementById('saveBtn').onclick=save;
-void [edit, mvSlot, dayPick, closeDayPick, moveToDay, rmSlot, addSlot, toggleDay];
+void [edit, editPool, mvSlot, dayPick, closeDayPick, moveToDay, rmSlot, rmPool, poolToDay, addSlot, addPool, toggleDay];
 load();
