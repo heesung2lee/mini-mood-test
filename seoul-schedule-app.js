@@ -106,8 +106,7 @@ function render(){
  renderPool('pool-all', (state.spots||[]).filter(function(s){ for(var di=0;di<state.days.length;di++){ var arr=state.days[di].slots; for(var si=0;si<arr.length;si++){ if(arr[si]._id&&arr[si]._id===s._id) return false; } } return true; }), 'spots');
  computeNums();
  initSortable(); if(!window._mapInitDone){ window._mapInitDone=true; drawMap(); } else { refreshMapPins(); } setupScrollSpy(); bindLocks(); persist(); fbStart(); fbStatus();
- // 변경 시 Firebase 푸시 (디바운스 1초)
- clearTimeout(fbTimer); fbTimer=setTimeout(fbPush, 1000);
+ // 수동 SAVE만 DB 반영 — 자동 푸시 금지 (마지막 수동 저장이 항상 기준)
  }finally{ window._rendering=false; }
 }
 function renderPool(id, arr, kind){
