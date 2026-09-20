@@ -199,7 +199,10 @@ function drawMap(){
  var d=state.days[mapDay]; if(!d) return;
  document.getElementById('mapDayLbl').textContent=d.label;
  var numMap=computeNums(), pts=[];
- d.slots.forEach(function(s){
+ // 🏠 항상 맨 앞: 호텔에서 순서대로 출발
+ var viewSlots=d.slots.filter(function(x){return x.cat!=='hotel';});
+ viewSlots.unshift({_id:'_hotel',n:'Andaz Seoul Gangnam (안다즈 서울 강남) — base',cat:'hotel',g:'andaz',_anchor:1});
+ viewSlots.forEach(function(s){
   var g=(s.g&&GEO[s.g])||GEO.andaz;
   var n2=numMap[s._id];
   var label=(s.cat==='hotel')?'🏠':String(n2>0?n2:'•');
