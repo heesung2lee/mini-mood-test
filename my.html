@@ -64,10 +64,19 @@ footer{text-align:center;color:var(--dim);font-size:11px;margin-top:20px}
 </div>
 <div class="card">
 <h2>2 · 결과</h2>
-<div class="out" id="nOut"></div>
+<div class="fmtbar" style="display:flex;gap:8px;margin-bottom:8px">
+<button id="fmtNaverBlog" class="on" onclick="setNaverFmt('blog')" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">블로그 복붙용</button>
+<button id="fmtNaverDocx" onclick="setNaverFmt('docx')" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">워드용</button>
+</div>
+<div class="out" id="nOut" style="user-select:text;-webkit-user-select:text"></div>
+<div class="imgrow" id="nImgs" style="display:flex;gap:8px;margin-top:8px"></div>
 <div class="chk" id="nChk"></div>
 <div class="meta" id="nMeta"></div>
-<div class="btnrow"><button id="genBtnN" onclick="genNaver()">만들기</button><button id="copyBtnN" onclick="copyOut('nOut')">복사</button></div>
+<div class="btnrow"><button id="genBtnN" onclick="genNaver()">만들기</button><button id="copyBtnN" onclick="copyOut('nOut')">복사</button><button id="dlBtnN" onclick="dlNaver()" style="background:#0b6e4f;color:#fff">다운로드</button></div>
+</div>
+<div class="card">
+<h2>3 · 히스토리 (최근 5개)</h2>
+<div id="nHist" style="display:flex;flex-direction:column;gap:8px"></div>
 </div>
 </div>
 
@@ -83,10 +92,15 @@ footer{text-align:center;color:var(--dim);font-size:11px;margin-top:20px}
 </div>
 <div class="card">
 <h2>2 · 결과</h2>
-<div class="out" id="tOut"></div>
+<div class="out" id="tOut" style="user-select:text;-webkit-user-select:text"></div>
+<div class="imgrow" id="tImgs" style="display:flex;gap:8px;margin-top:8px"></div>
 <div class="chk" id="tChk"></div>
 <div class="meta" id="tMeta"></div>
-<div class="btnrow"><button id="genBtnT" onclick="genThreads()">만들기</button><button id="copyBtnT" onclick="copyOut('tOut')">복사</button></div>
+<div class="btnrow"><button id="genBtnT" onclick="genThreads()">만들기</button><button id="copyBtnT" onclick="copyOut('tOut')">복사</button><button id="dlBtnT" onclick="dlThreads()" style="background:#0b6e4f;color:#fff">다운로드</button></div>
+</div>
+<div class="card">
+<h2>3 · 히스토리 (최근 5개)</h2>
+<div id="tHist" style="display:flex;flex-direction:column;gap:8px"></div>
 </div>
 </div>
 

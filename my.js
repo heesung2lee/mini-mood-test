@@ -10,10 +10,98 @@ function switchTab(which) {
   document.getElementById('panel-threads').className = 'panel' + (n ? '' : ' on');
 }
 function copyOut(id) {
-  var t = document.getElementById(id).innerText;
+  var el = document.getElementById(id);
+  var t = el.innerText;
   if (!t) return;
-  if (navigator.clipboard) navigator.clipboard.writeText(t);
-  else { var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} ta.remove(); }
+  function done(btn) { if (!btn) return; var o = btn.innerText; btn.innerText = '복사됨 ✓'; setTimeout(function () { btn.innerText = o; }, 1200); }
+  var btn = el.parentElement ? el.parentElement.querySelector('button[id^="copyBtn"]') : null;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(t).then(function () { done(btn); }, function () { fallback(); });
+  } else fallback();
+  function fallback() {
+    try {
+      var r = document.createRange(); r.selectNodeContents(el);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      document.execCommand('copy'); s.removeAllRanges(); done(btn);
+    } catch (_e) {
+      var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(btn); } catch (_e2) {} ta.remove();
+    }
+  }
+}
+/* ---------- 히스토리 (localStorage, 탭별 최근 5개) ---------- */
+function histGet(key) { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch (_e) { return []; } }
+function histPut(key, entry) {
+  var h = histGet(key); h.unshift(entry); h = h.slice(0, 5);
+  try { localStorage.setItem(key, JSON.stringify(h)); } catch (_e) {}
+  return h;
+}
+function histRender(key, boxId, onPick) {
+  var box = document.getElementById(boxId); if (!box) return;
+  var h = histGet(key);
+  window[onPick] = function (i) {
+    var e = histGet(key)[i]; if (!e) return;
+    histPick(key, e);
+  };
+  box.innerHTML = h.length ? h.map(function (e, i) {
+    return '<button onclick="' + onPick + '(' + i + ')" style="text-align:left;border:1px solid var(--line);background:#f8fafc;border-radius:8px;padding:8px 10px;font-size:12px;cursor:pointer;font-family:inherit">'
+      + '<b>' + escHtml(e.title) + '</b><br><span style="color:var(--dim)">' + e.time + ' · ' + e.chars + '자</span></button>';
+  }).join('') : '<div style="font-size:12px;color:var(--dim)">아직 없음 — 만들면 여기 저장됩니다</div>';
+}
+function escHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function nowTime() { var d = new Date(); function p(n) { return (n < 10 ? '0' : '') + n; } return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()); }
+/* ---------- 결과 이미지 2장 ---------- */
+function renderImgs(boxId, topic, kind) {
+  var box = document.getElementById(boxId); if (!box) return;
+  var url = function (seed) { return 'https://image.pollinations.ai/prompt/' + encodeURIComponent('minimal flat illustration, navy and gold, ' + kind + ' ' + (topic || '').slice(0, 60)) + '?width=640&height=360&nologo=true&seed=' + seed; };
+  var seeds = [(topic || 'x').length * 7 + 11, (topic || 'x').length * 13 + 29];
+  box.innerHTML = seeds.map(function (s, i) {
+    return '<a href="' + url(s) + '" download="img' + (i + 1) + '.png" style="flex:1;display:block;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#eef2f7;min-height:80px;text-align:center;font-size:11px;color:var(--dim);padding:26px 6px">이미지 ' + (i + 1) + ' (탭해서 저장)<img src="' + url(s) + '" alt="" loading="lazy" style="width:100%;display:block" onerror="this.remove()"></a>';
+  }).join('');
+}
+/* ---------- 다운로드 (.txt) ---------- */
+function histPick(key, e) {
+  if (key === 'myNaverHist') {
+    document.getElementById('nTopic').value = e.topic || '';
+    document.getElementById('nMemo').value = e.memo || '';
+    if (e.faqN) document.getElementById('nFaq').value = String(e.faqN);
+    document.getElementById('nOut').innerText = e.text;
+    renderChk('nChk', scan(e.text));
+    document.getElementById('nMeta').textContent = '공백제외 ' + charCount(e.text) + '자 · 히스토리에서 불러옴 (' + e.time + ')';
+    renderImgs('nImgs', e.topic, 'health infographic');
+  } else {
+    document.getElementById('tMemo').value = e.memo || '';
+    document.getElementById('tOut').innerText = e.text;
+    renderChk('tChk', scan(e.text).filter(function (s) { return s !== '오프닝 자기소개 패턴'; }));
+    document.getElementById('tMeta').textContent = e.text.length + '자 · 히스토리에서 불러옴 (' + e.time + ')';
+    renderImgs('tImgs', e.memo, 'social media');
+  }
+}
+function bootHist() {
+  histRender('myNaverHist', 'nHist', 'pickNaver');
+  histRender('myThreadsHist', 'tHist', 'pickThreads');
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootHist);
+else bootHist();
+function dlText(name, text) {
+  var b = new Blob(['﻿' + text], { type: 'text/plain;charset=utf-8' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function dlNaver() { var t = document.getElementById('nOut').innerText; if (t) dlText('naver.txt', t); }
+function dlThreads() { var t = document.getElementById('tOut').innerText; if (t) dlText('threads.txt', t); }
+/* ---------- 네이버 포맷 전환 ---------- */
+var naverFmt = 'blog';
+var lastNaver = { topic: '', memo: '', faqN: 5 };
+function setNaverFmt(f) {
+  naverFmt = f;
+  document.getElementById('fmtNaverBlog').className = f === 'blog' ? 'on' : '';
+  document.getElementById('fmtNaverDocx').className = f === 'docx' ? 'on' : '';
+  document.getElementById('fmtNaverBlog').style.background = f === 'blog' ? 'var(--gold)' : '#fff';
+  document.getElementById('fmtNaverBlog').style.color = f === 'blog' ? '#fff' : '#1a2333';
+  document.getElementById('fmtNaverDocx').style.background = f === 'docx' ? 'var(--gold)' : '#fff';
+  document.getElementById('fmtNaverDocx').style.color = f === 'docx' ? '#fff' : '#1a2333';
+  if (lastNaver.topic) genNaver(true);
 }
 /* ---------- 공통 검사 ---------- */
 var CJK_RE = /[぀-ヿ㐀-䶿豈-﫫]/;
@@ -40,11 +128,7 @@ function renderChk(id, issues) {
     : '<div class="ok">✓ 오타·CJK·AI냄새·오프닝 검사 통과</div>';
 }
 /* ---------- 네이버 FRAME ---------- */
-function genNaver() {
-  var topic = document.getElementById('nTopic').value.trim();
-  var memo = document.getElementById('nMemo').value.trim();
-  var faqN = parseInt(document.getElementById('nFaq').value, 10) || 5;
-  if (!topic) { document.getElementById('nOut').innerText = '주제를 입력하세요.'; return; }
+function buildNaver(topic, memo, faqN) {
   var exp = memo ? memo + ' ' : '';
   var memoBits = memo ? memo.split(/[,，.。、\n]/).map(function (s) { return s.trim(); }).filter(function (s) { return s; }) : [];
   var memoUse = memoBits.length
@@ -110,10 +194,27 @@ function genNaver() {
   }
   L.push('');
   L.push('============');
-  var text = L.join('\n');
+  var raw = L.join('\n');
+  return { text: raw, faqCount: Math.min(faqWant, faqPool.length) };
+}
+function toBlogFmt(r) { return r.text; }
+function toDocxFmt(r) {
+  return r.text.replace(/^◆ 제목: (.*)$/m, '제목: $1').replace(/^============$/m, '');
+}
+function genNaver(rerender) {
+  var topic = document.getElementById('nTopic').value.trim();
+  var memo = document.getElementById('nMemo').value.trim();
+  var faqN = parseInt(document.getElementById('nFaq').value, 10) || 5;
+  if (!topic) { if (!rerender) document.getElementById('nOut').innerText = '주제를 입력하세요.'; return; }
+  lastNaver = { topic: topic, memo: memo, faqN: faqN };
+  var r = buildNaver(topic, memo, faqN);
+  var text = naverFmt === 'docx' ? toDocxFmt(r) : toBlogFmt(r);
   document.getElementById('nOut').innerText = text;
   renderChk('nChk', scan(text));
-  document.getElementById('nMeta').textContent = '공백제외 ' + charCount(text) + '자 · FAQ ' + Math.min(faqWant, faqPool.length) + '개 · 복붙용(제목/키워드/본문/FAQ/구분선)';
+  document.getElementById('nMeta').textContent = '공백제외 ' + charCount(text) + '자 · FAQ ' + r.faqCount + '개 · ' + (naverFmt === 'docx' ? '워드용' : '블로그 복붙용');
+  renderImgs('nImgs', topic, 'health infographic');
+  histPut('myNaverHist', { title: topic, topic: topic, memo: memo, faqN: faqN, text: text, chars: charCount(text), time: nowTime() });
+  histRender('myNaverHist', 'nHist', 'pickNaver');
 }
 /* ---------- 스레드 ---------- */
 function genThreads() {
@@ -167,5 +268,8 @@ function genThreads() {
   if (text.length > parts * 480) issues.push('편당 480자 초과 (' + text.length + '자/' + parts + '편)');
   renderChk('tChk', issues);
   document.getElementById('tMeta').textContent = text.length + '자 · ' + parts + '편 · 목적 ' + goal;
+  renderImgs('tImgs', memo, 'social media');
+  histPut('myThreadsHist', { title: memo.slice(0, 30), memo: memo, text: text, chars: text.length, time: nowTime() });
+  histRender('myThreadsHist', 'tHist', 'pickThreads');
 }
-void [switchTab, copyOut, genNaver, genThreads];
+void [switchTab, copyOut, genNaver, genThreads, setNaverFmt, dlNaver, dlThreads];
