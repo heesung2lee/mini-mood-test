@@ -104,6 +104,19 @@ footer{text-align:center;color:var(--dim);font-size:11px;margin-top:20px}
 </div>
 </div>
 
+<div class="card" id="coupCard">
+<h2>4 · 쿠팡 추천 (주제별 3개)</h2>
+<div class="hint">주제 입력 후 만들기 누르면 관련 아이템 3개가 뜹니다. 링크만 붙여넣으면 됩니다.</div>
+<div id="coupItems" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
+</div>
+<div class="card">
+<h2>5 · 쿠팡 고지문 (SNS 규정 준수)</h2>
+<label>파트너스 링크 (붙여넣기)</label>
+<input type="text" id="coupLink" placeholder="https://link.coupang.com/a/…">
+<div class="btnrow"><button onclick="copyCoup()" style="background:var(--navy);color:#fff">고지문+링크 복사</button></div>
+<div class="out" id="coupOut" style="user-select:text;-webkit-user-select:text"></div>
+<div class="hint">공정위 기준: 고지문 최상단 배치 · 확정형 문구(제공받습니다) · 조건부(~받을 수 있습니다) 금지</div>
+</div>
 <footer>FRAME · thread-commercial-writing 기준 내장 — my.js</footer>
 <script src="my.js"></script>
 </body>

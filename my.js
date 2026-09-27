@@ -213,6 +213,7 @@ function genNaver(rerender) {
   renderChk('nChk', scan(text));
   document.getElementById('nMeta').textContent = '공백제외 ' + charCount(text) + '자 · FAQ ' + r.faqCount + '개 · ' + (naverFmt === 'docx' ? '워드용' : '블로그 복붙용');
   renderImgs('nImgs', topic, 'health infographic');
+  renderCoup(topic, memo);
   histPut('myNaverHist', { title: topic, topic: topic, memo: memo, faqN: faqN, text: text, chars: charCount(text), time: nowTime() });
   histRender('myNaverHist', 'nHist', 'pickNaver');
 }
@@ -269,7 +270,44 @@ function genThreads() {
   renderChk('tChk', issues);
   document.getElementById('tMeta').textContent = text.length + '자 · ' + parts + '편 · 목적 ' + goal;
   renderImgs('tImgs', memo, 'social media');
+  renderCoup('', memo);
   histPut('myThreadsHist', { title: memo.slice(0, 30), memo: memo, text: text, chars: text.length, time: nowTime() });
   histRender('myThreadsHist', 'tHist', 'pickThreads');
 }
-void [switchTab, copyOut, genNaver, genThreads, setNaverFmt, dlNaver, dlThreads];
+/* ---------- 쿠팡 추천 3 + 고지문 ---------- */
+var COUP_DISC = '이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.';
+function coupPicks(topic, memo) {
+  var t = ((topic || '') + ' ' + (memo || '')).toLowerCase();
+  function has() { for (var i = 0; i < arguments.length; i++) if (t.indexOf(arguments[i]) >= 0) return true; return false; }
+  if (has('혈압', '혈당', '당뇨', '건강', '몸', '허리', '무릎', '관절', '눈', '수면'))
+    return ['가정용 혈압계', '혈당 측정기 세트', '저염 식단 책'];
+  if (has('골프', '라운드', '필드', '코스', '스윙'))
+    return ['골프 거리측정기', '골프 장갑 2팩', '골프공 로스트볼 20구'];
+  if (has('여행', '호텔', '비행', '짐', '캐리어', '부산', '투어'))
+    return ['여행용 캐리어 20인치', '목베개 메모리폼', '여행 파우치 세트'];
+  if (has('주방', '요리', '레시피', '식단', '반찬'))
+    return ['저염 간장 세트', '밀프렙 용기 10P', '식단 기록 노트'];
+  if (has('운동', '걷기', '러닝', '헬스', '홈트'))
+    return ['만보기 스마트밴드', '홈트 매트', '마사지건 미니'];
+  return ['기록 노트', '건강검진 예약 가이드북', '생활습관 플래너'];
+}
+function renderCoup(topic, memo) {
+  var box = document.getElementById('coupItems'); if (!box) return;
+  box.innerHTML = coupPicks(topic, memo).map(function (name, i) {
+    return '<div style="display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px">'
+      + '<b style="flex:1">' + (i + 1) + '. ' + escHtml(name) + '</b>'
+      + '<input type="text" data-couplink="' + i + '" placeholder="링크 붙여넣기" style="flex:1.4;margin:0">'
+      + '</div>';
+  }).join('');
+}
+function copyCoup() {
+  var link = (document.getElementById('coupLink').value || '').trim();
+  var links = [];
+  var inputs = document.querySelectorAll('[data-couplink]');
+  for (var i = 0; i < inputs.length; i++) if (inputs[i].value.trim()) links.push(inputs[i].value.trim());
+  var all = links.length ? links : (link ? [link] : []);
+  var text = COUP_DISC + (all.length ? '\n' + all.join('\n') : '');
+  var box = document.getElementById('coupOut'); box.innerText = text;
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text);
+}
+void [switchTab, copyOut, genNaver, genThreads, setNaverFmt, dlNaver, dlThreads, renderCoup, copyCoup];
