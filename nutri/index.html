@@ -51,7 +51,13 @@ var DB=[{"en": "Sugar", "ko": "설탕", "grade": "caution", "one": "과다 섭�
 function grade2cls(g){return g==='good'?'g':(g==='avoid'?'a':'c');}
 function grade2ko(g){return g==='good'?'좋음':(g==='avoid'?'주의·회피':'보통·과다주의');}
 var ocrText='';
-function picked(inp){var f=inp.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){var p=document.getElementById('prev');p.src=rd.result;p.style.display='block';ocrText='';document.getElementById('ocrst').textContent='⏳ 사진 읽는 중… (한+영)';try{Tesseract.recognize(rd.result,'kor+eng').then(function(r){ocrText=r.data.text||'';document.getElementById('ocrst').textContent=ocrText?'✅ 사진에서 '+ocrText.length+'자 읽음':'⚠️ 글자를 못 읽음 — 텍스트 직접 입력';}).catch(function(){document.getElementById('ocrst').textContent='⚠️ OCR 실패 — 텍스트 직접 입력';});}catch(e){document.getElementById('ocrst').textContent='⚠️ OCR 실패 — 텍스트 직접 입력';}};rd.readAsDataURL(f);}
+var ocrBusy=false;
+function setBtn(){
+ var b=document.getElementById('b1');
+ if(ocrBusy){b.disabled=true;b.textContent='⏳ 사진 읽는 중… 잠시만요';}
+ else{b.disabled=false;b.textContent='성분 분석하기';}
+}
+function picked(inp){var f=inp.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){var p=document.getElementById('prev');p.src=rd.result;p.style.display='block';ocrText='';ocrBusy=true;setBtn();document.getElementById('ocrst').textContent='⏳ 사진 읽는 중… (한+영, 약 10초)';try{Tesseract.recognize(rd.result,'kor+eng').then(function(r){ocrText=r.data.text||'';ocrBusy=false;setBtn();if(ocrText){document.getElementById('ocrst').textContent='✅ 사진에서 '+ocrText.length+'자 읽음 — 자동 분석합니다';analyze();}else{document.getElementById('ocrst').textContent='⚠️ 글자를 못 읽음 — 텍스트 직접 입력';}}).catch(function(){ocrBusy=false;setBtn();document.getElementById('ocrst').textContent='⚠️ OCR 실패 — 텍스트 직접 입력';});}catch(e){ocrBusy=false;setBtn();document.getElementById('ocrst').textContent='⚠️ OCR 실패 — 텍스트 직접 입력';}};rd.readAsDataURL(f);}
 function analyze(){
  var q=((document.getElementById('tx').value||'')+' '+ocrText).toLowerCase();
  if(!q.trim()){alert('사진을 올리거나 성분을 직접 입력해주세요');return;}
