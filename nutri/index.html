@@ -59,55 +59,100 @@ function setBtn(){
  else{b.disabled=false;b.textContent='성분 분석하기';}
 }
 function picked(inp){var f=inp.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){var p=document.getElementById('prev');p.src=rd.result;p.style.display='block';ocrText='';ocrBusy=true;setBtn();document.getElementById('ocrst').textContent='⏳ 사진 읽는 중… (한+영, 약 10초)';try{Tesseract.recognize(rd.result,'kor+eng').then(function(r){ocrText=r.data.text||'';ocrBusy=false;setBtn();if(ocrText){document.getElementById('ocrst').textContent='✅ 사진에서 '+ocrText.length+'자 읽음 — 자동 분석합니다';analyze();}else{document.getElementById('ocrst').textContent='⚠️ 글자를 못 읽음 — 텍스트 직접 입력';}}).catch(function(){ocrBusy=false;setBtn();document.getElementById('ocrst').textContent='⚠️ OCR 실패 — 텍스트 직접 입력';});}catch(e){ocrBusy=false;setBtn();document.getElementById('ocrst').textContent='⚠️ OCR 실패 — 텍스트 직접 입력';}};rd.readAsDataURL(f);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function addCard(nmHtml, badgeCls, badgeTxt, one, tip){
+ var out=document.getElementById('out');
+ var c=document.createElement('div');c.className='card';
+ var nm=document.createElement('div');nm.className='nm';nm.innerHTML=nmHtml;
+ var bd=document.createElement('span');bd.className='badge '+badgeCls;bd.textContent=badgeTxt;nm.appendChild(bd);c.appendChild(nm);
+ if(one){var o=document.createElement('div');o.className='one';o.textContent=one;c.appendChild(o);}
+ if(tip){var t=document.createElement('div');t.className='tip';t.textContent='\uD83D\uDCA1 '+tip;c.appendChild(t);}
+ out.appendChild(c);
+ return c;
+}
+function renderSummary(total, nG, nA){
+ var out=document.getElementById('out');
+ var sc=document.createElement('div');sc.className='card';sc.style.borderColor='var(--gold)';
+ var sn=document.createElement('div');sn.className='nm';
+ sn.textContent='\uCD1D '+total+'\uC885 \uBC1C\uACAC ';
+ var sb=document.createElement('span');sb.className='badge '+(nA>0?'a':'g');sb.textContent=(nA>0?'\uC8FC\uC758 \uC131\uBD84 \uC788\uC74C':'\uC804\uCCB4 \uC591\uD638');sn.appendChild(sb);sc.appendChild(sn);
+ var so=document.createElement('div');so.className='one';so.textContent='\uC88B\uC74C '+nG+' \u00B7 \uC8FC\uC758\u00B7\uD68C\uD53C '+nA;sc.appendChild(so);out.appendChild(sc);
+}
+function apiExplain(words, done){
+ var st=document.getElementById('ocrst');
+ fetch('/api/explain',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({words:words})}).then(function(r){return r.json();}).then(function(j){
+  (j.items||[]).forEach(function(h){
+   addCard(esc(h.ko)+' ('+esc(h.en)+')', grade2cls(h.grade), grade2ko(h.grade), h.one, h.tip);
+  });
+  if(done)done((j.items||[]).length);
+ }).catch(function(){
+  var c=document.createElement('div');c.className='card';
+  var nm=document.createElement('div');nm.className='nm';nm.textContent='\uC11C\uBC84 \uD574\uC124 \uC2E4\uD328 — \uB2E4\uC74C\uC5D0 \uB2E4\uC2DC';
+  c.appendChild(nm);document.getElementById('out').appendChild(c);
+  if(done)done(0);
+ });
+}
 function analyze(){
  var q=((document.getElementById('tx').value||'')+' '+ocrText).toLowerCase();
- if(!q.trim()){alert('사진을 올리거나 성분을 직접 입력해주세요');return;}
+ if(!q.trim()){alert('\uC0AC\uC9C4\uC744 \uC62C\uB9AC\uAC70\uB098 \uC131\uBD84\uC744 \uC9C1\uC811 \uC785\uB825\uD574\uC8FC\uC138\uC694');return;}
  document.getElementById('spin').style.display='block';
+ document.getElementById('out').textContent='';
+ document.getElementById('rel').style.display='none';
+ document.getElementById('adslot').style.display='none';
  setTimeout(function(){
   document.getElementById('spin').style.display='none';
   var hits=DB.filter(function(d){return q.indexOf(d.en.toLowerCase())>=0||q.indexOf(d.ko)>=0||(d.alias&&q.indexOf(d.alias)>=0);});
-  window._lastUnknown=q.split(/[,\n·|\/]+/).map(function(w){return w.trim();}).filter(function(w){return w.length>1&&!DB.some(function(d){return d.en.toLowerCase()===w.toLowerCase()||d.ko===w;});}).slice(0,12);
-  showUnknown();
-  var out=document.getElementById('out');
-  if(!hits.length){out.innerHTML='<div class="card"><div class="nm">매칭 결과 없음</div><div class="one">DB에 없는 성분입니다. 아래 [모르는 성분 보내기]로 보내면 다음 업데이트에 반영됩니다.</div></div>';return;}
   var nG=hits.filter(function(h){return h.grade==='good';}).length;
   var nA=hits.filter(function(h){return h.grade==='avoid';}).length;
-  var sum='<div class="card" style="border-color:var(--gold)"><div class="nm">총 '+hits.length+'종 발견 <span class="badge '+(nA>0?'a':(nG===hits.length?'g':'c'))+'">'+(nA>0?'주의 성분 있음':(nG===hits.length?'전체 양호':'보통'))+'</span></div><div class="one">좋음 '+nG+' · 주의·회피 '+nA+'</div></div>';
-  out.textContent='';
-  var sc=document.createElement('div');sc.className='card';sc.style.borderColor='var(--gold)';
-  var sn=document.createElement('div');sn.className='nm';sn.textContent='총 '+hits.length+'종 발견 ';
-  var sb=document.createElement('span');sb.className='badge '+(nA>0?'a':(nG===hits.length?'g':'c'));sb.textContent=(nA>0?'주의 성분 있음':(nG===hits.length?'전체 양호':'보통'));sn.appendChild(sb);sc.appendChild(sn);
-  var so=document.createElement('div');so.className='one';so.textContent='좋음 '+nG+' · 주의·회피 '+nA;sc.appendChild(so);out.appendChild(sc);
+  var total=hits.length;
+  renderSummary(total, nG, nA);
   hits.forEach(function(h){
-   var c=document.createElement('div');c.className='card';
-   var nm=document.createElement('div');nm.className='nm';nm.textContent=h.ko+' ('+h.en+')';
-   var bd=document.createElement('span');bd.className='badge '+grade2cls(h.grade);bd.textContent=grade2ko(h.grade);nm.appendChild(bd);c.appendChild(nm);
-   var one=document.createElement('div');one.className='one';one.textContent=h.one;c.appendChild(one);
-   var tip=document.createElement('div');tip.className='tip';tip.textContent='💡 '+h.tip;c.appendChild(tip);
-   out.appendChild(c);
+   addCard(esc(h.ko)+' ('+esc(h.en)+')', grade2cls(h.grade), grade2ko(h.grade), h.one, h.tip);
   });
-  // related: link to infosite-style slugs
-  var rels=[['설탕·당류 줄이기','sugar-guide'],['가공식품 첨가물','additives-guide'],['나트륨과 건강','sodium-guide']];
-  var rl=document.getElementById('rell');rl.textContent='';rels.forEach(function(r){var a=document.createElement('a');a.href='#'+r[1];a.textContent='📄 '+r[0]+' →';rl.appendChild(a);});
-  document.getElementById('rel').style.display='block';
-  document.getElementById('adslot').style.display='block';
+  // unknown words -> server LLM fallback
+  var toks=q.split(/[,\n\u00B7|\/\(\)\[\]]+/).map(function(w){return w.trim();}).filter(function(w){return w.length>1;});
+  var unk=toks.filter(function(w){
+   return !DB.some(function(d){return d.en.toLowerCase()===w||d.ko===w||(d.alias&&d.alias===w);});
+  }).slice(0,12);
+  showUnknown(unk);
+  if(unk.length){
+   var wait=document.createElement('div');wait.className='card';wait.id='llmwait';
+   var nm=document.createElement('div');nm.className='nm';nm.textContent='\uD83E\uDD16 AI\uAC00 \uBD84\uC11D \uC911… ('+unk.length+'\uC885)';
+   wait.appendChild(nm);document.getElementById('out').appendChild(wait);
+   apiExplain(unk, function(n){
+    var w=document.getElementById('llmwait');if(w)w.remove();
+    // refresh summary counts to include LLM results
+    var cards=document.querySelectorAll('#out .card');
+    var g=0,a=0,t=0;
+    cards.forEach(function(c){
+     var b=c.querySelector('.badge');if(!b)return;t++;
+     if(b.classList.contains('a'))a++;
+     else g++;
+    });
+    var first=document.querySelector('#out .card .nm');
+    if(first&&t){first.childNodes[0].textContent='\uCD1D '+t+'\uC885 \uBC1C\uACAC ';}
+    var ones=document.querySelectorAll('#out .card .one');
+    if(ones.length){ones[0].textContent='\uC88B\uC74C '+g+' \u00B7 \uC8FC\uC758\u00B7\uD68C\uD53C '+a;}
+    document.getElementById('rel').style.display='block';
+    document.getElementById('adslot').style.display='block';
+   });
+  } else {
+   document.getElementById('rel').style.display='block';
+   document.getElementById('adslot').style.display='block';
+  }
+  try{
+   var rels=[['\uC124\uD0D5\u00B7\uB2F9\uB958 \uC904\uC774\uAE30','sugar-guide'],['\uAC00\uACF5\uC2DD\uD488 \uCCA8\uAC00\uBB3C','additives-guide'],['\uB098\uD2B8\uB968\uACFC \uAC74\uAC15','sodium-guide']];
+   var rl=document.getElementById('rell');rl.textContent='';rels.forEach(function(r){var a=document.createElement('a');a.href='#'+r[1];a.textContent='\uD83D\uDCC4 '+r[0]+' \u2192';rl.appendChild(a);});
+  }catch(e){}
  },400);
 }
-
-function showUnknown(){
- var u=window._lastUnknown||[];
+function showUnknown(u){
+ window._lastUnknown=u||[];
  var c=document.getElementById('unkcard');if(!c)return;
  if(!u.length){c.style.display='none';return;}
  c.style.display='block';
- document.getElementById('unkwords').textContent=u.join(' · ');
+ document.getElementById('unkwords').textContent=u.join(' \u00B7 ');
  document.getElementById('unkst').textContent='';
-}
-function sendUnknown(){
- var u=window._lastUnknown||[];
- if(!u.length)return;
- var body=encodeURIComponent('Unknown ingredients from NutriScan test\n\n'+u.join('\n')+'\n\nSource: nutri-scan-test '+ (typeof DBVER!=='undefined'?DBVER:''));
- document.getElementById('unkst').textContent='메일 앱이 열리면 보내기를 눌러주세요.';
- location.href='mailto:resonatetourclub@gmail.com?subject='+encodeURIComponent('[NutriScan] 모르는 성분 '+u.length+'건')+'&body='+body;
 }
 </script>
 </body>
