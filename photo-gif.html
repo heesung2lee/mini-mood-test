@@ -60,7 +60,7 @@ nav a.act{color:var(--gold);border-color:var(--gold)}
 </nav>
 <script>
 'use strict';
-var API = localStorage.getItem('gif_api') || location.origin.replace(':8964',':8191');
+var API = localStorage.getItem('gif_api') || 'https://ton-count-married-population.trycloudflare.com';
 var photoB64=null, gifB64=null;
 function showErr(s){var e=document.getElementById('err');e.style.display='block';e.textContent=s;setTimeout(function(){e.style.display='none';},8000);}
 async function health(){try{var r=await fetch(API+'/');if(r.ok){document.getElementById('st').textContent='● online';document.getElementById('st').classList.remove('off');return;}}catch(e){}document.getElementById('st').textContent='● offline';document.getElementById('st').classList.add('off');}
